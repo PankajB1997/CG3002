@@ -6,6 +6,7 @@ import pandas as pd
 from collections import Counter
 
 # import libraries for ML
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.utils.class_weight import compute_sample_weight
 from keras.models import load_model, Model
@@ -21,11 +22,35 @@ logger.setLevel(logging.INFO)
 PROB_THRESHOLD = 0.20
 
 ENC_LIST = [
-    ('others',0), ('description',1), ('skills',2), ('job_title',3), ('education',4)
+    ('WALKING', 0),
+    ('WALKING_UPSTAIRS', 1),
+    ('WALKING_DOWNSTAIRS', 2),
+    ('SITTING', 3),
+    ('STANDING', 4),
+    ('LAYING', 5),
+    # ('STAND_TO_SIT', 6),
+    # ('SIT_TO_STAND', 7),
+    # ('SIT_TO_LIE', 8),
+    # ('LIE_TO_SIT', 9),
+    # ('STAND_TO_LIE', 10),
+    # ('LIE_TO_STAND', 11)
 ]
 
+CLASSLIST = [ pair[0] for pair in ENC_LIST ]
+
 ENC_DICT = {
-    0: 'others', 1: 'description', 2: 'skills', 3: 'job_title', 4: 'education'
+    0: 'WALKING',
+    1: 'WALKING_UPSTAIRS',
+    2: 'WALKING_DOWNSTAIRS',
+    3: 'SITTING',
+    4: 'STANDING',
+    5: 'LAYING',
+    6: 'STAND_TO_SIT',
+    7: 'SIT_TO_STAND',
+    8: 'SIT_TO_LIE',
+    9: 'LIE_TO_SIT',
+    10: 'STAND_TO_LIE',
+    11: 'LIE_TO_STAND'
 }
 
 # Obtain best class from a given list of class probabilities for every prediction
@@ -79,38 +104,35 @@ def micro_macro_weighted(Y_pred, Y_true):
 # Calculate and display various accuracy, precision, recall and f1 scores
 def calculatePerformanceMetrics(Y_pred, Y_true, dataset_type):
     assert len(Y_pred) == len(Y_true)
-    # classlist = [ 'others', 'not_others' ]
-    # classlist = [ 'description', 'job_title', 'education', 'others' ]
-    classlist = [ 'description', 'job_title', 'education', 'others', 'skills' ]
 
     num_incorrect = len(Y_true) - accuracy_score(Y_true, Y_pred, normalize=False)
     accuracy = accuracy_score(Y_true, Y_pred)
-    metrics = precision_recall_f1(Y_pred, Y_true, classlist)
-    micro_macro_weighted_scores = micro_macro_weighted(Y_pred, Y_true)
-    cf_matrix = confusion_matrix(Y_true, Y_pred, labels=classlist)
+    metrics = precision_recall_f1(Y_pred, Y_true, CLASSLIST)
+    # micro_macro_weighted_scores = micro_macro_weighted(Y_pred, Y_true)
+    cf_matrix = confusion_matrix(Y_true, Y_pred, labels=CLASSLIST)
 
     logger.info("Results for " + dataset_type + " set...")
     logger.info("Number of cases that were incorrect: " + str(num_incorrect))
     logger.info("Accuracy: " + str(accuracy))
 
-    for i in range(0, len(classlist)):
-        logger.info("Precision " + classlist[i] + ": " + str(metrics[classlist[i]]['precision']))
-        logger.info("Recall " + classlist[i] + ": " + str(metrics[classlist[i]]['recall']))
-        logger.info("F1 " + classlist[i] + ": " + str(metrics[classlist[i]]['f1']))
+    for i in range(0, len(CLASSLIST)):
+        # logger.info("Precision " + CLASSLIST[i] + ": " + str(metrics[CLASSLIST[i]]['precision']))
+        logger.info("Recall " + CLASSLIST[i] + ": " + str(metrics[CLASSLIST[i]]['recall']))
+        # logger.info("F1 " + CLASSLIST[i] + ": " + str(metrics[CLASSLIST[i]]['f1']))
 
-    logger.info("Micro precision: " + str(micro_macro_weighted_scores['micro_precision']))
-    logger.info("Micro recall: " + str(micro_macro_weighted_scores['micro_recall']))
-    logger.info("Micro f1: " + str(micro_macro_weighted_scores['micro_f1']))
+    # logger.info("Micro precision: " + str(micro_macro_weighted_scores['micro_precision']))
+    # logger.info("Micro recall: " + str(micro_macro_weighted_scores['micro_recall']))
+    # logger.info("Micro f1: " + str(micro_macro_weighted_scores['micro_f1']))
+    #
+    # logger.info("Macro precision: " + str(micro_macro_weighted_scores['macro_precision']))
+    # logger.info("Macro recall: " + str(micro_macro_weighted_scores['macro_recall']))
+    # logger.info("Macro f1: " + str(micro_macro_weighted_scores['macro_f1']))
+    #
+    # logger.info("Weighted precision: " + str(micro_macro_weighted_scores['weighted_precision']))
+    # logger.info("Weighted recall: " + str(micro_macro_weighted_scores['weighted_recall']))
+    # logger.info("Weighted f1: " + str(micro_macro_weighted_scores['weighted_f1']))
 
-    logger.info("Macro precision: " + str(micro_macro_weighted_scores['macro_precision']))
-    logger.info("Macro recall: " + str(micro_macro_weighted_scores['macro_recall']))
-    logger.info("Macro f1: " + str(micro_macro_weighted_scores['macro_f1']))
-
-    logger.info("Weighted precision: " + str(micro_macro_weighted_scores['weighted_precision']))
-    logger.info("Weighted recall: " + str(micro_macro_weighted_scores['weighted_recall']))
-    logger.info("Weighted f1: " + str(micro_macro_weighted_scores['weighted_f1']))
-
-    logger.info("Confusion Matrix below " + str(classlist) + " : ")
+    logger.info("Confusion Matrix below " + str(CLASSLIST) + " : ")
     logger.info(str(cf_matrix))
 
 # Obtain a list of class probability values for every prediction
@@ -165,7 +187,7 @@ def prob2str_multibucket(probs,sens):
 
 # Initialise neural network model using Keras
 def initialiseModel(X_train):
-    main_input = Input(shape=(X_train.shape[1],))
+    main_input = Input(shape=(X_train[0].size,))
     x = Dense(512)(main_input)
     x = LeakyReLU()(x)
     x = Dropout(0.2)(x)
@@ -181,7 +203,7 @@ def initialiseModel(X_train):
     x = Dense(64)(x)
     x = LeakyReLU()(x)
     x = Dropout(0.2)(x)
-    output = Dense(5, activation = 'softmax')(x)
+    output = Dense(6, activation = 'softmax')(x)
     model = Model(inputs = main_input, outputs = output)
     # from keras import optimizers
     # sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
@@ -189,25 +211,48 @@ def initialiseModel(X_train):
     return model
 
 # Train the model, monitor on validation loss and save the best model out of given epochs
-def fitModel(X_train, X_val, Y_train, Y_val):
+def fitModel(X_train, Y_train, X_val, Y_val):
+    # X_train, X_val, Y_train, Y_val = train_test_split(X, Y, shuffle=True)
     model = initialiseModel(X_train)
-    filepath = os.path.join("nn_models", "model_" + unique_id + ".hdf5")
+    filepath = os.path.join("nn_models", "nn_model.hdf5")
     checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')
     callbacks_list = [checkpoint]
     sample_weight = compute_sample_weight('balanced', Y_train)
     model.fit(X_train, str2onehot(Y_train), epochs=100, validation_data=(X_val, str2onehot(Y_val)), batch_size=50, callbacks=callbacks_list, sample_weight=sample_weight)
     return model
 
-TRAIN_VALID_READY_PKL = os.path.join("<path to training/cross-validation set>")
-TEST_READY_PKL = os.path.join("<path to testing set>")
+def loadDataset(X_PATH, Y_PATH):
+    X = []
+    Y = []
+    with open(X_PATH) as x_file:
+        for input in x_file:
+            X.append(list(map(float, input[:-1].split(" "))))
+    with open(Y_PATH) as y_file:
+        for input in y_file:
+            Y.append(ENC_DICT[int(input) - 1])
+    classes_removed = [
+        'STAND_TO_SIT',
+        'SIT_TO_STAND',
+        'SIT_TO_LIE',
+        'LIE_TO_SIT',
+        'STAND_TO_LIE',
+        'LIE_TO_STAND'
+    ]
+
+    del_idx = [ idx for idx, val in enumerate(Y) if val in classes_removed ]
+    X = np.delete(X, del_idx, axis=0)
+    Y = np.delete(Y, del_idx)
+    return X, Y
+
+X_TRAIN_TXT_PATH = os.path.join("\\Users\\pankaj\\Documents\\CG3002", "dummy_dataset\\Train\\X_train.txt")
+Y_TRAIN_TXT_PATH = os.path.join("\\Users\\pankaj\\Documents\\CG3002", "dummy_dataset\\Train\\y_train.txt")
+X_TEST_TXT_PATH = os.path.join("\\Users\\pankaj\\Documents\\CG3002", "dummy_dataset\\Test\\X_test.txt")
+Y_TEST_TXT_PATH = os.path.join("\\Users\\pankaj\\Documents\\CG3002", "dummy_dataset\\Test\\y_test.txt")
 
 if __name__ == "__main__":
 
-    train_crossval_dataset = pickle.load(open(TRAIN_VALID_READY_PKL, 'rb'))
-    X, Y = train_crossval_dataset[0], train_crossval_dataset[1]
-
-    test_dataset = pickle.load(open(TEST_READY_PKL, 'rb'))
-    X_test, Y_test = zip(*test_dataset)
+    X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
+    X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
 
     logger.info("Vectorizing...")
     logger.info(str(Counter(Y)))
@@ -217,41 +262,37 @@ if __name__ == "__main__":
     # vectorizer(...)
     # vectorizer(...)
 
-    print("Vectorizing done!")
-    logger.info(str(Counter(Y)))
-    logger.info(str(Counter(Y_test)))
+    # print("Vectorizing done!")
+    # logger.info(str(Counter(Y)))
+    # logger.info(str(Counter(Y_test)))
 
     logger.info("Fitting...")
 
-    # Change below onwards to implement cross-validation
-    model = fitModel(X_train, X_val, Y_train, Y_val)
+    model = fitModel(X, Y, X_test, Y_test)
 
     logger.info("Predicting...")
-    train_pred = model.predict(X_train)
-    val_pred = model.predict(X_val)
+    train_pred = model.predict(X)
     test_pred = model.predict(X_test)
     logger.info("Predictions done! Compiling results...")
 
     # Convert model output of class probabilities to corresponding best predictions
     Y_train_pred = onehot2str(train_pred)
-    Y_val_pred = onehot2str(val_pred)
     Y_test_pred = onehot2str(test_pred)
 
     # Calculate accuracy, precision, recall and f1 scores
-    calculatePerformanceMetrics(Y_train_pred, Y_train, "training")
-    calculatePerformanceMetrics(Y_val_pred, Y_val, "validation")
+    calculatePerformanceMetrics(Y_train_pred, Y, "training")
     calculatePerformanceMetrics(Y_test_pred, Y_test, "testing")
 
-    # Record model confidence on every prediction
-    train_confidence_list = calculatePredictionConfidence(train_pred)
-    val_confidence_list = calculatePredictionConfidence(val_pred)
-    test_confidence_list = calculatePredictionConfidence(test_pred)
-
-    # Record class probabilities for every prediction
-    train_dict_list = recordClassProbabilites(train_pred)
-    val_dict_list = recordClassProbabilites(val_pred)
-    test_dict_list = recordClassProbabilites(test_pred)
-
+    # # Record model confidence on every prediction
+    # train_confidence_list = calculatePredictionConfidence(train_pred)
+    # val_confidence_list = calculatePredictionConfidence(val_pred)
+    # test_confidence_list = calculatePredictionConfidence(test_pred)
+    #
+    # # Record class probabilities for every prediction
+    # train_dict_list = recordClassProbabilites(train_pred)
+    # val_dict_list = recordClassProbabilites(val_pred)
+    # test_dict_list = recordClassProbabilites(test_pred)
+    #
     # # Prepare a detailed log of all incorrect cases on every prediction as text file
     # logIncorrectCases(..., 'training-crossval')
     # logIncorrectCases(..., 'testing')
