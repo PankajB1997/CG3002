@@ -255,8 +255,6 @@ if __name__ == "__main__":
     X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
 
     logger.info("Vectorizing...")
-    logger.info(str(Counter(Y)))
-    logger.info(str(Counter(Y_test)))
 
     # # Do some preprocess vectorizing for training/validation/testing sets respectively, as needed
     # vectorizer(...)
@@ -268,19 +266,28 @@ if __name__ == "__main__":
 
     logger.info("Fitting...")
 
-    model = fitModel(X, Y, X_test, Y_test)
+    X_val, X_test, Y_val, Y_test = train_test_split(X_test, Y_test, test_size=0.5, random_state=42, shuffle=True, stratify=Y_test)
+
+    logger.info(str(Counter(Y)))
+    logger.info(str(Counter(Y_val)))
+    logger.info(str(Counter(Y_test)))
+
+    model = fitModel(X, Y, X_val, Y_val)
 
     logger.info("Predicting...")
     train_pred = model.predict(X)
+    val_pred = model.predict(X_val)
     test_pred = model.predict(X_test)
     logger.info("Predictions done! Compiling results...")
 
     # Convert model output of class probabilities to corresponding best predictions
     Y_train_pred = onehot2str(train_pred)
+    Y_val_pred = onehot2str(val_pred)
     Y_test_pred = onehot2str(test_pred)
 
     # Calculate accuracy, precision, recall and f1 scores
     calculatePerformanceMetrics(Y_train_pred, Y, "training")
+    calculatePerformanceMetrics(Y_val_pred, Y_val, "validation")
     calculatePerformanceMetrics(Y_test_pred, Y_test, "testing")
 
     # # Record model confidence on every prediction
@@ -294,5 +301,6 @@ if __name__ == "__main__":
     # test_dict_list = recordClassProbabilites(test_pred)
     #
     # # Prepare a detailed log of all incorrect cases on every prediction as text file
-    # logIncorrectCases(..., 'training-crossval')
+    # logIncorrectCases(..., 'training')
+    # logIncorrectCases(..., 'validation')
     # logIncorrectCases(..., 'testing')
