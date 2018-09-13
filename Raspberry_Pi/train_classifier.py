@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-CG3002_FILEPATH = "\\Users\\pankaj\\Documents\\CG3002"
+CG3002_FILEPATH = ""
 
 # set constant flag for which classifier to use
 '''
@@ -42,7 +42,7 @@ CG3002_FILEPATH = "\\Users\\pankaj\\Documents\\CG3002"
 '''
 
 # set probability threshold for multibucketing
-PROB_THRESHOLD = 0.20
+# PROB_THRESHOLD = 0.20
 
 MODEL_UNIQUE_IDS = {
     0: 'KNeighborsClassifier',
@@ -209,20 +209,20 @@ def writeDatasetToExcel(X, y, filepath):
     writer.save()
 
 # Obtain a list of all classes for each prediction for which probability is greater than a threshold
-def prob2str_multibucket(probs,sens):
-    enc_dict = dict([(i[1],i[0]) for i in ENC_LIST])
-    cats = []
-    final_sens = []
-    for (prob,sen) in zip(probs,sens):
-        classes = ""
-        for idx,pro in enumerate(prob):
-            if pro >= PROB_THRESHOLD:
-                classes += enc_dict[idx] + ", "
-        cats.append(classes[:-2])
-        final_sens.append(sen)
-    return np.asarray(cats), final_sens
+# def prob2str_multibucket(probs,sens):
+#     enc_dict = dict([(i[1],i[0]) for i in ENC_LIST])
+#     cats = []
+#     final_sens = []
+#     for (prob,sen) in zip(probs,sens):
+#         classes = ""
+#         for idx,pro in enumerate(prob):
+#             if pro >= PROB_THRESHOLD:
+#                 classes += enc_dict[idx] + ", "
+#         cats.append(classes[:-2])
+#         final_sens.append(sen)
+#     return np.asarray(cats), final_sens
 
-# Initialise neural network model using Keras
+# Initialise neural network model using classifier
 def initialiseModel(model_index):
     classifiers = [
         KNeighborsClassifier(3),
@@ -235,7 +235,7 @@ def initialiseModel(model_index):
         AdaBoostClassifier(),
         GaussianNB(),
         QuadraticDiscriminantAnalysis(),
-        GaussianProcessClassifier(1.0 * RBF(1.0)),
+        # GaussianProcessClassifier(1.0 * RBF(1.0)),
     ]
     return classifiers[model_index]
 
@@ -244,7 +244,7 @@ def fitModel(X, Y):
     models = []
     scores = []
 
-    for i in range(0, 11):
+    for i in range(0, 10):
         model = initialiseModel(i)
         accuracy_scores = cross_val_score(model, X, Y, cv=10, scoring="accuracy", n_jobs=-1)
         scores.append(accuracy_scores.mean())
@@ -287,10 +287,10 @@ def loadDataset(X_PATH, Y_PATH):
     Y = np.delete(Y, del_idx)
     return X, Y
 
-X_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\X_train.txt")
-Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\y_train.txt")
-X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\X_test.txt")
-Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\y_test.txt")
+X_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "dummy_dataset/Train/X_train.txt")
+Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "dummy_dataset/Train/y_train.txt")
+X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "dummy_dataset/Test/X_test.txt")
+Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "dummy_dataset/Test/y_test.txt")
 
 if __name__ == "__main__":
 
