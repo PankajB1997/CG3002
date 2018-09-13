@@ -8,7 +8,7 @@ from collections import Counter
 # import libraries for ML
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, QuantileTransformer, Normalizer
 from sklearn.datasets import make_moons, make_circles, make_classification
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
@@ -46,23 +46,22 @@ CG3002_FILEPATH = ""
 
 MODEL_UNIQUE_IDS = {
     0: 'KNeighborsClassifier',
-    1: 'LinearSVC',
-    2: 'GammaSVC',
-    3: 'DecisionTreeClassifier',
-    4: 'RandomForestClassifier10',
-    5: 'RandomForestClassifier200',
-    6: 'MLPClassifier',
+    1: 'MLPClassifier',
+    2: 'LinearSVC',
+    3: 'GammaSVC',
+    4: 'DecisionTreeClassifier',
+    5: 'RandomForestClassifier10',
+    6: 'RandomForestClassifier200',
     7: 'AdaBoostClassifier',
     8: 'GaussianNB',
-    9: 'QuadraticDiscriminantAnalysis',
-    10: 'GaussianProcessClassifier',
+    9: 'QuadraticDiscriminantAnalysis'
 }
 
 ENC_LIST = [
     ('WALKING', 0),
-    ('WALKING_UPSTAIRS', 1),
-    ('WALKING_DOWNSTAIRS', 2),
-    ('SITTING', 3),
+    # ('WALKING_UPSTAIRS', 1),
+    # ('WALKING_DOWNSTAIRS', 2),
+    # ('SITTING', 3),
     ('STANDING', 4),
     ('LAYING', 5),
     # ('STAND_TO_SIT', 6),
@@ -226,16 +225,15 @@ def writeDatasetToExcel(X, y, filepath):
 def initialiseModel(model_index):
     classifiers = [
         KNeighborsClassifier(3),
+        MLPClassifier(alpha=1),
         SVC(kernel="linear", C=0.025),
         SVC(gamma=2, C=1),
         DecisionTreeClassifier(max_depth=5),
         RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
         RandomForestClassifier(max_depth=5, n_estimators=200, max_features=1),
-        MLPClassifier(alpha=1),
         AdaBoostClassifier(),
         GaussianNB(),
         QuadraticDiscriminantAnalysis(),
-        # GaussianProcessClassifier(1.0 * RBF(1.0)),
     ]
     return classifiers[model_index]
 
@@ -274,6 +272,9 @@ def loadDataset(X_PATH, Y_PATH):
         for input in y_file:
             Y.append(ENC_DICT[int(input) - 1])
     classes_removed = [
+        'WALKING_UPSTAIRS',
+        'WALKING_DOWNSTAIRS',
+        'SITTING',
         'STAND_TO_SIT',
         'SIT_TO_STAND',
         'SIT_TO_LIE',
@@ -294,8 +295,14 @@ Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "dummy_dataset/Test/y_test.txt")
 
 if __name__ == "__main__":
 
+    # Normalizer() works best with GammaSVC
+    # QuantileTransformer(output_distribution='uniform') works best with LinearSVC
+    scaler = QuantileTransformer(output_distribution='uniform')
+
     X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
+    X = scaler.fit_transform(X)
     X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
+    X_test = scaler.transform(X_test)
 
     logger.info(str(Counter(Y)))
     # logger.info(str(Counter(Y_val)))
