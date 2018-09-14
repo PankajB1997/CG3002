@@ -7,6 +7,7 @@ from collections import Counter
 
 # import libraries for ML
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, QuantileTransformer, Normalizer
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.utils.class_weight import compute_sample_weight
 from keras.models import load_model, Model
@@ -20,6 +21,8 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 CG3002_FILEPATH = "\\Users\\pankaj\\Documents\\CG3002"
+# "\\Users\\pankaj\\Documents\\CG3002"
+SAVE_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
 
 PROB_THRESHOLD = 0.20
 
@@ -246,6 +249,29 @@ def loadDataset(X_PATH, Y_PATH):
     Y = np.delete(Y, del_idx)
     return X, Y
 
+def filterDataset(X, Y, X_test, Y_test):
+    classes_removed = [
+        # 'WALKING_UPSTAIRS',
+        # 'WALKING_DOWNSTAIRS',
+        # 'SITTING',
+        'STAND_TO_SIT',
+        'SIT_TO_STAND',
+        'SIT_TO_LIE',
+        'LIE_TO_SIT',
+        'STAND_TO_LIE',
+        'LIE_TO_STAND'
+    ]
+
+    del_idx = [ idx for idx, val in enumerate(Y) if val in classes_removed ]
+    X = np.delete(X, del_idx, axis=0)
+    Y = np.delete(Y, del_idx)
+
+    del_idx = [ idx for idx, val in enumerate(Y_test) if val in classes_removed ]
+    X_test = np.delete(X_test, del_idx, axis=0)
+    Y_test = np.delete(Y_test, del_idx)
+
+    return X, Y, X_test, Y_test
+
 X_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\X_train.txt")
 Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\y_train.txt")
 X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\X_test.txt")
@@ -253,8 +279,17 @@ Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Te
 
 if __name__ == "__main__":
 
-    X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
-    X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
+    # scaler = QuantileTransformer(output_distribution='uniform')
+    scaler = StandardScaler()
+
+    # X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
+    # X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
+    X, Y = pickle.load(open(SAVE_FILEPATH + 'train.pkl', 'rb'))
+    X_test, Y_test = pickle.load(open(SAVE_FILEPATH + 'test.pkl', 'rb'))
+    X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
+
+    X = scaler.fit_transform(X)
+    X_test = scaler.transform(X_test)
 
     logger.info("Vectorizing...")
 

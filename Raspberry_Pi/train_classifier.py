@@ -26,8 +26,8 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 CG3002_FILEPATH = os.path.join('\\', 'Users', 'pankaj', 'Documents', 'CG3002')
-SAVE_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
 # "\\Users\\pankaj\\Documents\\CG3002"
+SAVE_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
 
 # set constant flag for which classifier to use
 '''
@@ -292,9 +292,9 @@ def loadDataset(X_PATH, Y_PATH):
 
 def filterDataset(X, Y, X_test, Y_test):
     classes_removed = [
-        'WALKING_UPSTAIRS',
-        'WALKING_DOWNSTAIRS',
-        'SITTING',
+        # 'WALKING_UPSTAIRS',
+        # 'WALKING_DOWNSTAIRS',
+        # 'SITTING',
         'STAND_TO_SIT',
         'SIT_TO_STAND',
         'SIT_TO_LIE',
@@ -322,8 +322,8 @@ if __name__ == "__main__":
 
     # Normalizer() works best with GammaSVC
     # QuantileTransformer(output_distribution='uniform') works best with LinearSVC
-    scaler = QuantileTransformer(output_distribution='uniform')
-    # scaler = StandardScaler()
+    # scaler = QuantileTransformer(output_distribution='uniform')
+    scaler = StandardScaler()
 
     # X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
     # X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)

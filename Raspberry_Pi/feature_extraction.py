@@ -2,8 +2,13 @@ import numpy as np
 from statsmodels import robust
 import pickle
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, QuantileTransformer, Normalizer
+from obspy.signal.filter import highpass
+from scipy.signal import savgol_filter
 
 SAVE_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
+
+scaler = StandardScaler()
 
 # for every segment of data, extract the feature vector
 def extract_feature_vector(X):
@@ -23,6 +28,11 @@ def extract_feature_vector(X):
 # segment data from the raw data files, return list of tuples (segments, move_class)
 # where every tuple represents raw data for that segment and the move_class for that segment
 def get_all_segments(raw_data, move_class):
+    # preprocess data
+    raw_data = savgol_filter(raw_data, 5, 3)
+    raw_data = highpass(raw_data, 3, 50)
+    raw_data = scaler.fit_transform(raw_data)
+    # extract segments
     limit = (len(raw_data) // 128 ) * 128
     segments = []
     for i in range(0, limit, 64):
