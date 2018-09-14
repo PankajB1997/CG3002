@@ -31,20 +31,20 @@ SAVE_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
 
 # set constant flag for which classifier to use
 '''
-    0: 'KNeighborsClassifier',
-    1: 'MLPClassifier',
-    2: 'LinearSVC',
-    3: 'GammaSVC',
-    4: 'DecisionTreeClassifier',
-    5: 'RandomForestClassifier10',
-    6: 'RandomForestClassifier200',
-    7: 'AdaBoostClassifier',
-    8: 'GaussianNB',
-    9: 'QuadraticDiscriminantAnalysis',
+0: KNeighborsClassifier(3),
+1: SVC(kernel="linear", C=0.025),
+2: SVC(gamma=2, C=1),
+3: GaussianProcessClassifier(1.0 * RBF(1.0)),
+4: DecisionTreeClassifier(max_depth=5),
+5: RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
+6: MLPClassifier(alpha=1),
+7: AdaBoostClassifier(),
+8: GaussianNB(),
+9: QuadraticDiscriminantAnalysis()
 '''
 
 # set probability threshold for multibucketing
-PROB_THRESHOLD = 0.20
+# PROB_THRESHOLD = 0.20
 
 MODEL_UNIQUE_IDS = {
     0: 'KNeighborsClassifier',
@@ -56,7 +56,7 @@ MODEL_UNIQUE_IDS = {
     6: 'RandomForestClassifier200',
     7: 'AdaBoostClassifier',
     8: 'GaussianNB',
-    9: 'QuadraticDiscriminantAnalysis',
+    9: 'QuadraticDiscriminantAnalysis'
 }
 
 ENC_LIST = [
@@ -210,20 +210,20 @@ def writeDatasetToExcel(X, y, filepath):
     writer.save()
 
 # Obtain a list of all classes for each prediction for which probability is greater than a threshold
-def prob2str_multibucket(probs,sens):
-    enc_dict = dict([(i[1],i[0]) for i in ENC_LIST])
-    cats = []
-    final_sens = []
-    for (prob,sen) in zip(probs,sens):
-        classes = ""
-        for idx,pro in enumerate(prob):
-            if pro >= PROB_THRESHOLD:
-                classes += enc_dict[idx] + ", "
-        cats.append(classes[:-2])
-        final_sens.append(sen)
-    return np.asarray(cats), final_sens
+# def prob2str_multibucket(probs,sens):
+#     enc_dict = dict([(i[1],i[0]) for i in ENC_LIST])
+#     cats = []
+#     final_sens = []
+#     for (prob,sen) in zip(probs,sens):
+#         classes = ""
+#         for idx,pro in enumerate(prob):
+#             if pro >= PROB_THRESHOLD:
+#                 classes += enc_dict[idx] + ", "
+#         cats.append(classes[:-2])
+#         final_sens.append(sen)
+#     return np.asarray(cats), final_sens
 
-# Initialise neural network model using Keras
+# Initialise neural network model using classifier
 def initialiseModel(model_index):
     classifiers = [
         KNeighborsClassifier(3),
