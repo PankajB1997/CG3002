@@ -26,6 +26,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 CG3002_FILEPATH = os.path.join('\\', 'Users', 'pankaj', 'Documents', 'CG3002')
+SAVE_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
 # "\\Users\\pankaj\\Documents\\CG3002"
 
 # set constant flag for which classifier to use
@@ -289,6 +290,29 @@ def loadDataset(X_PATH, Y_PATH):
     Y = np.delete(Y, del_idx)
     return X, Y
 
+def filterDataset(X, Y, X_test, Y_test):
+    classes_removed = [
+        'WALKING_UPSTAIRS',
+        'WALKING_DOWNSTAIRS',
+        'SITTING',
+        'STAND_TO_SIT',
+        'SIT_TO_STAND',
+        'SIT_TO_LIE',
+        'LIE_TO_SIT',
+        'STAND_TO_LIE',
+        'LIE_TO_STAND'
+    ]
+
+    del_idx = [ idx for idx, val in enumerate(Y) if val in classes_removed ]
+    X = np.delete(X, del_idx, axis=0)
+    Y = np.delete(Y, del_idx)
+
+    del_idx = [ idx for idx, val in enumerate(Y_test) if val in classes_removed ]
+    X_test = np.delete(X_test, del_idx, axis=0)
+    Y_test = np.delete(Y_test, del_idx)
+
+    return X, Y, X_test, Y_test
+
 X_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\X_train.txt")
 Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\y_train.txt")
 X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\X_test.txt")
@@ -299,10 +323,15 @@ if __name__ == "__main__":
     # Normalizer() works best with GammaSVC
     # QuantileTransformer(output_distribution='uniform') works best with LinearSVC
     scaler = QuantileTransformer(output_distribution='uniform')
+    # scaler = StandardScaler()
 
-    X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
+    # X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
+    # X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
+    X, Y = pickle.load(open(SAVE_FILEPATH + 'train.pkl', 'rb'))
+    X_test, Y_test = pickle.load(open(SAVE_FILEPATH + 'test.pkl', 'rb'))
+    X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
+
     X = scaler.fit_transform(X)
-    X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
     X_test = scaler.transform(X_test)
 
     logger.info(str(Counter(Y)))
