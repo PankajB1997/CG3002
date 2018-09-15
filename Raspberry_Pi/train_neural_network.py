@@ -30,9 +30,9 @@ ENC_LIST = [
     ('WALKING', 0),
     ('WALKING_UPSTAIRS', 1),
     ('WALKING_DOWNSTAIRS', 2),
-    ('SITTING', 3),
-    ('STANDING', 4),
-    ('LAYING', 5),
+    # ('SITTING', 3),
+    # ('STANDING', 4),
+    # ('LAYING', 5),
     # ('STAND_TO_SIT', 6),
     # ('SIT_TO_STAND', 7),
     # ('SIT_TO_LIE', 8),
@@ -208,7 +208,7 @@ def initialiseModel(X_train):
     x = Dense(64)(x)
     x = LeakyReLU()(x)
     x = Dropout(0.2)(x)
-    output = Dense(6, activation = 'softmax')(x)
+    output = Dense(3, activation = 'softmax')(x)
     model = Model(inputs = main_input, outputs = output)
     # from keras import optimizers
     # sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
@@ -254,9 +254,9 @@ def filterDataset(X, Y, X_test, Y_test):
         # 'WALKING',
         # 'WALKING_UPSTAIRS',
         # 'WALKING_DOWNSTAIRS',
-        # 'SITTING',
-        # 'STANDING',
-        # 'LAYING',
+        'STANDING',
+        'LAYING',
+        'SITTING',
         'STAND_TO_SIT',
         'SIT_TO_STAND',
         'SIT_TO_LIE',
@@ -313,7 +313,12 @@ if __name__ == "__main__":
     logger.info("Predicting...")
     train_pred = model.predict(X)
     val_pred = model.predict(X_val)
+    import time
+    start = time.time()
     test_pred = model.predict(X_test)
+    end = time.time()
+    logger.info("Prediction time: " + str(end-start))
+
     logger.info("Predictions done! Compiling results...")
 
     # Convert model output of class probabilities to corresponding best predictions
