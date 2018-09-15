@@ -251,9 +251,12 @@ def loadDataset(X_PATH, Y_PATH):
 
 def filterDataset(X, Y, X_test, Y_test):
     classes_removed = [
+        # 'WALKING',
         # 'WALKING_UPSTAIRS',
         # 'WALKING_DOWNSTAIRS',
         # 'SITTING',
+        # 'STANDING',
+        # 'LAYING',
         'STAND_TO_SIT',
         'SIT_TO_STAND',
         'SIT_TO_LIE',
@@ -308,7 +311,7 @@ if __name__ == "__main__":
     model = fitModel(X, Y, X_val, Y_val)
 
     logger.info("Predicting...")
-    train_pred = model.predict(X_train)
+    train_pred = model.predict(X)
     val_pred = model.predict(X_val)
     test_pred = model.predict(X_test)
     logger.info("Predictions done! Compiling results...")
@@ -319,7 +322,7 @@ if __name__ == "__main__":
     Y_test_pred = onehot2str(test_pred)
 
     # Calculate accuracy, precision, recall and f1 scores
-    calculatePerformanceMetrics(Y_train_pred, Y_train, "training")
+    calculatePerformanceMetrics(Y_train_pred, Y, "training")
     calculatePerformanceMetrics(Y_val_pred, Y_val, "validation")
     calculatePerformanceMetrics(Y_test_pred, Y_test, "testing")
 

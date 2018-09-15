@@ -8,7 +8,7 @@ from scipy.signal import savgol_filter
 
 SAVE_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
 
-scaler = StandardScaler()
+scaler = MinMaxScaler((-1,1))
 
 # for every segment of data, extract the feature vector
 def extract_feature_vector(X):
