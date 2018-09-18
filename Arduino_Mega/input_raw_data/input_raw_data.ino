@@ -64,17 +64,16 @@ int count = 0;
 int remapVoltage(int);
 void calibrateScale();
 
-// @Junyang: Pls refer to this link - https://learn.sparkfun.com/tutorials/adxl345-hookup-guide
 void setup()
 {
   Wire.begin();        // join i2c bus (address optional for master)
-  Serial.begin(9600);  // start serial for output
+  Serial.begin(115200);  // start serial for output
   // Initializing sensors 
   sensorA.initialize();
   sensorB.initialize();
   sensorC.initialize();
   // Setting sampling frequency to 50hz
-  sensorA.setRate(ADXL345_RATE_50);
+//  sensorA.setRate(ADXL345_RATE_100);
   // Testing connection by reading device ID of each sensor
   // Returns false if deviceID not found, Returns true if deviceID is found
   Serial.println(sensorA.testConnection() ? "Sensor A connected successfully" : "Sensor A failed to connect");
@@ -85,7 +84,7 @@ void setup()
 void loop()
 {  
   // Getting raw values at 50 Hz frequency by setting 20 ms delay
-  delay(20)
+  delay(20);
 
   // Read values from different sensors
   sensorA.getAcceleration(&xa_raw, &ya_raw, &za_raw);
@@ -102,8 +101,7 @@ void loop()
 //  zg = (zg_raw + zg_offset)*scaleFactorGyro;
 
   // Display values for different sensors
-  if count == 
-    Serial.print("accel for Sensor A:\t");
+//    Serial.print("accel for Sensor A:\t");
     Serial.print(xa); Serial.print("\t");
     Serial.print(ya); Serial.print("\t");
     Serial.println(za);
