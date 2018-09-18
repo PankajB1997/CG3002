@@ -27,7 +27,6 @@ logger.setLevel(logging.INFO)
 
 CG3002_FILEPATH = os.path.join('\\', 'Users', 'pankaj', 'Documents', 'CG3002')
 # "\\Users\\pankaj\\Documents\\CG3002"
-SAVE_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
 
 # set constant flag for which classifier to use
 '''
@@ -63,9 +62,9 @@ ENC_LIST = [
     ('WALKING', 0),
     ('WALKING_UPSTAIRS', 1),
     ('WALKING_DOWNSTAIRS', 2),
-    # ('SITTING', 3),
-    # ('STANDING', 4),
-    # ('LAYING', 5),
+    ('SITTING', 3),
+    ('STANDING', 4),
+    ('LAYING', 5),
     # ('STAND_TO_SIT', 6),
     # ('SIT_TO_STAND', 7),
     # ('SIT_TO_LIE', 8),
@@ -244,7 +243,7 @@ def fitModel(X, Y):
     models = []
     scores = []
 
-    for i in range(6, 7):
+    for i in range(3, 4):
         model = initialiseModel(i)
         accuracy_scores = cross_val_score(model, X, Y, cv=10, scoring="accuracy", n_jobs=-1)
         scores.append(accuracy_scores.mean())
@@ -274,9 +273,12 @@ def loadDataset(X_PATH, Y_PATH):
         for input in y_file:
             Y.append(ENC_DICT[int(input) - 1])
     classes_removed = [
-        'WALKING_UPSTAIRS',
-        'WALKING_DOWNSTAIRS',
-        'SITTING',
+        # 'WALKING',
+        # 'WALKING_UPSTAIRS',
+        # 'WALKING_DOWNSTAIRS',
+        # 'SITTING',
+        # 'STANDING',
+        # 'LAYING',
         'STAND_TO_SIT',
         'SIT_TO_STAND',
         'SIT_TO_LIE',
@@ -295,9 +297,9 @@ def filterDataset(X, Y, X_test, Y_test):
         # 'WALKING',
         # 'WALKING_UPSTAIRS',
         # 'WALKING_DOWNSTAIRS',
-        'STANDING',
-        'LAYING',
-        'SITTING',
+        # 'SITTING',
+        # 'STANDING',
+        # 'LAYING',
         'STAND_TO_SIT',
         'SIT_TO_STAND',
         'SIT_TO_LIE',
@@ -321,12 +323,17 @@ Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\T
 X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\X_test.txt")
 Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\y_test.txt")
 
+SAVE_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
+TRAIN_DATASET_PATH = "dataset\\train.pkl"
+TEST_DATASET_PATH = "dataset\\test.pkl"
+
 if __name__ == "__main__":
 
     # Normalizer() works best with GammaSVC
     # QuantileTransformer(output_distribution='uniform') works best with LinearSVC
     # scaler = QuantileTransformer(output_distribution='uniform')
     scaler = StandardScaler()
+    # scaler = MinMaxScaler((-1,1))
 
     # X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
     # X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
