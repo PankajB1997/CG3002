@@ -25,17 +25,18 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-CG3002_FILEPATH = ""
+CG3002_FILEPATH = os.path.join('\\', 'Users', 'pankaj', 'Documents', 'CG3002')
+# "\\Users\\pankaj\\Documents\\CG3002"
 
 # set constant flag for which classifier to use
 '''
-0: KNeighborsClassifier(3),
-1: SVC(kernel="linear", C=0.025),
-2: SVC(gamma=2, C=1),
-3: GaussianProcessClassifier(1.0 * RBF(1.0)),
-4: DecisionTreeClassifier(max_depth=5),
-5: RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
-6: MLPClassifier(alpha=1),
+0: RandomForestClassifier(max_depth=5, n_estimators=200, max_features=1),
+1: RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
+2: MLPClassifier(alpha=1),
+3: SVC(kernel="linear", C=0.025),
+4: KNeighborsClassifier(3),
+5: SVC(gamma=2, C=1),
+6: DecisionTreeClassifier(max_depth=5),
 7: AdaBoostClassifier(),
 8: GaussianNB(),
 9: QuadraticDiscriminantAnalysis()
@@ -45,13 +46,13 @@ CG3002_FILEPATH = ""
 # PROB_THRESHOLD = 0.20
 
 MODEL_UNIQUE_IDS = {
-    0: 'KNeighborsClassifier',
-    1: 'MLPClassifier',
-    2: 'LinearSVC',
-    3: 'GammaSVC',
-    4: 'DecisionTreeClassifier',
-    5: 'RandomForestClassifier10',
-    6: 'RandomForestClassifier200',
+    0: 'RandomForestClassifier200',
+    1: 'RandomForestClassifier10',
+    2: 'MLPClassifier',
+    3: 'LinearSVC',
+    4: 'KNeighborsClassifier',
+    5: 'GammaSVC',
+    6: 'DecisionTreeClassifier',
     7: 'AdaBoostClassifier',
     8: 'GaussianNB',
     9: 'QuadraticDiscriminantAnalysis'
@@ -59,9 +60,9 @@ MODEL_UNIQUE_IDS = {
 
 ENC_LIST = [
     ('WALKING', 0),
-    # ('WALKING_UPSTAIRS', 1),
-    # ('WALKING_DOWNSTAIRS', 2),
-    # ('SITTING', 3),
+    ('WALKING_UPSTAIRS', 1),
+    ('WALKING_DOWNSTAIRS', 2),
+    ('SITTING', 3),
     ('STANDING', 4),
     ('LAYING', 5),
     # ('STAND_TO_SIT', 6),
@@ -224,13 +225,13 @@ def writeDatasetToExcel(X, y, filepath):
 # Initialise neural network model using classifier
 def initialiseModel(model_index):
     classifiers = [
-        KNeighborsClassifier(3),
+        RandomForestClassifier(max_depth=5, n_estimators=200, max_features=1),
+        RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
         MLPClassifier(alpha=1),
         SVC(kernel="linear", C=0.025),
+        KNeighborsClassifier(5),
         SVC(gamma=2, C=1),
         DecisionTreeClassifier(max_depth=5),
-        RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
-        RandomForestClassifier(max_depth=5, n_estimators=200, max_features=1),
         AdaBoostClassifier(),
         GaussianNB(),
         QuadraticDiscriminantAnalysis(),
@@ -242,7 +243,7 @@ def fitModel(X, Y):
     models = []
     scores = []
 
-    for i in range(0, 10):
+    for i in range(3, 4):
         model = initialiseModel(i)
         accuracy_scores = cross_val_score(model, X, Y, cv=10, scoring="accuracy", n_jobs=-1)
         scores.append(accuracy_scores.mean())
@@ -272,9 +273,12 @@ def loadDataset(X_PATH, Y_PATH):
         for input in y_file:
             Y.append(ENC_DICT[int(input) - 1])
     classes_removed = [
-        'WALKING_UPSTAIRS',
-        'WALKING_DOWNSTAIRS',
-        'SITTING',
+        # 'WALKING',
+        # 'WALKING_UPSTAIRS',
+        # 'WALKING_DOWNSTAIRS',
+        # 'SITTING',
+        # 'STANDING',
+        # 'LAYING',
         'STAND_TO_SIT',
         'SIT_TO_STAND',
         'SIT_TO_LIE',
@@ -288,20 +292,56 @@ def loadDataset(X_PATH, Y_PATH):
     Y = np.delete(Y, del_idx)
     return X, Y
 
-X_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "dummy_dataset/Train/X_train.txt")
-Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "dummy_dataset/Train/y_train.txt")
-X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "dummy_dataset/Test/X_test.txt")
-Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "dummy_dataset/Test/y_test.txt")
+def filterDataset(X, Y, X_test, Y_test):
+    classes_removed = [
+        # 'WALKING',
+        # 'WALKING_UPSTAIRS',
+        # 'WALKING_DOWNSTAIRS',
+        # 'SITTING',
+        # 'STANDING',
+        # 'LAYING',
+        'STAND_TO_SIT',
+        'SIT_TO_STAND',
+        'SIT_TO_LIE',
+        'LIE_TO_SIT',
+        'STAND_TO_LIE',
+        'LIE_TO_STAND'
+    ]
+
+    del_idx = [ idx for idx, val in enumerate(Y) if val in classes_removed ]
+    X = np.delete(X, del_idx, axis=0)
+    Y = np.delete(Y, del_idx)
+
+    del_idx = [ idx for idx, val in enumerate(Y_test) if val in classes_removed ]
+    X_test = np.delete(X_test, del_idx, axis=0)
+    Y_test = np.delete(Y_test, del_idx)
+
+    return X, Y, X_test, Y_test
+
+X_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\X_train.txt")
+Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\y_train.txt")
+X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\X_test.txt")
+Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\y_test.txt")
+
+SAVE_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
+TRAIN_DATASET_PATH = "dataset\\train.pkl"
+TEST_DATASET_PATH = "dataset\\test.pkl"
 
 if __name__ == "__main__":
 
     # Normalizer() works best with GammaSVC
     # QuantileTransformer(output_distribution='uniform') works best with LinearSVC
-    scaler = QuantileTransformer(output_distribution='uniform')
+    # scaler = QuantileTransformer(output_distribution='uniform')
+    scaler = StandardScaler()
+    # scaler = MinMaxScaler((-1,1))
 
-    X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
+    # X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
+    # X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
+    X, Y = pickle.load(open(SAVE_FILEPATH + 'train.pkl', 'rb'))
+    X_test, Y_test = pickle.load(open(SAVE_FILEPATH + 'test.pkl', 'rb'))
+    X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
+
     X = scaler.fit_transform(X)
-    X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
     X_test = scaler.transform(X_test)
 
     logger.info(str(Counter(Y)))
@@ -323,7 +363,12 @@ if __name__ == "__main__":
     logger.info("Predicting...")
     train_pred = model.predict(X)
     # val_pred = model.predict(X_val)
+    import time
+    start = time.time()
     test_pred = model.predict(X_test)
+    end = time.time()
+
+    logger.info("Prediction time: " + str(end-start))
 
     logger.info("Predictions done! Compiling results...")
 

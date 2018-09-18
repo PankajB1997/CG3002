@@ -7,6 +7,7 @@ from collections import Counter
 
 # import libraries for ML
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, QuantileTransformer, Normalizer
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.utils.class_weight import compute_sample_weight
 from keras.models import load_model, Model
@@ -20,16 +21,19 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 CG3002_FILEPATH = "\\Users\\pankaj\\Documents\\CG3002"
+# "\\Users\\pankaj\\Documents\\CG3002"
 
 PROB_THRESHOLD = 0.20
 
-ENC_LIST = [
+# Encoding below for dummy dataset
+
+DUMMY_ENC_LIST = [
     ('WALKING', 0),
     ('WALKING_UPSTAIRS', 1),
     ('WALKING_DOWNSTAIRS', 2),
-    ('SITTING', 3),
-    ('STANDING', 4),
-    ('LAYING', 5),
+    # ('SITTING', 3),
+    # ('STANDING', 4),
+    # ('LAYING', 5),
     # ('STAND_TO_SIT', 6),
     # ('SIT_TO_STAND', 7),
     # ('SIT_TO_LIE', 8),
@@ -38,9 +42,7 @@ ENC_LIST = [
     # ('LIE_TO_STAND', 11)
 ]
 
-CLASSLIST = [ pair[0] for pair in ENC_LIST ]
-
-ENC_DICT = {
+DUMMY_ENC_DICT = {
     0: 'WALKING',
     1: 'WALKING_UPSTAIRS',
     2: 'WALKING_DOWNSTAIRS',
@@ -54,6 +56,24 @@ ENC_DICT = {
     10: 'STAND_TO_LIE',
     11: 'LIE_TO_STAND'
 }
+
+DUMMY_CLASSLIST = [ pair[0] for pair in DUMMY_ENC_LIST ]
+
+# Encoding below for actual dataset
+
+ENC_LIST = [
+    ('idle', 0),
+    ('logout', 1),
+    ('number_six', 2)
+]
+
+ENC_DICT = {
+    0: 'idle',
+    1: 'logout',
+    2: 'number_six'
+}
+
+CLASSLIST = [ pair[0] for pair in ENC_LIST ]
 
 # Obtain best class from a given list of class probabilities for every prediction
 def onehot2str(onehot):
@@ -205,7 +225,7 @@ def initialiseModel(X_train):
     x = Dense(64)(x)
     x = LeakyReLU()(x)
     x = Dropout(0.2)(x)
-    output = Dense(6, activation = 'softmax')(x)
+    output = Dense(3, activation = 'softmax')(x)
     model = Model(inputs = main_input, outputs = output)
     # from keras import optimizers
     # sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
@@ -233,6 +253,12 @@ def loadDataset(X_PATH, Y_PATH):
         for input in y_file:
             Y.append(ENC_DICT[int(input) - 1])
     classes_removed = [
+        # 'WALKING',
+        # 'WALKING_UPSTAIRS',
+        # 'WALKING_DOWNSTAIRS',
+        'SITTING',
+        'STANDING',
+        'LAYING',
         'STAND_TO_SIT',
         'SIT_TO_STAND',
         'SIT_TO_LIE',
@@ -246,15 +272,78 @@ def loadDataset(X_PATH, Y_PATH):
     Y = np.delete(Y, del_idx)
     return X, Y
 
+def filterDummyDataset(X, Y, X_test, Y_test):
+    classes_removed = [
+        # 'WALKING',
+        # 'WALKING_UPSTAIRS',
+        # 'WALKING_DOWNSTAIRS',
+        'SITTING',
+        'STANDING',
+        'LAYING',
+        'STAND_TO_SIT',
+        'SIT_TO_STAND',
+        'SIT_TO_LIE',
+        'LIE_TO_SIT',
+        'STAND_TO_LIE',
+        'LIE_TO_STAND'
+    ]
+
+    del_idx = [ idx for idx, val in enumerate(Y) if val in classes_removed ]
+    X = np.delete(X, del_idx, axis=0)
+    Y = np.delete(Y, del_idx)
+
+    del_idx = [ idx for idx, val in enumerate(Y_test) if val in classes_removed ]
+    X_test = np.delete(X_test, del_idx, axis=0)
+    Y_test = np.delete(Y_test, del_idx)
+
+    return X, Y, X_test, Y_test
+
+def filterDataset(X, Y, X_test, Y_test):
+    classes_removed = [
+        # No classes need to be removed from self-collected dataset unless experimenting
+    ]
+
+    del_idx = [ idx for idx, val in enumerate(Y) if val in classes_removed ]
+    X = np.delete(X, del_idx, axis=0)
+    Y = np.delete(Y, del_idx)
+
+    del_idx = [ idx for idx, val in enumerate(Y_test) if val in classes_removed ]
+    X_test = np.delete(X_test, del_idx, axis=0)
+    Y_test = np.delete(Y_test, del_idx)
+
+    return X, Y, X_test, Y_test
+
 X_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\X_train.txt")
 Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\y_train.txt")
 X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\X_test.txt")
 Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\y_test.txt")
 
+DUMMY_DATASET_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
+TRAIN_DATASET_PATH = "dataset\\train.pkl"
+TEST_DATASET_PATH = "dataset\\test.pkl"
+
 if __name__ == "__main__":
 
-    X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
-    X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
+    # scaler = QuantileTransformer(output_distribution='uniform')
+    scaler = StandardScaler()
+    # scaler = MinMaxScaler((-1,1))
+
+    # # 1. Use Dummy dataset's provided training and testing set
+    # X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
+    # X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
+
+    # # 2. Use the dataset prepared from Dummy dataset's raw data values
+    # X, Y = pickle.load(open(DUMMY_DATASET_FILEPATH + 'train.pkl', 'rb'))
+    # X_test, Y_test = pickle.load(open(DUMMY_DATASET_FILEPATH + 'test.pkl', 'rb'))
+    # X, Y, X_test, Y_test = filterDummyDataset(X, Y, X_test, Y_test)
+
+    # 3. Use the dataset prepared from self-collected dataset's raw data values
+    X, Y = pickle.load(open(TRAIN_DATASET_PATH, 'rb'))
+    X_test, Y_test = pickle.load(open(TEST_DATASET_PATH, 'rb'))
+    X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
+
+    X = scaler.fit_transform(X)
+    X_test = scaler.transform(X_test)
 
     logger.info("Vectorizing...")
 
@@ -273,9 +362,14 @@ if __name__ == "__main__":
     model = fitModel(X, Y, X_val, Y_val)
 
     logger.info("Predicting...")
-    train_pred = model.predict(X_train)
+    train_pred = model.predict(X)
     val_pred = model.predict(X_val)
+    import time
+    start = time.time()
     test_pred = model.predict(X_test)
+    end = time.time()
+    logger.info("Prediction time: " + str(end-start))
+
     logger.info("Predictions done! Compiling results...")
 
     # Convert model output of class probabilities to corresponding best predictions
@@ -284,7 +378,7 @@ if __name__ == "__main__":
     Y_test_pred = onehot2str(test_pred)
 
     # Calculate accuracy, precision, recall and f1 scores
-    calculatePerformanceMetrics(Y_train_pred, Y_train, "training")
+    calculatePerformanceMetrics(Y_train_pred, Y, "training")
     calculatePerformanceMetrics(Y_val_pred, Y_val, "validation")
     calculatePerformanceMetrics(Y_test_pred, Y_test, "testing")
 
