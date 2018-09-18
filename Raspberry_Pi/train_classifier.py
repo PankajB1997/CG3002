@@ -244,7 +244,7 @@ def fitModel(X, Y):
     models = []
     scores = []
 
-    for i in range(3, 4):
+    for i in range(0, 10):
         model = initialiseModel(i)
         accuracy_scores = cross_val_score(model, X, Y, cv=10, scoring="accuracy", n_jobs=-1)
         scores.append(accuracy_scores.mean())
@@ -324,7 +324,7 @@ Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\T
 X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\X_test.txt")
 Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\y_test.txt")
 
-SAVE_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
+DUMMY_DATASET_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
 TRAIN_DATASET_PATH = "dataset\\train.pkl"
 TEST_DATASET_PATH = "dataset\\test.pkl"
 
@@ -336,10 +336,18 @@ if __name__ == "__main__":
     scaler = StandardScaler()
     # scaler = MinMaxScaler((-1,1))
 
+    # # 1. Use Dummy dataset's provided training and testing set
     # X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
     # X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
-    X, Y = pickle.load(open(SAVE_FILEPATH + 'train.pkl', 'rb'))
-    X_test, Y_test = pickle.load(open(SAVE_FILEPATH + 'test.pkl', 'rb'))
+
+    # # 2. Use the dataset prepared from Dummy dataset's raw data values
+    # X, Y = pickle.load(open(DUMMY_DATASET_FILEPATH + 'train.pkl', 'rb'))
+    # X_test, Y_test = pickle.load(open(DUMMY_DATASET_FILEPATH + 'test.pkl', 'rb'))
+    # X, Y, X_test, Y_test = filterDummyDataset(X, Y, X_test, Y_test)
+
+    # 3. Use the dataset prepared from self-collected dataset's raw data values
+    X, Y = pickle.load(open(TRAIN_DATASET_PATH, 'rb'))
+    X_test, Y_test = pickle.load(open(TEST_DATASET_PATH, 'rb'))
     X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
 
     X = scaler.fit_transform(X)

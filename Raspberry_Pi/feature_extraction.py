@@ -1,13 +1,23 @@
 import numpy as np
 from statsmodels import robust
 import pickle
+import logging
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, QuantileTransformer, Normalizer
 from obspy.signal.filter import highpass
 from scipy.signal import savgol_filter
 
-DUMMY_DATASET_FILEPATH = "dummy_dataset/RawData_ByMove/"
-DATASET_FILEPATH = "dataset/"
+# initialise logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+DUMMY_DATASET_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
+DATASET_FILEPATH = "dataset\\"
+
+# Default: 128 sets per segment with 50% overlap; currently, 8 segments per set is used due to insufficient data
+SEGMENT_SIZE = 8
+OVERLAP = 0.5
 
 scaler = MinMaxScaler((-1,1))
 
@@ -36,10 +46,10 @@ def get_all_segments(raw_data, move_class):
     raw_data = highpass(raw_data, 3, 50)
     raw_data = scaler.fit_transform(raw_data)
     # extract segments
-    limit = (len(raw_data) // 128 ) * 128
+    limit = (len(raw_data) // SEGMENT_SIZE ) * SEGMENT_SIZE
     segments = []
-    for i in range(0, limit, 64):
-        segment = raw_data[i: (i + 128)]
+    for i in range(0, limit, int(SEGMENT_SIZE * (1 - OVERLAP))):
+        segment = raw_data[i: (i + SEGMENT_SIZE)]
         segments.append(segment)
     return segments
 
@@ -53,7 +63,7 @@ if __name__ == "__main__":
         segments = get_all_segments(raw_data[move], move)
         for segment in segments:
             X = extract_feature_vector(segment)
-            print(move + " " + str(X))
+            logger.info(move + " " + str(X))
             data.append((X, move))
     X, Y = zip(*data)
     X_train, X_val, Y_train, Y_val = train_test_split(X, Y, test_size=0.2, random_state=42, shuffle=True, stratify=Y)
