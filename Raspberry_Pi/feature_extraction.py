@@ -6,8 +6,8 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, Ro
 from obspy.signal.filter import highpass
 from scipy.signal import savgol_filter
 
-DUMMY_DATASET_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
-DATASET_FILEPATH = "dataset\\"
+DUMMY_DATASET_FILEPATH = "dummy_dataset/RawData_ByMove/"
+DATASET_FILEPATH = "dataset/"
 
 scaler = MinMaxScaler((-1,1))
 

@@ -25,8 +25,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-CG3002_FILEPATH = os.path.join('\\', 'Users', 'pankaj', 'Documents', 'CG3002')
+CG3002_FILEPATH = os.path.join('/', 'Users', 'bryanlee', 'CG3002')
 # "\\Users\\pankaj\\Documents\\CG3002"
+# "/Users/bryanlee/CG3002"
 
 # set constant flag for which classifier to use
 '''
