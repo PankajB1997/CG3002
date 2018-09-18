@@ -7,6 +7,7 @@ from obspy.signal.filter import highpass
 from scipy.signal import savgol_filter
 
 SAVE_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
+DATASET_PATH = "dataset\\data_by_move.pkl"
 
 scaler = MinMaxScaler((-1,1))
 

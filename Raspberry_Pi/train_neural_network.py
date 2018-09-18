@@ -236,6 +236,12 @@ def loadDataset(X_PATH, Y_PATH):
         for input in y_file:
             Y.append(ENC_DICT[int(input) - 1])
     classes_removed = [
+        # 'WALKING',
+        # 'WALKING_UPSTAIRS',
+        # 'WALKING_DOWNSTAIRS',
+        'SITTING',
+        'STANDING',
+        'LAYING',
         'STAND_TO_SIT',
         'SIT_TO_STAND',
         'SIT_TO_LIE',
@@ -254,9 +260,9 @@ def filterDataset(X, Y, X_test, Y_test):
         # 'WALKING',
         # 'WALKING_UPSTAIRS',
         # 'WALKING_DOWNSTAIRS',
+        'SITTING',
         'STANDING',
         'LAYING',
-        'SITTING',
         'STAND_TO_SIT',
         'SIT_TO_STAND',
         'SIT_TO_LIE',
@@ -284,12 +290,13 @@ if __name__ == "__main__":
 
     # scaler = QuantileTransformer(output_distribution='uniform')
     scaler = StandardScaler()
+    # scaler = MinMaxScaler((-1,1))
 
-    # X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
-    # X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
-    X, Y = pickle.load(open(SAVE_FILEPATH + 'train.pkl', 'rb'))
-    X_test, Y_test = pickle.load(open(SAVE_FILEPATH + 'test.pkl', 'rb'))
-    X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
+    X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
+    X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
+    # X, Y = pickle.load(open(SAVE_FILEPATH + 'train.pkl', 'rb'))
+    # X_test, Y_test = pickle.load(open(SAVE_FILEPATH + 'test.pkl', 'rb'))
+    # X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
 
     X = scaler.fit_transform(X)
     X_test = scaler.transform(X_test)
