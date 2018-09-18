@@ -6,8 +6,8 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, Ro
 from obspy.signal.filter import highpass
 from scipy.signal import savgol_filter
 
-SAVE_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
-DATASET_PATH = "dataset\\data_by_move.pkl"
+DUMMY_DATASET_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
+DATASET_FILEPATH = "dataset\\"
 
 scaler = MinMaxScaler((-1,1))
 
@@ -30,7 +30,7 @@ def extract_feature_vector(X):
 # where every tuple represents raw data for that segment and the move_class for that segment
 def get_all_segments(raw_data, move_class):
     # preprocess data
-    raw_data = savgol_filter(raw_data, 5, 3)
+    raw_data = savgol_filter(raw_data, 3, 2)
     raw_data = highpass(raw_data, 3, 50)
     raw_data = scaler.fit_transform(raw_data)
     # extract segments
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     # Get all segments for every move one by one
     # for every segment for a given move, extract the feature vector
     # in the end, store a list of tuple pairs of (feature_vector, move_class) to pickle file
-    raw_data = pickle.load(open(SAVE_FILEPATH + 'data_by_move.pkl', 'rb'))
+    raw_data = pickle.load(open(DATASET_FILEPATH + 'data_by_move.pkl', 'rb'))
     data = []
     for move in raw_data:
         segments = get_all_segments(raw_data[move], move)
@@ -55,5 +55,5 @@ if __name__ == "__main__":
             data.append((X, move))
     X, Y = zip(*data)
     X_train, X_val, Y_train, Y_val = train_test_split(X, Y, test_size=0.2, random_state=42, shuffle=True, stratify=Y)
-    pickle.dump([X_train, Y_train], open(SAVE_FILEPATH + 'train.pkl', 'wb'))
-    pickle.dump([X_val, Y_val], open(SAVE_FILEPATH + 'test.pkl', 'wb'))
+    pickle.dump([X_train, Y_train], open(DATASET_FILEPATH + 'train.pkl', 'wb'))
+    pickle.dump([X_val, Y_val], open(DATASET_FILEPATH + 'test.pkl', 'wb'))

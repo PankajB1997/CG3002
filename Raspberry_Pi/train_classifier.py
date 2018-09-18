@@ -27,9 +27,6 @@ logger.setLevel(logging.INFO)
 
 CG3002_FILEPATH = os.path.join('\\', 'Users', 'pankaj', 'Documents', 'CG3002')
 # "\\Users\\pankaj\\Documents\\CG3002"
-SAVE_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
-TRAIN_DATASET_PATH = "dataset\\train.pkl"
-TEST_DATASET_PATH = "dataset\\test.pkl"
 
 # set constant flag for which classifier to use
 '''
@@ -326,6 +323,10 @@ Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\T
 X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\X_test.txt")
 Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\y_test.txt")
 
+SAVE_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
+TRAIN_DATASET_PATH = "dataset\\train.pkl"
+TEST_DATASET_PATH = "dataset\\test.pkl"
+
 if __name__ == "__main__":
 
     # Normalizer() works best with GammaSVC
@@ -334,11 +335,11 @@ if __name__ == "__main__":
     scaler = StandardScaler()
     # scaler = MinMaxScaler((-1,1))
 
-    X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
-    X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
-    # X, Y = pickle.load(open(SAVE_FILEPATH + 'train.pkl', 'rb'))
-    # X_test, Y_test = pickle.load(open(SAVE_FILEPATH + 'test.pkl', 'rb'))
-    # X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
+    # X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
+    # X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
+    X, Y = pickle.load(open(SAVE_FILEPATH + 'train.pkl', 'rb'))
+    X_test, Y_test = pickle.load(open(SAVE_FILEPATH + 'test.pkl', 'rb'))
+    X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
 
     X = scaler.fit_transform(X)
     X_test = scaler.transform(X_test)
