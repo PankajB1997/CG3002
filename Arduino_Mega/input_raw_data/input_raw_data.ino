@@ -58,83 +58,78 @@ int16_t xg_offset, yg_offset, zg_offset;
 //Float values for scaled values of gyroscopes
 float xg, yg, zg;
 
+int count = 0;
+
 //Function prototypes
 int remapVoltage(int);
 void calibrateScale();
 
+// @Junyang: Pls refer to this link - https://learn.sparkfun.com/tutorials/adxl345-hookup-guide
 void setup()
 {
   Wire.begin();        // join i2c bus (address optional for master)
   Serial.begin(9600);  // start serial for output
-
-  //Initializing sensors 
+  // Initializing sensors 
   sensorA.initialize();
   sensorB.initialize();
   sensorC.initialize();
-
-  //Setting sampling frequency to 50hz
-  sensor.setRate(ADXL345_RATE_50);
-  //Testing connection by reading device ID of each sensor
-  //Returns false if deviceID not found, Returns true if deviceID is found
+  // Setting sampling frequency to 50hz
+  sensorA.setRate(ADXL345_RATE_50);
+  // Testing connection by reading device ID of each sensor
+  // Returns false if deviceID not found, Returns true if deviceID is found
   Serial.println(sensorA.testConnection() ? "Sensor A connected successfully" : "Sensor A failed to connect");
 //  Serial.println(sensorB.testConnection() ? "Sensor B connected successfully" : "Sensor B failed to connect");
-// Serial.println(sensorC.testConnection() ? "Sensor C connected successfully" : "Sensor C failed to connect");
- 
+//  Serial.println(sensorC.testConnection() ? "Sensor C connected successfully" : "Sensor C failed to connect");
   calibrateSensors();
-  
 }
 void loop()
 {  
-  //Getting raw values
+  // Getting raw values at 50 Hz frequency by setting 20 ms delay
+  delay(20)
+
+  // Read values from different sensors
   sensorA.getAcceleration(&xa_raw, &ya_raw, &za_raw);
- // sensorB.getAcceleration(&xb_raw, &yb_raw, &zb_raw);
-  
   xa = (xa_raw + xa_offset)*scaleFactorAccel;
   ya = (ya_raw + ya_offset)*scaleFactorAccel;
   za = (za_raw + za_offset)*scaleFactorAccel;
-//
+//  sensorB.getAcceleration(&xb_raw, &yb_raw, &zb_raw);
 //  xb = (xb_raw + xb_offset)*scaleFactorAccel;
 //  yb = (yb_raw + yb_offset)*scaleFactorAccel;
 //  zb = (zb_raw + zb_offset)*scaleFactorAccel;
-//
 //  sensorC.getRotation(&xg_raw, &yg_raw, &zg_raw);
-//
 //  xg = (xg_raw + xg_offset)*scaleFactorGyro;
 //  yg = (yg_raw + yg_offset)*scaleFactorGyro;
 //  zg = (zg_raw + zg_offset)*scaleFactorGyro;
-//  
 
-  // display values for different sensors 
-  Serial.print("accel for Sensor A:\t");
-  Serial.print(xa); Serial.print("\t");
-  Serial.print(ya); Serial.print("\t");
-  Serial.println(za);
-   
+  // Display values for different sensors
+  if count == 
+    Serial.print("accel for Sensor A:\t");
+    Serial.print(xa); Serial.print("\t");
+    Serial.print(ya); Serial.print("\t");
+    Serial.println(za);
 //  Serial.print("accel for Sensor B:\t");
 //  Serial.print(xb); Serial.print("\t");
 //  Serial.print(yb); Serial.print("\t");
 //  Serial.println(zb);
-//
 //  Serial.print("rotation for Sensor C:\t");
 //  Serial.print(xg); Serial.print("\t");
 //  Serial.print(yg); Serial.print("\t");
 //  Serial.println(zg);
-  
+
+  // Measure and display voltage and current
 //  voltageReading = analogRead(voltagePin);
 //  voltageReading = remapVoltage(voltageReading);
 //  Serial.print("voltage reading :\t");
 //  Serial.print(voltageReading);
-//
 //  currentReading = (voltageReading * 1000) / (RS + RL);
 //  Serial.print("current reading :\t");
 //  Serial.print(currentReading);
-  
+
 }
 
 int remapVoltage(int voltageReading) {
   float analogToDigital;
-  analogToDigital = (5.0/1023) * voltageReading;
-  
+  analogToDigital = (5.0/1023) * voltageReading;  
   return (int)analogToDigital;
 }
 
@@ -162,5 +157,3 @@ void calibrateSensors() {
 //  yg_offset = -yg_raw;
 //  zg_offset = -zg_raw;
 }
-
-
