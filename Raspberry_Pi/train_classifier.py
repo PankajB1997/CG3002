@@ -91,26 +91,42 @@ ENC_DICT = {
     11: 'LIE_TO_STAND'
 }
 
+# Encoding below for actual dataset
+
+ENC_LIST = [
+    ('idle', 0),
+    ('logout', 1),
+    ('number_six', 2)
+]
+
+ENC_DICT = {
+    0: 'idle',
+    1: 'logout',
+    2: 'number_six'
+}
+
+CLASSLIST = [ pair[0] for pair in ENC_LIST ]
+
 # Obtain best class from a given list of class probabilities for every prediction
-def onehot2str(onehot):
-       enc_dict = dict([(i[1],i[0]) for i in ENC_LIST])
-       idx_list = np.argmax(onehot, axis=1).tolist()
-       result_str = []
-       for i in idx_list:
-               result_str.append(enc_dict[i])
-       return np.asarray(result_str)
+# def onehot2str(onehot):
+#        enc_dict = dict([(i[1],i[0]) for i in ENC_LIST])
+#        idx_list = np.argmax(onehot, axis=1).tolist()
+#        result_str = []
+#        for i in idx_list:
+#                result_str.append(enc_dict[i])
+#        return np.asarray(result_str)
 
 # Convert a class to its corresponding one hot vector
-def str2onehot(Y):
-   enc_dict = dict(ENC_LIST)
-   new_Y = []
-   for y in Y:
-       vec = np.zeros((1,len(ENC_LIST)),dtype='float64')
-       vec[ 0, enc_dict[y] ] = 1.
-       new_Y.append(vec)
-   del Y
-   new_Y = np.vstack(new_Y)
-   return new_Y
+# def str2onehot(Y):
+#    enc_dict = dict(ENC_LIST)
+#    new_Y = []
+#    for y in Y:
+#        vec = np.zeros((1,len(ENC_LIST)),dtype='float64')
+#        vec[ 0, enc_dict[y] ] = 1.
+#        new_Y.append(vec)
+#    del Y
+#    new_Y = np.vstack(new_Y)
+#    return new_Y
 
 # Computes precision, recall and F1 scores for every class
 def precision_recall_f1(Y_pred, Y_test, classlist):
@@ -319,14 +335,14 @@ def filterDataset(X, Y, X_test, Y_test):
 
     return X, Y, X_test, Y_test
 
-X_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\X_train.txt")
-Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\y_train.txt")
-X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\X_test.txt")
-Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\y_test.txt")
+X_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi/dummy_dataset/Train/X_train.txt")
+Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi/dummy_dataset/Train/y_train.txt")
+X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi/dummy_dataset/Test/X_test.txt")
+Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi/dummy_dataset/Test/y_test.txt")
 
-DUMMY_DATASET_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
-TRAIN_DATASET_PATH = "dataset\\train.pkl"
-TEST_DATASET_PATH = "dataset\\test.pkl"
+DUMMY_DATASET_FILEPATH = "dummy_dataset/RawData_ByMove/"
+TRAIN_DATASET_PATH = "dataset/train.pkl"
+TEST_DATASET_PATH = "dataset/test.pkl"
 
 if __name__ == "__main__":
 
