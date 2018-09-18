@@ -11,11 +11,13 @@ def extract_feature_vector(X):
     X_min = np.min(X, axis=0)
     X_off = np.subtract(X_max, X_min)
     X_mad = robust.mad(X, axis=0)
-    # extract frequency domain features
-    X_psd = []
-    X_peakF = []
+
+    # extract frequency domain features, powerspectraldensity, peakf
+    # X_psd = []
+    # X_peakF = []
+
     # return feature vector by appending all vectors above as one d-dimension feature vector
-    return np.append(X_mean, [X_var, X_max, X_min, X_off, X_mad, X_psd, X_peakF])
+    return np.append(X_mean, [X_var, X_max, X_min, X_off, X_mad])
 
 # segment data from the raw data files, return list of tuples (segments, move_class)
 # where every tuple represents raw data for that segment and the move_class for that segment
