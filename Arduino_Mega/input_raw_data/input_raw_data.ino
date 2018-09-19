@@ -69,8 +69,10 @@ void setup()
   Serial.println(sensorA.testConnection() ? "Sensor A connected successfully" : "Sensor A failed to connect");
   Serial.println(sensorB.testConnection() ? "Sensor B connected successfully" : "Sensor B failed to connect");
   Serial.println(sensorC.testConnection() ? "Sensor C connected successfully" : "Sensor C failed to connect");
-  
   calibrateSensors();
+
+  //Input delay to show user the successful connection of the wires
+  delay(1000);
 }
 
 float getSum(float array[]){
@@ -93,44 +95,36 @@ void printPower(){
     float current = remapVoltage(currentVoltage);
 
     //formula given by hookup guide
-    current = (currentVoltage * 1000) / (RS * RL);
+    //converting current to mA
+    current = (current * 1000) / (RS * RL);
+    current = current * 1000;
 
-    static float powerValues[PowerBufferSize];
-    static int count = 0;
-    static boolean arrayFilled = false;
-    static startTime = -1;
+    static long prevTime = 0;
 
-    if(startTime == -1){
-      startTime = millis();
-    }
+    float power = current * voltage;
 
-    count = (count + 1) % PowerBufferSize;
+    float hoursPassed = (millis()-prevTime) / (1000.0 * 60.0);
 
-    int size;
+    prevTime = millis();
 
-    if(arrayFilled){
-      size = PowerBufferSize;
-    }else{
-      size = count;
-    }
-
-    float sum = getSum(powerValues);
-    float averagePower = sum / size;
-
-    float hoursPassed = (millis()-startTime) / 1000.0 / 60.0;
-    float energy = hoursPassed * averagePower;
+    static float energy = 0;
+    energy += hoursPassed * power;
 
     Serial.print("current reading: ");
-    Serial.println(currentReading, 9);
+    Serial.print(current, 9);
+    Serial.println("mA");
 
     Serial.print("voltage reading");
-    Serial.println(voltageReading, 9);
+    Serial.print(voltage, 9);
+    Serial.println("V");
 
     Serial.print("Power reading");
-    Serial.println(averagePower, 9);
+    Serial.print(power, 9);
+    Serial.println("mW");
 
     Serial.print("Energy reading");
-    Serial.println(energy, 9);
+    Serial.print(energy, 9);
+    Serial.println("J");
 }
 
 void loop()
@@ -159,7 +153,7 @@ void loop()
 
 float remapVoltage(int volt) {
   float analogToDigital;
-  analogToDigital = (5.0/1023) * volt;  
+  analogToDigital = (5.0/1023) * volt;
   return analogToDigital;
 }
 
@@ -209,6 +203,7 @@ float remapVoltage(int volt) {
  */
 void calibrateSensors() {
   //Setting range of ADXL345
+  Serial.println("Calibrating sensors...");
   sensorA.setRange(ADXL345_RANGE_2G);
   sensorB.setRange(ADXL345_RANGE_2G);
 
