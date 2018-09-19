@@ -7,10 +7,11 @@
 #define DEVICE_B_ACCEL (0x1D)    //second ADXL345 device address
 #define DEVICE_C_GYRO (0x68) // MPU6050 address
 #define TO_READ (6)        //num of bytes we are going to read each time
-#define voltageDividerPin 0
-#define currentSensorPin 1
+#define voltageDividerPin A0 // Arduino Analog 0 pin
+#define currentSensorPin A1  // Arduino Analog 1 pin
 #define RS 0.1
 #define RL 10000
+#define PowerBufferSize 100
 
 ADXL345 sensorA = ADXL345(DEVICE_A_ACCEL);
 ADXL345 sensorB = ADXL345(DEVICE_B_ACCEL);
@@ -25,15 +26,10 @@ const float scaleFactorAccel = rangeAccel/1023.0;
 /*
  * +-250degrees/second already set initialize() function
  * value of 65535 is used due to 16 bit ADC
- */ 
+ */
 //determining the scale factor for gyroscope
 int rangeGyro = 250-(-250);
-const float scaleFactorGyro = rangeGyro/65535.0; 
- 
-//declaring variable to store value of volt and amps
-    float vOut;
-    float voltageReading;
-    float currentReading;
+const float scaleFactorGyro = rangeGyro/65535.0;
 
 //16 bit integer values for raw data of accelerometers
 int16_t xa_raw, ya_raw, za_raw, xb_raw, yb_raw, zb_raw;
@@ -61,7 +57,7 @@ void setup()
 {
   Wire.begin();        // join i2c bus (address optional for master)
   Serial.begin(115200);  // start serial for output
-  // Initializing sensors 
+  // Initializing sensors
   sensorA.initialize();
   sensorB.initialize();
   sensorC.initialize();
@@ -73,8 +69,69 @@ void setup()
   Serial.println(sensorC.testConnection() ? "Sensor C connected successfully" : "Sensor C failed to connect");
   calibrateSensors();
 }
+
+float getSum(float array[]){
+  float result = 0;
+  for(int i = 0; i < PowerBufferSize; i++)
+    result += array[i];
+  }
+  return result;
+}
+
+void printPower(){
+    //Measure and display voltage measured from voltage divider
+    float voltage = analogRead(voltageDividerPin);
+    //voltage divider halfs the voltage
+    //times 2 here to compensate
+    voltage = remapVoltage(voltage) * 2;
+
+    //Measure voltage out from current sensor to calculate current
+    float currentVoltage = analogRead(currentSensorPin);
+    float current = remapVoltage(currentVoltage);
+
+    //formula given by hookup guide
+    current = (currentVoltage * 1000) / (RS * RL);
+
+    static float powerValues[PowerBufferSize];
+    static int count = 0;
+    static boolean arrayFilled = false;
+    static startTime = -1;
+
+    if(startTime == -1){
+      startTime = millis();
+    }
+
+    count = (count + 1) % PowerBufferSize;
+
+    int size;
+
+    if(arrayFilled){
+      size = PowerBufferSize;
+    }else{
+      size = count;
+    }
+
+    float sum = getSum(powerValues);
+    float averagePower = sum / size;
+
+    float hoursPassed = (millis()-startTime) / 1000.0 / 60.0;
+    float energy = hoursPassed * averagePower;
+
+    Serial.print("current reading: ");
+    Serial.println(currentReading, 9);
+
+    Serial.print("voltage reading");
+    Serial.println(voltageReading, 9);
+
+    Serial.print("Power reading");
+    Serial.println(averagePower, 9);
+
+    Serial.print("Energy reading");
+    Serial.println(energy, 9);
+}
+
 void loop()
-{  
+{
   // Getting raw values at 50 Hz frequency by setting 20 ms delay
   delay(20);
 
@@ -83,12 +140,12 @@ void loop()
   xa = (xa_raw + xa_offset)*scaleFactorAccel;
   ya = (ya_raw + ya_offset)*scaleFactorAccel;
   za = (za_raw + za_offset)*scaleFactorAccel;
-  
+
   sensorB.getAcceleration(&xb_raw, &yb_raw, &zb_raw);
   xb = (xb_raw + xb_offset)*scaleFactorAccel;
   yb = (yb_raw + yb_offset)*scaleFactorAccel;
   zb = (zb_raw + zb_offset)*scaleFactorAccel;
-  
+
   sensorC.getRotation(&xg_raw, &yg_raw, &zg_raw);
   xg = (xg_raw + xg_offset)*scaleFactorGyro;
   yg = (yg_raw + yg_offset)*scaleFactorGyro;
@@ -99,36 +156,20 @@ void loop()
   Serial.print(xa); Serial.print("\t");
   Serial.print(ya); Serial.print("\t");
   Serial.println(za);
-  
+
   Serial.print("accel for Sensor B:\t");
   Serial.print(xb); Serial.print("\t");
   Serial.print(yb); Serial.print("\t");
   Serial.println(zb);
-  
+
   Serial.print("rotation for Sensor C:\t");
   Serial.print(xg); Serial.print("\t");
   Serial.print(yg); Serial.print("\t");
   Serial.println(zg);
-
-  //Measure and display voltage measured from voltage divider
-  voltageReading = analogRead(voltageDividerPin);
-  voltageReading = remapVoltage(voltageReading);
-  Serial.print("voltage reading");
-  Serial.println(voltageReading, 9);
-
-  //Measure voltage out from current sensor to calculate current
-  vOut = analogRead(currentSensorPin);
-  vOut = remapVoltage(vOut);
-  currentReading = (vOut * 1000) / (RS * RL);
-  Serial.print("current reading: ");
-  Serial.println(currentReading, 9);
-
 }
 
 float remapVoltage(int volt) {
-  float analogToDigital;
-  analogToDigital = (5.0/1023) * volt;  
-  return analogToDigital;
+  return map(volt, 0, 1024, 0f, 5f);
 }
 
 /*
@@ -138,11 +179,11 @@ void calibrateSensors() {
   //Setting range of ADXL345
   sensorA.setRange(ADXL345_RANGE_2G);
   sensorB.setRange(ADXL345_RANGE_2G);
-  
+
   sensorA.getAcceleration(&xa_raw, &ya_raw, &za_raw);
   sensorB.getAcceleration(&xb_raw, &yb_raw, &zb_raw);
   sensorC.getRotation(&xg_raw, &yg_raw, &zg_raw);
-  
+
   xa_offset = -xa_raw;
   ya_offset = -ya_raw;
   za_offset = -za_raw+255;
