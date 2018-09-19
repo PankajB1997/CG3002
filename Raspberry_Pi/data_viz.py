@@ -20,7 +20,6 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 DATASET_PATH = "dataset/"
-# SAVEPATH = "dataset/"
 
 # moves = ['idle', 'logout', 'number_six']
 #
@@ -37,50 +36,35 @@ DATASET_PATH = "dataset/"
 #         plt.scatter(transformed[y==i][0], transformed[y==i][1], label=move)
 #     i += 1
 
-# logger.info(pickle.load(open(DATASET_PATH + 'number_six' + '.pkl', 'rb')))
-#
+logger.info(pickle.load(open(DATASET_PATH + 'number_six' + '.pkl', 'rb')))
+
 X, y = pickle.load(open(DATASET_PATH + 'number_six' + '.pkl', 'rb'))
 
-logger.info(X)
-logger.info(y)
-
 pca = sklearnPCA(n_components=2) #2-dimensional PCA
 transformed = pd.DataFrame(pca.fit_transform(X, y))
 
-logger.info("transformed")
-logger.info(transformed)
+plt.scatter(transformed[0], transformed[1], label='number_six', c='red')
 
-plt.scatter(transformed[0], transformed[1], label='Class 1', c='red')
+# X, y = pickle.load(open(DATASET_PATH + 'idle' + '.pkl', 'rb'))
+#
+# pca = sklearnPCA(n_components=2) #2-dimensional PCA
+# transformed = pd.DataFrame(pca.fit_transform(X, y))
+#
+# plt.scatter(transformed[0], transformed[1], label='idle', c='blue')
 
-X, y = pickle.load(open(DATASET_PATH + 'idle' + '.pkl', 'rb'))
+# X, y = pickle.load(open(DATASET_PATH + 'logout' + '.pkl', 'rb'))
+#
+# logger.info(X)
+# logger.info(y)
+#
+# pca = sklearnPCA(n_components=2) #2-dimensional PCA
+# transformed = pd.DataFrame(pca.fit_transform(X, y))
+#
+# logger.info("transformed")
+# logger.info(transformed)
+#
+# plt.scatter(transformed[0], transformed[1], label='logout', c='green')
 
-logger.info(X)
-logger.info(y)
-
-pca = sklearnPCA(n_components=2) #2-dimensional PCA
-transformed = pd.DataFrame(pca.fit_transform(X, y))
-
-logger.info("transformed")
-logger.info(transformed)
-
-plt.scatter(transformed[0], transformed[1], label='Class 2', c='blue')
-
-X, y = pickle.load(open(DATASET_PATH + 'logout' + '.pkl', 'rb'))
-
-logger.info(X)
-logger.info(y)
-
-pca = sklearnPCA(n_components=2) #2-dimensional PCA
-transformed = pd.DataFrame(pca.fit_transform(X, y))
-
-logger.info("transformed")
-logger.info(transformed)
-
-plt.scatter(transformed[0], transformed[1], label='Class 3', c='green')
-# plt.scatter(transformed[y==2][0], transformed[y==2][1], label='Class 2', c='blue')
-# plt.scatter(transformed[y==3][0], transformed[y==3][1], label='Class 3', c='lightgreen')
-
-# three different scatter series so the class labels in the legend are distinct
-
+# plot
 plt.legend()
 plt.show()
