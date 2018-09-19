@@ -196,16 +196,12 @@ void printSensorReadings() {
   Serial.print(xg); Serial.print("\t");
   Serial.print(yg); Serial.print("\t");
   Serial.println(zg);
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
+
 }
 
 float remapVoltage(int volt) {
   return map(volt, 0, 1024, 0f, 5f);
-=======
->>>>>>> master
->>>>>>> 58c2fb33a4d97417676446b9ebbb6dd03f9681c0
+
 }
 
 /*
