@@ -51,7 +51,9 @@ float xg, yg, zg;
 
 //Function prototypes
 float remapVoltage(int);
-void calibrateScale();
+void calibrateSensors();
+void getScaledReadings();
+void printSensorReadings();
 
 void setup()
 {
@@ -67,6 +69,7 @@ void setup()
   Serial.println(sensorA.testConnection() ? "Sensor A connected successfully" : "Sensor A failed to connect");
   Serial.println(sensorB.testConnection() ? "Sensor B connected successfully" : "Sensor B failed to connect");
   Serial.println(sensorC.testConnection() ? "Sensor C connected successfully" : "Sensor C failed to connect");
+  
   calibrateSensors();
 }
 
@@ -136,6 +139,31 @@ void loop()
   delay(20);
 
   // Read values from different sensors
+  getScaledReadings();
+  printSensorReadings();
+
+  //Measure and display voltage measured from voltage divider
+  voltageReading = analogRead(voltageDividerPin);
+  voltageReading = remapVoltage(voltageReading);
+  Serial.print("voltage reading");
+  Serial.println(voltageReading, 9);
+
+  //Measure voltage out from current sensor to calculate current
+  vOut = analogRead(currentSensorPin);
+  vOut = remapVoltage(vOut);
+  currentReading = (vOut * 1000) / (RS * RL);
+  Serial.print("current reading: ");
+  Serial.println(currentReading, 9);
+
+}
+
+float remapVoltage(int volt) {
+  float analogToDigital;
+  analogToDigital = (5.0/1023) * volt;  
+  return analogToDigital;
+}
+
+void getScaledReadings() {
   sensorA.getAcceleration(&xa_raw, &ya_raw, &za_raw);
   xa = (xa_raw + xa_offset)*scaleFactorAccel;
   ya = (ya_raw + ya_offset)*scaleFactorAccel;
@@ -150,8 +178,10 @@ void loop()
   xg = (xg_raw + xg_offset)*scaleFactorGyro;
   yg = (yg_raw + yg_offset)*scaleFactorGyro;
   zg = (zg_raw + zg_offset)*scaleFactorGyro;
+}
 
-   //Display values for different sensors
+void printSensorReadings() {
+  //Display values for different sensors
   Serial.print("accel for Sensor A:\t");
   Serial.print(xa); Serial.print("\t");
   Serial.print(ya); Serial.print("\t");
@@ -166,10 +196,13 @@ void loop()
   Serial.print(xg); Serial.print("\t");
   Serial.print(yg); Serial.print("\t");
   Serial.println(zg);
+<<<<<<< HEAD
 }
 
 float remapVoltage(int volt) {
   return map(volt, 0, 1024, 0f, 5f);
+=======
+>>>>>>> master
 }
 
 /*
