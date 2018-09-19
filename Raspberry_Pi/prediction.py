@@ -115,6 +115,6 @@ if __name__ == '__main__':
         [0.65, -0.75, 1.01]
     ]
 
-    print(predict_dance_move(segment_idle))
-    print(predict_dance_move(segment_logout))
-    print(predict_dance_move(segment_numbersix))
+    print("Dance Move 1: " + predict_dance_move(segment_idle))
+    print("Dance Move 2: " + predict_dance_move(segment_logout))
+    print("Dance Move 3: " + predict_dance_move(segment_numbersix))
