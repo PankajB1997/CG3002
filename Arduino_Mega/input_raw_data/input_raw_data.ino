@@ -69,16 +69,16 @@ void setup()
   Serial.println(sensorA.testConnection() ? "Sensor A connected successfully" : "Sensor A failed to connect");
   Serial.println(sensorB.testConnection() ? "Sensor B connected successfully" : "Sensor B failed to connect");
   Serial.println(sensorC.testConnection() ? "Sensor C connected successfully" : "Sensor C failed to connect");
-  
+
   calibrateSensors();
 }
 
-float getSum(float array[]){
-  float result = 0;
-  for(int i = 0; i < PowerBufferSize; i++)
-    result += array[i];
+float getSum(float arr[]){
+  float res = 0;
+  for(int i = 0; i < PowerBufferSize; i++){
+    res += arr[i];
   }
-  return result;
+  return res;
 }
 
 void printPower(){
@@ -93,41 +93,27 @@ void printPower(){
     float current = remapVoltage(currentVoltage);
 
     //formula given by hookup guide
-    current = (currentVoltage * 1000) / (RS * RL);
+    current = (current * 1000) / (RS * RL);
 
-    static float powerValues[PowerBufferSize];
-    static int count = 0;
-    static boolean arrayFilled = false;
-    static startTime = -1;
+    static long prevTime = 0;
+    
+    float power = current * voltage;
 
-    if(startTime == -1){
-      startTime = millis();
-    }
+    float hoursPassed = (millis()-prevTime) / (1000.0 * 60.0);
 
-    count = (count + 1) % PowerBufferSize;
-
-    int size;
-
-    if(arrayFilled){
-      size = PowerBufferSize;
-    }else{
-      size = count;
-    }
-
-    float sum = getSum(powerValues);
-    float averagePower = sum / size;
-
-    float hoursPassed = (millis()-startTime) / 1000.0 / 60.0;
-    float energy = hoursPassed * averagePower;
+    prevTime = millis();
+    
+    static float energy = 0;
+    energy += hoursPassed * power;
 
     Serial.print("current reading: ");
-    Serial.println(currentReading, 9);
+    Serial.println(current, 9);
 
     Serial.print("voltage reading");
-    Serial.println(voltageReading, 9);
+    Serial.println(voltage, 9);
 
     Serial.print("Power reading");
-    Serial.println(averagePower, 9);
+    Serial.println(power, 9);
 
     Serial.print("Energy reading");
     Serial.println(energy, 9);
@@ -141,26 +127,7 @@ void loop()
   // Read values from different sensors
   getScaledReadings();
   printSensorReadings();
-
-  //Measure and display voltage measured from voltage divider
-  voltageReading = analogRead(voltageDividerPin);
-  voltageReading = remapVoltage(voltageReading);
-  Serial.print("voltage reading");
-  Serial.println(voltageReading, 9);
-
-  //Measure voltage out from current sensor to calculate current
-  vOut = analogRead(currentSensorPin);
-  vOut = remapVoltage(vOut);
-  currentReading = (vOut * 1000) / (RS * RL);
-  Serial.print("current reading: ");
-  Serial.println(currentReading, 9);
-
-}
-
-float remapVoltage(int volt) {
-  float analogToDigital;
-  analogToDigital = (5.0/1023) * volt;  
-  return analogToDigital;
+  printPower();
 }
 
 void getScaledReadings() {
@@ -196,13 +163,10 @@ void printSensorReadings() {
   Serial.print(xg); Serial.print("\t");
   Serial.print(yg); Serial.print("\t");
   Serial.println(zg);
-<<<<<<< HEAD
 }
 
 float remapVoltage(int volt) {
-  return map(volt, 0, 1024, 0f, 5f);
-=======
->>>>>>> master
+  return volt/1023.0 * 5;
 }
 
 /*
