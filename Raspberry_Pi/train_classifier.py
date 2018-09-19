@@ -59,37 +59,37 @@ MODEL_UNIQUE_IDS = {
     9: 'QuadraticDiscriminantAnalysis'
 }
 
-ENC_LIST = [
-    ('WALKING', 0),
-    ('WALKING_UPSTAIRS', 1),
-    ('WALKING_DOWNSTAIRS', 2),
-    ('SITTING', 3),
-    ('STANDING', 4),
-    ('LAYING', 5),
-    # ('STAND_TO_SIT', 6),
-    # ('SIT_TO_STAND', 7),
-    # ('SIT_TO_LIE', 8),
-    # ('LIE_TO_SIT', 9),
-    # ('STAND_TO_LIE', 10),
-    # ('LIE_TO_STAND', 11)
-]
+# ENC_LIST = [
+#     ('WALKING', 0),
+#     ('WALKING_UPSTAIRS', 1),
+#     ('WALKING_DOWNSTAIRS', 2)
+#     ('SITTING', 3),
+#     ('STANDING', 4),
+#     ('LAYING', 5),
+#     ('STAND_TO_SIT', 6),
+#     ('SIT_TO_STAND', 7),
+#     ('SIT_TO_LIE', 8),
+#     ('LIE_TO_SIT', 9),
+#     ('STAND_TO_LIE', 10),
+#     ('LIE_TO_STAND', 11)
+# ]
 
-CLASSLIST = [ pair[0] for pair in ENC_LIST ]
+# ENC_DICT = {
+#     0: 'WALKING',
+#     1: 'WALKING_UPSTAIRS',
+#     2: 'WALKING_DOWNSTAIRS',
+#     3: 'SITTING',
+#     4: 'STANDING',
+#     5: 'LAYING',
+#     6: 'STAND_TO_SIT',
+#     7: 'SIT_TO_STAND',
+#     8: 'SIT_TO_LIE',
+#     9: 'LIE_TO_SIT',
+#     10: 'STAND_TO_LIE',
+#     11: 'LIE_TO_STAND'
+# }
 
-ENC_DICT = {
-    0: 'WALKING',
-    1: 'WALKING_UPSTAIRS',
-    2: 'WALKING_DOWNSTAIRS',
-    3: 'SITTING',
-    4: 'STANDING',
-    5: 'LAYING',
-    6: 'STAND_TO_SIT',
-    7: 'SIT_TO_STAND',
-    8: 'SIT_TO_LIE',
-    9: 'LIE_TO_SIT',
-    10: 'STAND_TO_LIE',
-    11: 'LIE_TO_STAND'
-}
+# CLASSLIST = [ pair[0] for pair in ENC_LIST ]
 
 # Encoding below for actual dataset
 
@@ -278,7 +278,7 @@ def fitModel(X, Y):
             max_index = i
     logger.info("Best model is " + str(MODEL_UNIQUE_IDS[max_index]) + " with accuracy of " + str(max_accuracy_score))
 
-    return models[max_index]
+    return models[2]
 
 def loadDataset(X_PATH, Y_PATH):
     X = []
@@ -357,14 +357,14 @@ if __name__ == "__main__":
     # X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
 
     # # 2. Use the dataset prepared from Dummy dataset's raw data values
-    # X, Y = pickle.load(open(DUMMY_DATASET_FILEPATH + 'train.pkl', 'rb'))
-    # X_test, Y_test = pickle.load(open(DUMMY_DATASET_FILEPATH + 'test.pkl', 'rb'))
-    # X, Y, X_test, Y_test = filterDummyDataset(X, Y, X_test, Y_test)
+    X, Y = pickle.load(open(DUMMY_DATASET_FILEPATH + 'train.pkl', 'rb'))
+    X_test, Y_test = pickle.load(open(DUMMY_DATASET_FILEPATH + 'test.pkl', 'rb'))
+    X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
 
     # 3. Use the dataset prepared from self-collected dataset's raw data values
-    X, Y = pickle.load(open(TRAIN_DATASET_PATH, 'rb'))
-    X_test, Y_test = pickle.load(open(TEST_DATASET_PATH, 'rb'))
-    X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
+    # X, Y = pickle.load(open(TRAIN_DATASET_PATH, 'rb'))
+    # X_test, Y_test = pickle.load(open(TEST_DATASET_PATH, 'rb'))
+    # X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
 
     X = scaler.fit_transform(X)
     X_test = scaler.transform(X_test)
@@ -384,6 +384,7 @@ if __name__ == "__main__":
     # X_val, X_test, Y_val, Y_test = train_test_split(X_test, Y_test, test_size=0.5, random_state=42, shuffle=True, stratify=Y_test)
 
     model = fitModel(X, Y)
+    logger.info(model)
 
     logger.info("Predicting...")
     train_pred = model.predict(X)
