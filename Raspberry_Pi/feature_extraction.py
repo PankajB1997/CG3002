@@ -19,8 +19,6 @@ DATASET_FILEPATH = "dataset\\"
 SEGMENT_SIZE = 8
 OVERLAP = 0.5
 
-scaler = MinMaxScaler((-1,1))
-
 # for every segment of data, extract the feature vector
 def extract_feature_vector(X):
     # extract time domain features
@@ -38,11 +36,11 @@ def extract_feature_vector(X):
 
 # segment data from the raw data files, return list of tuples (segments, move_class)
 # where every tuple represents raw data for that segment and the move_class for that segment
-def get_all_segments(raw_data, move_class):
+def get_all_segments(raw_data, move_class, scaler):
     # preprocess data
     raw_data = savgol_filter(raw_data, 3, 2)
     raw_data = highpass(raw_data, 3, 50)
-    raw_data = scaler.fit_transform(raw_data)
+    raw_data = scaler.transform(raw_data)
     # extract segments
     limit = (len(raw_data) // SEGMENT_SIZE ) * SEGMENT_SIZE
     segments = []
@@ -56,9 +54,15 @@ if __name__ == "__main__":
     # for every segment for a given move, extract the feature vector
     # in the end, store a list of tuple pairs of (feature_vector, move_class) to pickle file
     raw_data = pickle.load(open(DATASET_FILEPATH + 'data_by_move.pkl', 'rb'))
+    scaler = MinMaxScaler((-1,1))
+    raw_data_all = []
+    for move in raw_data:
+        raw_data_all.extend(raw_data[move])
+    scaler.fit(raw_data_all)
+    pickle.dump(scaler, open('scaler\\min_max_scaler.pkl', 'wb'))
     data = []
     for move in raw_data:
-        segments = get_all_segments(raw_data[move], move)
+        segments = get_all_segments(raw_data[move], move, scaler)
         for segment in segments:
             X = extract_feature_vector(segment)
             logger.info(move + " " + str(X))
