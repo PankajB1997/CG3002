@@ -117,8 +117,8 @@ void setup()
   calibrateSensors();
    handshake();
    
-  xTaskCreate(collectData, "collectData", STACK_SIZE, (void *)NULL, 1, NULL);
-  xTaskCreate(sendToPi, "sendToPi", STACK_SIZE, (void *)NULL, 2, NULL);
+  xTaskCreate(collectData, "collectData", STACK_SIZE, (void *)NULL, 2, NULL);
+  xTaskCreate(sendToPi, "sendToPi", STACK_SIZE, (void *)NULL, 1, NULL);
    vTaskStartScheduler();
 } 
 
