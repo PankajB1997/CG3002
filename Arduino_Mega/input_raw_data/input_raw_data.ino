@@ -55,7 +55,9 @@ float xg, yg, zg;
 
 //Function prototypes
 float remapVoltage(int);
-void calibrateScale();
+void calibrateSensors();
+void getScaledReadings();
+void printSensorReadings();
 
 void setup()
 {
@@ -71,6 +73,7 @@ void setup()
   Serial.println(sensorA.testConnection() ? "Sensor A connected successfully" : "Sensor A failed to connect");
   Serial.println(sensorB.testConnection() ? "Sensor B connected successfully" : "Sensor B failed to connect");
   Serial.println(sensorC.testConnection() ? "Sensor C connected successfully" : "Sensor C failed to connect");
+  
   calibrateSensors();
 }
 void loop()
@@ -79,36 +82,8 @@ void loop()
   delay(20);
 
   // Read values from different sensors
-  sensorA.getAcceleration(&xa_raw, &ya_raw, &za_raw);
-  xa = (xa_raw + xa_offset)*scaleFactorAccel;
-  ya = (ya_raw + ya_offset)*scaleFactorAccel;
-  za = (za_raw + za_offset)*scaleFactorAccel;
-  
-  sensorB.getAcceleration(&xb_raw, &yb_raw, &zb_raw);
-  xb = (xb_raw + xb_offset)*scaleFactorAccel;
-  yb = (yb_raw + yb_offset)*scaleFactorAccel;
-  zb = (zb_raw + zb_offset)*scaleFactorAccel;
-  
-  sensorC.getRotation(&xg_raw, &yg_raw, &zg_raw);
-  xg = (xg_raw + xg_offset)*scaleFactorGyro;
-  yg = (yg_raw + yg_offset)*scaleFactorGyro;
-  zg = (zg_raw + zg_offset)*scaleFactorGyro;
-
-   //Display values for different sensors
-  Serial.print("accel for Sensor A:\t");
-  Serial.print(xa); Serial.print("\t");
-  Serial.print(ya); Serial.print("\t");
-  Serial.println(za);
-  
-  Serial.print("accel for Sensor B:\t");
-  Serial.print(xb); Serial.print("\t");
-  Serial.print(yb); Serial.print("\t");
-  Serial.println(zb);
-  
-  Serial.print("rotation for Sensor C:\t");
-  Serial.print(xg); Serial.print("\t");
-  Serial.print(yg); Serial.print("\t");
-  Serial.println(zg);
+  getScaledReadings();
+  printSensorReadings();
 
   //Measure and display voltage measured from voltage divider
   voltageReading = analogRead(voltageDividerPin);
@@ -129,6 +104,41 @@ float remapVoltage(int volt) {
   float analogToDigital;
   analogToDigital = (5.0/1023) * volt;  
   return analogToDigital;
+}
+
+void getScaledReadings() {
+  sensorA.getAcceleration(&xa_raw, &ya_raw, &za_raw);
+  xa = (xa_raw + xa_offset)*scaleFactorAccel;
+  ya = (ya_raw + ya_offset)*scaleFactorAccel;
+  za = (za_raw + za_offset)*scaleFactorAccel;
+  
+  sensorB.getAcceleration(&xb_raw, &yb_raw, &zb_raw);
+  xb = (xb_raw + xb_offset)*scaleFactorAccel;
+  yb = (yb_raw + yb_offset)*scaleFactorAccel;
+  zb = (zb_raw + zb_offset)*scaleFactorAccel;
+  
+  sensorC.getRotation(&xg_raw, &yg_raw, &zg_raw);
+  xg = (xg_raw + xg_offset)*scaleFactorGyro;
+  yg = (yg_raw + yg_offset)*scaleFactorGyro;
+  zg = (zg_raw + zg_offset)*scaleFactorGyro;
+}
+
+void printSensorReadings() {
+  //Display values for different sensors
+  Serial.print("accel for Sensor A:\t");
+  Serial.print(xa); Serial.print("\t");
+  Serial.print(ya); Serial.print("\t");
+  Serial.println(za);
+  
+  Serial.print("accel for Sensor B:\t");
+  Serial.print(xb); Serial.print("\t");
+  Serial.print(yb); Serial.print("\t");
+  Serial.println(zb);
+  
+  Serial.print("rotation for Sensor C:\t");
+  Serial.print(xg); Serial.print("\t");
+  Serial.print(yg); Serial.print("\t");
+  Serial.println(zg);
 }
 
 /*
