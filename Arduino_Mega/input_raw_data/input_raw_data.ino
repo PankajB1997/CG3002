@@ -101,14 +101,17 @@ void printPower(){
 
     static long prevTime = 0;
 
+    //Power is in mW due to current being in mA
     float power = current * voltage;
 
-    float hoursPassed = (millis()-prevTime) / (1000.0 * 60.0);
+    float secondsPassed = (millis()-prevTime) / (1000.0);
 
     prevTime = millis();
 
     static float energy = 0;
-    energy += hoursPassed * power;
+    //Power / 1000.0 because converting mW to W
+    //This allows joules to  be in W per seconds
+    energy += secondsPassed * (power /1000.0);
 
     Serial.print("current reading: ");
     Serial.print(current, 9);
