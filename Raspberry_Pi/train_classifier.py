@@ -357,14 +357,14 @@ if __name__ == "__main__":
     # X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
 
     # # 2. Use the dataset prepared from Dummy dataset's raw data values
-    X, Y = pickle.load(open(DUMMY_DATASET_FILEPATH + 'train.pkl', 'rb'))
-    X_test, Y_test = pickle.load(open(DUMMY_DATASET_FILEPATH + 'test.pkl', 'rb'))
-    X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
+    # X, Y = pickle.load(open(DUMMY_DATASET_FILEPATH + 'train.pkl', 'rb'))
+    # X_test, Y_test = pickle.load(open(DUMMY_DATASET_FILEPATH + 'test.pkl', 'rb'))
+    # X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
 
     # 3. Use the dataset prepared from self-collected dataset's raw data values
-    # X, Y = pickle.load(open(TRAIN_DATASET_PATH, 'rb'))
-    # X_test, Y_test = pickle.load(open(TEST_DATASET_PATH, 'rb'))
-    # X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
+    X, Y = pickle.load(open(TRAIN_DATASET_PATH, 'rb'))
+    X_test, Y_test = pickle.load(open(TEST_DATASET_PATH, 'rb'))
+    X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
 
     X = scaler.fit_transform(X)
     X_test = scaler.transform(X_test)
