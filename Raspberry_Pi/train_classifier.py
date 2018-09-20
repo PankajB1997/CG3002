@@ -187,7 +187,7 @@ def calculatePerformanceMetrics(Y_pred, Y_true, dataset_type):
     # logger.info("Weighted f1: " + str(micro_macro_weighted_scores['weighted_f1']))
 
     logger.info("Confusion Matrix below " + str(CLASSLIST) + " : ")
-    logger.info(str(cf_matrix))
+    print(str(cf_matrix))
 
 # Obtain a list of class probability values for every prediction
 def recordClassProbabilites(pred):
@@ -260,15 +260,15 @@ def fitModel(X, Y):
     models = []
     scores = []
 
-    for i in range(0, 10):
-        model = initialiseModel(i)
-        accuracy_scores = cross_val_score(model, X, Y, cv=10, scoring="accuracy", n_jobs=-1)
-        scores.append(accuracy_scores.mean())
-        logger.info("Cross validation score for model " + str(MODEL_UNIQUE_IDS[i]) + ": " + str(accuracy_scores.mean()))
-        model.fit(X, Y)
-        filepath = os.path.join("classifier_models", "model_" + MODEL_UNIQUE_IDS[i] + ".pkl")
-        pickle.dump(model, open(filepath, 'wb'))
-        models.append(model)
+    # for i in range(0, 10):
+    model = initialiseModel(3)
+    accuracy_scores = cross_val_score(model, X, Y, cv=10, scoring="accuracy", n_jobs=-1)
+    scores.append(accuracy_scores.mean())
+    logger.info("Cross validation score for model " + str(MODEL_UNIQUE_IDS[3]) + ": " + str(accuracy_scores.mean()))
+    model.fit(X, Y)
+    filepath = os.path.join("classifier_models", "model_" + MODEL_UNIQUE_IDS[3] + ".pkl")
+    pickle.dump(model, open(filepath, 'wb'))
+    models.append(model)
 
     max_index = 0
     max_accuracy_score = scores[0]
@@ -276,9 +276,9 @@ def fitModel(X, Y):
         if scores[i] > max_accuracy_score:
             max_accuracy_score = scores[i]
             max_index = i
-    logger.info("Best model is " + str(MODEL_UNIQUE_IDS[max_index]) + " with accuracy of " + str(max_accuracy_score))
+    logger.info("Best model is " + str(MODEL_UNIQUE_IDS[3]) + " with accuracy of " + str(max_accuracy_score))
 
-    return models[2]
+    return models[0]
 
 def loadDataset(X_PATH, Y_PATH):
     X = []
@@ -340,7 +340,7 @@ Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi/dummy_dataset/Tra
 X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi/dummy_dataset/Test/X_test.txt")
 Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi/dummy_dataset/Test/y_test.txt")
 
-DUMMY_DATASET_FILEPATH = "dummy_dataset/RawData_ByMove/"
+# DUMMY_DATASET_FILEPATH = "dummy_dataset/RawData_ByMove/"
 TRAIN_DATASET_PATH = "dataset/train.pkl"
 TEST_DATASET_PATH = "dataset/test.pkl"
 

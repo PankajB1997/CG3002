@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-DUMMY_DATASET_FILEPATH = "dummy_dataset/RawData_ByMove/"
+# DUMMY_DATASET_FILEPATH = "dummy_dataset/RawData_ByMove/"
 DATASET_FILEPATH = "dataset/"
 
 # Default: 128 sets per segment with 50% overlap; currently, 8 segments per set is used due to insufficient data
