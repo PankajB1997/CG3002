@@ -119,7 +119,7 @@ void setup()
   Serial.println(sensorC.testConnection() ? "Sensor C connected successfully" : "Sensor C failed to connect");
   
   calibrateSensors();
-   //handshake();
+    handshake();
    
   xTaskCreate(collectData, "collectData", STACK_SIZE, (void *)NULL, 2, NULL);
   xTaskCreate(sendToPi, "sendToPi", STACK_SIZE, (void *)NULL, 1, NULL);
@@ -327,7 +327,7 @@ char charbuf[100] ;
       int len = strlen(databuf);
 
       Serial.println();
-    
+       
       for (int i = 0; i < len; i++) {
         Serial.print(databuf[i]);
         Serial1.write(databuf[i]);
@@ -335,7 +335,7 @@ char charbuf[100] ;
       }
       xSemaphoreGive(taskSemaphore);      
     }
-    vTaskDelayUntil(&xLastWakeTime, 15);
+    vTaskDelayUntil(&xLastWakeTime, 20);
   }
 }
  
