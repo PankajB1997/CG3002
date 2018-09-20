@@ -344,6 +344,7 @@ if __name__ == "__main__":
 
     X = scaler.fit_transform(X)
     X_test = scaler.transform(X_test)
+    pickle.dump(scaler, open('scaler\\standard_scaler.pkl', 'wb'))
 
     logger.info("Vectorizing...")
 

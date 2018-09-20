@@ -96,13 +96,13 @@ void printPower(){
     current = (current * 1000) / (RS * RL);
 
     static long prevTime = 0;
-    
+
     float power = current * voltage;
 
     float hoursPassed = (millis()-prevTime) / (1000.0 * 60.0);
 
     prevTime = millis();
-    
+
     static float energy = 0;
     energy += hoursPassed * power;
 
@@ -127,7 +127,26 @@ void loop()
   // Read values from different sensors
   getScaledReadings();
   printSensorReadings();
-  printPower();
+
+  //Measure and display voltage measured from voltage divider
+  voltageReading = analogRead(voltageDividerPin);
+  voltageReading = remapVoltage(voltageReading);
+  Serial.print("voltage reading");
+  Serial.println(voltageReading, 9);
+
+  //Measure voltage out from current sensor to calculate current
+  vOut = analogRead(currentSensorPin);
+  vOut = remapVoltage(vOut);
+  currentReading = (vOut * 1000) / (RS * RL);
+  Serial.print("current reading: ");
+  Serial.println(currentReading, 9);
+
+}
+
+float remapVoltage(int volt) {
+  float analogToDigital;
+  analogToDigital = (5.0/1023) * volt;
+  return analogToDigital;
 }
 
 void getScaledReadings() {
@@ -163,10 +182,6 @@ void printSensorReadings() {
   Serial.print(xg); Serial.print("\t");
   Serial.print(yg); Serial.print("\t");
   Serial.println(zg);
-}
-
-float remapVoltage(int volt) {
-  return volt/1023.0 * 5;
 }
 
 /*
