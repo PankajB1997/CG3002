@@ -62,17 +62,16 @@ float xg, yg, zg;
 
 //Structure of data packet
 typedef struct Packet {
-  float ID = 0;
-  float GYRO_ID = 0;
   float gyro[3];
-  float ACC_ID = 1;
   float acc1[3];
   float acc2[3];
   float power;
   float current;
   float voltage;
+  float energy;
 } Packet;   //Size of packet is 60 (15 of 4 bytes)
-DataPacket packet;
+
+Packet packet;
 
 char* acc1_x;
 char* acc1_y;
@@ -86,6 +85,7 @@ char* gyro_z;
 char* voltage_c;
 char* current_c;
 char* power_c;
+char* energy_c;
 
 int test_flag = 0;
 int dataReady = 0;
@@ -96,6 +96,9 @@ float remapVoltage(int);
 void calibrateSensors();
 void getScaledReadings();
 void printSensorReadings();
+void sendToPi(void *p);
+
+SemaphoreHandle_t taskSemaphore =  xSemaphoreCreateMutex();
 
 void setup()
 {
@@ -110,12 +113,13 @@ void setup()
 
   // Testing connection by reading device ID of each sensor
   // Returns false if deviceID not found, Returns true if deviceID is found
+  Serial.println();
   Serial.println(sensorA.testConnection() ? "Sensor A connected successfully" : "Sensor A failed to connect");
   Serial.println(sensorB.testConnection() ? "Sensor B connected successfully" : "Sensor B failed to connect");
   Serial.println(sensorC.testConnection() ? "Sensor C connected successfully" : "Sensor C failed to connect");
   
   calibrateSensors();
-   handshake();
+   //handshake();
    
   xTaskCreate(collectData, "collectData", STACK_SIZE, (void *)NULL, 2, NULL);
   xTaskCreate(sendToPi, "sendToPi", STACK_SIZE, (void *)NULL, 1, NULL);
@@ -164,19 +168,38 @@ void collectData(void *p){
   {
     if (xSemaphoreTake(taskSemaphore, (TickType_t)portMAX_DELAY) == pdTRUE)
     {
+      // Read values from different sensors
+      getScaledReadings();
+    
+      //Measure and display voltage measured from voltage divider
+      voltageReading = analogRead(voltageDividerPin);
+      packet.voltage = remapVoltage(voltageReading) * 2;
 
-  // Read values from different sensors
-  getScaledReadings();
 
-  //Measure and display voltage measured from voltage divider
-  voltageReading = analogRead(voltageDividerPin);
-  packet.voltage = remapVoltage(voltageReading);
+      //Measure voltage out from current sensor to calculate current
+      vOut = analogRead(currentSensorPin);
+      vOut = remapVoltage(vOut);
+      packet.current = (vOut * 1000) / (RS * RL) * 1000;
 
+      //Power is in mW due to current being in mA
+      packet.power = packet.current * packet.voltage;
 
-  //Measure voltage out from current sensor to calculate current
-  vOut = analogRead(currentSensorPin);
-  vOut = remapVoltage(vOut);
-  packet.current = (vOut * 1000) / (RS * RL);
+      static long prevTime = 0;
+      float secondsPassed = (millis()-prevTime) / (1000.0);
+
+      static float energy = 0;
+      //Power / 1000.0 because converting mW to W
+      //This allows joules to  be in W per seconds
+      energy += secondsPassed * (packet.power /1000.0);
+
+      prevTime = millis();
+
+      packet.energy = energy;
+
+      xSemaphoreGive(taskSemaphore);      
+    }
+    vTaskDelayUntil(&xLastWakeTime, 10);
+  }
 }
 
  /*
@@ -201,17 +224,12 @@ void getScaledReadings() {
   sensorB.getAcceleration(&xb_raw, &yb_raw, &zb_raw);
   packet.acc2[0] = (xb_raw + xb_offset)*scaleFactorAccel;
   packet.acc2[1] = (yb_raw + yb_offset)*scaleFactorAccel;
-  packet.acc1[2] = (zb_raw + zb_offset)*scaleFactorAccel;
+  packet.acc2[2] = (zb_raw + zb_offset)*scaleFactorAccel;
   
   sensorC.getRotation(&xg_raw, &yg_raw, &zg_raw);
   packet.gyro[0] = (xg_raw + xg_offset)*scaleFactorGyro;
   packet.gyro[1]= (yg_raw + yg_offset)*scaleFactorGyro;
   packet.gyro[2] = (zg_raw + zg_offset)*scaleFactorGyro;
-   Serial.println("collect Data Readings");
-        xSemaphoreGive(taskSemaphore);
-       }
-        vTaskDelayUntil(&xLastWakeTime, 10);
-  }
  }
 
 
@@ -247,44 +265,48 @@ void calibrateSensors() {
 void changeFormat(){
 char charbuf[100] ;
 
-  acc1_x = dtostrf( pkt.acc1[0],3,2,charbuf);
+  acc1_x = dtostrf( packet.acc1[0],3,2,charbuf);
   strcat(databuf, acc1_x); 
   strcat(databuf, ",");
-  acc1_y = dtostrf(pkt.acc1[1],3,2,charbuf);
+  acc1_y = dtostrf(packet.acc1[1],3,2,charbuf);
   strcat(databuf, acc1_y); 
   strcat(databuf, ",");
-  acc1_z = dtostrf(pkt.acc1[2],3,2,charbuf);
+  acc1_z = dtostrf(packet.acc1[2],3,2,charbuf);
   strcat(databuf, acc1_z); 
   strcat(databuf, ",");
 
-  acc2_x = dtostrf(pkt.acc2[0],3,2,charbuf);
+  acc2_x = dtostrf(packet.acc2[0],3,2,charbuf);
   strcat(databuf, acc2_x); 
   strcat(databuf, ",");
-  acc2_y = dtostrf(pkt.acc2[1],3,2,charbuf);
+  acc2_y = dtostrf(packet.acc2[1],3,2,charbuf);
   strcat(databuf, acc2_y); 
   strcat(databuf, ",");
-  acc2_z = dtostrf(pkt.acc2[2],3,2,charbuf);
+  acc2_z = dtostrf(packet.acc2[2],3,2,charbuf);
   strcat(databuf, acc2_z); 
   strcat(databuf, ",");
 
-  gyro_x = dtostrf(pkt.gyro[0],3,2,charbuf);
+  gyro_x = dtostrf(packet.gyro[0],3,2,charbuf);
   strcat(databuf, gyro_x); 
   strcat(databuf, ",");
   gyro_y = dtostrf( packet.gyro[1],3,2,charbuf);
   strcat(databuf, gyro_y); 
   strcat(databuf, ",");
-  gyro_z = dtostrf(pkt.gyro[2],3,2,charbuf);
+  gyro_z = dtostrf(packet.gyro[2],3,2,charbuf);
   strcat(databuf, gyro_z); 
   strcat(databuf, ",");
 
-  voltage_c = dtostrf(pkt.voltage,3,2,charbuf);
+  voltage_c = dtostrf(packet.voltage,3,2,charbuf);
   strcat(databuf,  voltage_c); 
   strcat(databuf, ",");
-  current_c = dtostrf( pkt.current,3,2,charbuf);
+  current_c = dtostrf( packet.current,3,2,charbuf);
   strcat(databuf, current_c); 
   strcat(databuf, ",");
-  power_c = dtostrf( pkt.power,3,2,charbuf);
+  power_c = dtostrf( packet.power,3,2,charbuf);
   strcat(databuf, power_c ); 
+  strcat(databuf, ",");
+  
+  energy_c = dtostrf( packet.energy,3,2,charbuf);
+  strcat(databuf, energy_c  ); 
   strcat(databuf, ",");
  }
  
@@ -294,24 +316,27 @@ char charbuf[100] ;
  *Packet is of Type float (4 bytes) thus one packet contains 15 values, a total of 60 bytes
  * A sample of 20 packets will be sent to Rpi every 200ms
  */
- void sendToPi() {
-  sendData();
-  changeFormat();
-  Serial.println("Send to pi");
-  strcat(databuf, "\r");
-  int len = strlen(databuf);
+ void sendToPi(void *p) {
+  static TickType_t xLastWakeTime = xTaskGetTickCount();
+  while (1)
+  {
+    if (xSemaphoreTake(taskSemaphore, (TickType_t)portMAX_DELAY) == pdTRUE)
+    {
+      changeFormat();
+      strcat(databuf, "\r");
+      int len = strlen(databuf);
 
-  while (Serial1.available()) {
-    Serial.print("Data handshake");
-    if (Serial.read() == 'A') {
-      dataReady = 1;
+      Serial.println();
+    
       for (int i = 0; i < len; i++) {
         Serial.print(databuf[i]);
         Serial1.write(databuf[i]);
+        strcpy(databuf, "");
       }
-      strcpy(databuf, "");
+      xSemaphoreGive(taskSemaphore);      
     }
+    vTaskDelayUntil(&xLastWakeTime, 15);
   }
-
 }
  
+
