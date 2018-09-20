@@ -45,25 +45,25 @@ transformed = pd.DataFrame(pca.fit_transform(X, y))
 
 plt.scatter(transformed[0], transformed[1], label='number_six', c='red')
 
-# X, y = pickle.load(open(DATASET_PATH + 'idle' + '.pkl', 'rb'))
-#
-# pca = sklearnPCA(n_components=2) #2-dimensional PCA
-# transformed = pd.DataFrame(pca.fit_transform(X, y))
-#
-# plt.scatter(transformed[0], transformed[1], label='idle', c='blue')
+X, y = pickle.load(open(DATASET_PATH + 'idle' + '.pkl', 'rb'))
 
-# X, y = pickle.load(open(DATASET_PATH + 'logout' + '.pkl', 'rb'))
+pca = sklearnPCA(n_components=2) #2-dimensional PCA
+transformed = pd.DataFrame(pca.fit_transform(X, y))
+
+plt.scatter(transformed[0], transformed[1], label='idle', c='blue')
+
+X, y = pickle.load(open(DATASET_PATH + 'logout' + '.pkl', 'rb'))
 #
 # logger.info(X)
 # logger.info(y)
 #
-# pca = sklearnPCA(n_components=2) #2-dimensional PCA
-# transformed = pd.DataFrame(pca.fit_transform(X, y))
+pca = sklearnPCA(n_components=2) #2-dimensional PCA
+transformed = pd.DataFrame(pca.fit_transform(X, y))
 #
 # logger.info("transformed")
 # logger.info(transformed)
 #
-# plt.scatter(transformed[0], transformed[1], label='logout', c='green')
+plt.scatter(transformed[0], transformed[1], label='logout', c='green')
 
 # plot
 plt.legend()
