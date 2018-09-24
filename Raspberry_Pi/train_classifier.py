@@ -58,13 +58,15 @@ MODEL_UNIQUE_IDS = {
     9: 'QuadraticDiscriminantAnalysis'
 }
 
-ENC_LIST = [
+# Encoding below for dummy dataset
+
+DUMMY_ENC_LIST = [
     ('WALKING', 0),
     ('WALKING_UPSTAIRS', 1),
     ('WALKING_DOWNSTAIRS', 2),
-    ('SITTING', 3),
-    ('STANDING', 4),
-    ('LAYING', 5),
+    # ('SITTING', 3),
+    # ('STANDING', 4),
+    # ('LAYING', 5),
     # ('STAND_TO_SIT', 6),
     # ('SIT_TO_STAND', 7),
     # ('SIT_TO_LIE', 8),
@@ -73,9 +75,7 @@ ENC_LIST = [
     # ('LIE_TO_STAND', 11)
 ]
 
-CLASSLIST = [ pair[0] for pair in ENC_LIST ]
-
-ENC_DICT = {
+DUMMY_ENC_DICT = {
     0: 'WALKING',
     1: 'WALKING_UPSTAIRS',
     2: 'WALKING_DOWNSTAIRS',
@@ -89,6 +89,24 @@ ENC_DICT = {
     10: 'STAND_TO_LIE',
     11: 'LIE_TO_STAND'
 }
+
+DUMMY_CLASSLIST = [ pair[0] for pair in DUMMY_ENC_LIST ]
+
+# Encoding below for actual dataset
+
+ENC_LIST = [
+    ('idle', 0),
+    ('logout', 1),
+    ('number_six', 2)
+]
+
+ENC_DICT = {
+    0: 'idle',
+    1: 'logout',
+    2: 'number_six'
+}
+
+CLASSLIST = [ pair[0] for pair in ENC_LIST ]
 
 # Obtain best class from a given list of class probabilities for every prediction
 def onehot2str(onehot):
@@ -292,7 +310,7 @@ def loadDataset(X_PATH, Y_PATH):
     Y = np.delete(Y, del_idx)
     return X, Y
 
-def filterDataset(X, Y, X_test, Y_test):
+def filterDummyDataset(X, Y, X_test, Y_test):
     classes_removed = [
         # 'WALKING',
         # 'WALKING_UPSTAIRS',
@@ -306,6 +324,21 @@ def filterDataset(X, Y, X_test, Y_test):
         'LIE_TO_SIT',
         'STAND_TO_LIE',
         'LIE_TO_STAND'
+    ]
+
+    del_idx = [ idx for idx, val in enumerate(Y) if val in classes_removed ]
+    X = np.delete(X, del_idx, axis=0)
+    Y = np.delete(Y, del_idx)
+
+    del_idx = [ idx for idx, val in enumerate(Y_test) if val in classes_removed ]
+    X_test = np.delete(X_test, del_idx, axis=0)
+    Y_test = np.delete(Y_test, del_idx)
+
+    return X, Y, X_test, Y_test
+
+def filterDataset(X, Y, X_test, Y_test):
+    classes_removed = [
+        # No classes need to be removed from self-collected dataset unless experimenting
     ]
 
     del_idx = [ idx for idx, val in enumerate(Y) if val in classes_removed ]
