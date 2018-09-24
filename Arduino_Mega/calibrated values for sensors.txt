@@ -1,0 +1,11 @@
+#define x1_accelRaw -55.18 //0x53 (RIGHT HAND)
+#define y1_accelRaw -252.07 //0x53 (RIGHT HAND)
+#define z1_accelRaw 41.42 //0x53 (RIGHT HAND)
+#define x2_accelRaw 51.97 //0x1D (LEFT HAND)
+#define y2_accelRaw -256.83 //0x1D (LEFT HAND)
+#define z2_accelRaw 16.73//0x1D (LEFT HAND)
+#define x1_gyroRaw 296.02//0x68 (LEFT HAND)
+#define y1_gyroRaw -74.04//0x68 (LEFT HAND)
+#define z1_gyroRaw 153.84//0x68 (LEFT HAND)
+
+These values are achieved after taking the average of 100 raw values while the sensors are mounted on the user at idle state (standing still)

@@ -13,6 +13,17 @@
 #define RL 10000
 #define PowerBufferSize 100
 
+//Offsets are to idle state (standing still)
+#define x1_accelRaw -55.18 //0x53 (RIGHT HAND)
+#define y1_accelRaw -252.07 //0x53 (RIGHT HAND)
+#define z1_accelRaw 41.42 //0x53 (RIGHT HAND)
+#define x2_accelRaw 51.97 //0x1D (LEFT HAND)
+#define y2_accelRaw -256.83 //0x1D (LEFT HAND)
+#define z2_accelRaw 16.73//0x1D (LEFT HAND)
+#define x1_gyroRaw 296.02//0x68 (LEFT HAND)
+#define y1_gyroRaw -74.04//0x68 (LEFT HAND)
+#define z1_gyroRaw 153.84//0x68 (LEFT HAND)
+
 ADXL345 sensorA = ADXL345(DEVICE_A_ACCEL);
 ADXL345 sensorB = ADXL345(DEVICE_B_ACCEL);
 MPU6050 sensorC = MPU6050(DEVICE_C_GYRO);
@@ -77,7 +88,7 @@ void setup()
 
 float getSum(float array[]){
   float result = 0;
-  for(int i = 0; i < PowerBufferSize; i++)
+  for(int i = 0; i < PowerBufferSize; i++) {
     result += array[i];
   }
   return result;
@@ -138,26 +149,8 @@ void loop()
   // Read values from different sensors
   getScaledReadings();
   printSensorReadings();
+  printPower();
 
-  //Measure and display voltage measured from voltage divider
-  voltageReading = analogRead(voltageDividerPin);
-  voltageReading = remapVoltage(voltageReading);
-  Serial.print("voltage reading");
-  Serial.println(voltageReading, 9);
-
-  //Measure voltage out from current sensor to calculate current
-  vOut = analogRead(currentSensorPin);
-  vOut = remapVoltage(vOut);
-  currentReading = (vOut * 1000) / (RS * RL);
-  Serial.print("current reading: ");
-  Serial.println(currentReading, 9);
-
-}
-
-float remapVoltage(int volt) {
-  float analogToDigital;
-  analogToDigital = (5.0/1023) * volt;
-  return analogToDigital;
 }
 
 void getScaledReadings() {
@@ -197,7 +190,7 @@ void printSensorReadings() {
 }
 
 float remapVoltage(int volt) {
-  return map(volt, 0, 1024, 0f, 5f);
+  return volt/1023.0 * 5;
 
 }
 
@@ -205,24 +198,20 @@ float remapVoltage(int volt) {
  * Purpose of adding 255 is to account for downward default acceleration in Z axis to be 1g
  */
 void calibrateSensors() {
-  //Setting range of ADXL345
+  //Setting range  of ADXL345
   Serial.println("Calibrating sensors...");
   sensorA.setRange(ADXL345_RANGE_2G);
   sensorB.setRange(ADXL345_RANGE_2G);
+  
+  xa_offset = -x1_accelRaw;
+  ya_offset = -y1_accelRaw;
+  za_offset = -z1_accelRaw+255;
 
-  sensorA.getAcceleration(&xa_raw, &ya_raw, &za_raw);
-  sensorB.getAcceleration(&xb_raw, &yb_raw, &zb_raw);
-  sensorC.getRotation(&xg_raw, &yg_raw, &zg_raw);
+  xb_offset = -x2_accelRaw;
+  yb_offset = -y2_accelRaw;
+  zb_offset = -z2_accelRaw+255;
 
-  xa_offset = -xa_raw;
-  ya_offset = -ya_raw;
-  za_offset = -za_raw+255;
-
-  xb_offset = -xb_raw;
-  yb_offset = -yb_raw;
-  zb_offset = -zb_raw+255;
-
-  xg_offset = -xg_raw;
-  yg_offset = -yg_raw;
-  zg_offset = -zg_raw;
+  xg_offset = -x1_gyroRaw;
+  yg_offset = -y1_gyroRaw;
+  zg_offset = -z1_gyroRaw;
 }
