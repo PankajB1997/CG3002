@@ -133,29 +133,29 @@ def calculatePerformanceMetrics(Y_pred, Y_true, dataset_type):
     # micro_macro_weighted_scores = micro_macro_weighted(Y_pred, Y_true)
     cf_matrix = confusion_matrix(Y_true, Y_pred, labels=CLASSLIST)
 
-    logger.info("Results for " + dataset_type + " set...")
-    logger.info("Number of cases that were incorrect: " + str(num_incorrect))
-    logger.info("Accuracy: " + str(accuracy))
+    print("Results for " + dataset_type + " set...")
+    print("Number of cases that were incorrect: " + str(num_incorrect))
+    print("Accuracy: " + str(accuracy))
 
     for i in range(0, len(CLASSLIST)):
-        # logger.info("Precision " + CLASSLIST[i] + ": " + str(metrics[CLASSLIST[i]]['precision']))
-        logger.info("Recall " + CLASSLIST[i] + ": " + str(metrics[CLASSLIST[i]]['recall']))
-        # logger.info("F1 " + CLASSLIST[i] + ": " + str(metrics[CLASSLIST[i]]['f1']))
+        # print("Precision " + CLASSLIST[i] + ": " + str(metrics[CLASSLIST[i]]['precision']))
+        print("Recall " + CLASSLIST[i] + ": " + str(metrics[CLASSLIST[i]]['recall']))
+        # print("F1 " + CLASSLIST[i] + ": " + str(metrics[CLASSLIST[i]]['f1']))
 
-    # logger.info("Micro precision: " + str(micro_macro_weighted_scores['micro_precision']))
-    # logger.info("Micro recall: " + str(micro_macro_weighted_scores['micro_recall']))
-    # logger.info("Micro f1: " + str(micro_macro_weighted_scores['micro_f1']))
+    # print("Micro precision: " + str(micro_macro_weighted_scores['micro_precision']))
+    # print("Micro recall: " + str(micro_macro_weighted_scores['micro_recall']))
+    # print("Micro f1: " + str(micro_macro_weighted_scores['micro_f1']))
     #
-    # logger.info("Macro precision: " + str(micro_macro_weighted_scores['macro_precision']))
-    # logger.info("Macro recall: " + str(micro_macro_weighted_scores['macro_recall']))
-    # logger.info("Macro f1: " + str(micro_macro_weighted_scores['macro_f1']))
+    # print("Macro precision: " + str(micro_macro_weighted_scores['macro_precision']))
+    # print("Macro recall: " + str(micro_macro_weighted_scores['macro_recall']))
+    # print("Macro f1: " + str(micro_macro_weighted_scores['macro_f1']))
     #
-    # logger.info("Weighted precision: " + str(micro_macro_weighted_scores['weighted_precision']))
-    # logger.info("Weighted recall: " + str(micro_macro_weighted_scores['weighted_recall']))
-    # logger.info("Weighted f1: " + str(micro_macro_weighted_scores['weighted_f1']))
+    # print("Weighted precision: " + str(micro_macro_weighted_scores['weighted_precision']))
+    # print("Weighted recall: " + str(micro_macro_weighted_scores['weighted_recall']))
+    # print("Weighted f1: " + str(micro_macro_weighted_scores['weighted_f1']))
 
-    logger.info("Confusion Matrix below " + str(CLASSLIST) + " : ")
-    logger.info(str(cf_matrix))
+    print("Confusion Matrix below " + str(CLASSLIST) + " : ")
+    print(str(cf_matrix))
 
 # Obtain a list of class probability values for every prediction
 def recordClassProbabilites(pred):
@@ -236,11 +236,11 @@ def initialiseModel(X_train):
 def fitModel(X_train, Y_train, X_val, Y_val):
     # X_train, X_val, Y_train, Y_val = train_test_split(X, Y, shuffle=True)
     model = initialiseModel(X_train)
-    filepath = os.path.join("nn_models", "nn_model.hdf5")
+    filepath = os.path.join("nn_models", "nn_model_1.hdf5")
     checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')
     callbacks_list = [checkpoint]
     sample_weight = compute_sample_weight('balanced', Y_train)
-    model.fit(X_train, str2onehot(Y_train), epochs=100, validation_data=(X_val, str2onehot(Y_val)), batch_size=50, callbacks=callbacks_list, sample_weight=sample_weight)
+    model.fit(X_train, str2onehot(Y_train), epochs=20, validation_data=(X_val, str2onehot(Y_val)), batch_size=50, callbacks=callbacks_list, sample_weight=sample_weight)
     return model
 
 def loadDataset(X_PATH, Y_PATH):
@@ -346,32 +346,32 @@ if __name__ == "__main__":
     X_test = scaler.transform(X_test)
     pickle.dump(scaler, open('scaler\\standard_scaler.pkl', 'wb'))
 
-    logger.info("Vectorizing...")
+    print("Vectorizing...")
 
     # # Do some preprocess vectorizing for training/validation/testing sets respectively, as needed
     # vectorizer(...)
     # vectorizer(...)
 
-    logger.info("Fitting...")
+    print("Fitting...")
 
     X_val, X_test, Y_val, Y_test = train_test_split(X_test, Y_test, test_size=0.5, random_state=42, shuffle=True, stratify=Y_test)
 
-    logger.info(str(Counter(Y)))
-    logger.info(str(Counter(Y_val)))
-    logger.info(str(Counter(Y_test)))
+    print(str(Counter(Y)))
+    print(str(Counter(Y_val)))
+    print(str(Counter(Y_test)))
 
     model = fitModel(X, Y, X_val, Y_val)
 
-    logger.info("Predicting...")
+    print("Predicting...")
     train_pred = model.predict(X)
     val_pred = model.predict(X_val)
     import time
     start = time.time()
     test_pred = model.predict(X_test)
     end = time.time()
-    logger.info("Prediction time: " + str(end-start))
+    print("Prediction time: " + str(end-start))
 
-    logger.info("Predictions done! Compiling results...")
+    print("Predictions done! Compiling results...")
 
     # Convert model output of class probabilities to corresponding best predictions
     Y_train_pred = onehot2str(train_pred)
