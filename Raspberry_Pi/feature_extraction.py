@@ -1,7 +1,6 @@
+import os, pickle, logging
 import numpy as np
 from statsmodels import robust
-import pickle
-import logging
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, QuantileTransformer, Normalizer
 from obspy.signal.filter import highpass
@@ -12,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-DATASET_FILEPATH = "dataset\\"
+DATASET_FILEPATH = "dataset"
 
 # Default: 128 sets per segment with 50% overlap; currently, 8 segments per set is used due to insufficient data
 SEGMENT_SIZE = 8
@@ -52,7 +51,7 @@ if __name__ == "__main__":
     # Get all segments for every move one by one
     # for every segment for a given move, extract the feature vector
     # in the end, store a list of tuple pairs of (feature_vector, move_class) to pickle file
-    raw_data_all_moves = pickle.load(open(DATASET_FILEPATH + 'data_by_move.pkl', 'rb'))
+    raw_data_all_moves = pickle.load(open(os.path.join(DATASET_FILEPATH, 'data_by_move.pkl'), 'rb'))
     raw_data = {}
     for move in raw_data_all_moves:
         if len(raw_data_all_moves[move]) > 0:
@@ -62,7 +61,7 @@ if __name__ == "__main__":
     for move in raw_data:
         raw_data_all.extend(raw_data[move])
     scaler.fit(raw_data_all)
-    pickle.dump(scaler, open('scaler\\min_max_scaler.pkl', 'wb'))
+    pickle.dump(scaler, open(os.path.join('scaler', 'min_max_scaler.pkl'), 'wb'))
     data = []
     for move in raw_data:
         segments = get_all_segments(raw_data[move], move, scaler)
@@ -72,5 +71,5 @@ if __name__ == "__main__":
             data.append((X, move))
     X, Y = zip(*data)
     X_train, X_val, Y_train, Y_val = train_test_split(X, Y, test_size=0.2, random_state=42, shuffle=True, stratify=Y)
-    pickle.dump([X_train, Y_train], open(DATASET_FILEPATH + 'train.pkl', 'wb'))
-    pickle.dump([X_val, Y_val], open(DATASET_FILEPATH + 'test.pkl', 'wb'))
+    pickle.dump([X_train, Y_train], open(os.path.join(DATASET_FILEPATH, 'train.pkl'), 'wb'))
+    pickle.dump([X_val, Y_val], open(os.path.join(DATASET_FILEPATH, 'test.pkl'), 'wb'))

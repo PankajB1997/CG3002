@@ -193,7 +193,7 @@ def initialiseModel(X_train):
 # Train the model, monitor on validation loss and save the best model out of given epochs
 def fitModel(X_train, Y_train, X_val, Y_val):
     model = initialiseModel(X_train)
-    filepath = os.path.join("nn_models", "nn_model.hdf5")
+    filepath = os.path.join("nn_models", "nn_model" + "_{epoch:02d}.hdf5")
     checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')
     callbacks_list = [checkpoint]
     sample_weight = compute_sample_weight('balanced', Y_train)
@@ -220,8 +220,9 @@ def filterDataset(X, Y, X_test, Y_test):
 
     return X, Y, X_test, Y_test
 
-TRAIN_DATASET_PATH = "dataset\\train.pkl"
-TEST_DATASET_PATH = "dataset\\test.pkl"
+TRAIN_DATASET_PATH = os.path.join("dataset", "train.pkl")
+TEST_DATASET_PATH = os.path.join("dataset", "test.pkl")
+SCALER_SAVEPATH = os.path.join("scaler", "standard_scaler.pkl")
 
 if __name__ == "__main__":
 
@@ -236,7 +237,7 @@ if __name__ == "__main__":
 
     X = scaler.fit_transform(X)
     X_test = scaler.transform(X_test)
-    pickle.dump(scaler, open('scaler\\standard_scaler.pkl', 'wb'))
+    pickle.dump(scaler, open(SCALER_SAVEPATH, 'wb'))
 
     print("Vectorizing...")
 
