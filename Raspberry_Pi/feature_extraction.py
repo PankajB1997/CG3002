@@ -12,7 +12,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-DUMMY_DATASET_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
 DATASET_FILEPATH = "dataset\\"
 
 # Default: 128 sets per segment with 50% overlap; currently, 8 segments per set is used due to insufficient data
@@ -53,7 +52,11 @@ if __name__ == "__main__":
     # Get all segments for every move one by one
     # for every segment for a given move, extract the feature vector
     # in the end, store a list of tuple pairs of (feature_vector, move_class) to pickle file
-    raw_data = pickle.load(open(DATASET_FILEPATH + 'data_by_move.pkl', 'rb'))
+    raw_data_all_moves = pickle.load(open(DATASET_FILEPATH + 'data_by_move.pkl', 'rb'))
+    raw_data = {}
+    for move in raw_data_all_moves:
+        if len(raw_data_all_moves[move]) > 0:
+            raw_data[move] = raw_data_all_moves[move]
     scaler = MinMaxScaler((-1,1))
     raw_data_all = []
     for move in raw_data:

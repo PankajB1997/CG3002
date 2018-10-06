@@ -79,8 +79,9 @@ def extract_feature_vector(X):
 
 def predict_dance_move(segment):
     X = extract_feature_vector(segment)
+    Y = model.predict(X)
     # return model.predict(X).tolist()[0]
-    return onehot2str(model.predict(X))[0]
+    return onehot2str(Y)[0], max(Y[0])
 
 if __name__ == '__main__':
     segment_idle = [
@@ -116,6 +117,10 @@ if __name__ == '__main__':
         [0.65, -0.75, 1.01]
     ]
 
-    print("Dance Move 1: " + predict_dance_move(segment_idle))
-    print("Dance Move 2: " + predict_dance_move(segment_logout))
-    print("Dance Move 3: " + predict_dance_move(segment_numbersix))
+    move1, move1prob = predict_dance_move(segment_idle)
+    move2, move2prob = predict_dance_move(segment_logout)
+    move3, move3prob = predict_dance_move(segment_numbersix)
+
+    print("Dance Move 1: " + move1 + ", " + str(move1prob))
+    print("Dance Move 2: " + move2 + ", " + str(move2prob))
+    print("Dance Move 3: " + move3 + ", " + str(move3prob))

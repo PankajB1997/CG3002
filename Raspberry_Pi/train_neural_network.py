@@ -1,6 +1,5 @@
 # import standard python libraries
-import logging
-import os, pickle, json, h5py, operator
+import logging, os, pickle, json, h5py, operator, time
 import numpy as np
 import pandas as pd
 from collections import Counter
@@ -20,57 +19,34 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-CG3002_FILEPATH = "\\Users\\pankaj\\Documents\\CG3002"
-# "\\Users\\pankaj\\Documents\\CG3002"
-
-PROB_THRESHOLD = 0.20
-
-# Encoding below for dummy dataset
-
-DUMMY_ENC_LIST = [
-    ('WALKING', 0),
-    ('WALKING_UPSTAIRS', 1),
-    ('WALKING_DOWNSTAIRS', 2),
-    # ('SITTING', 3),
-    # ('STANDING', 4),
-    # ('LAYING', 5),
-    # ('STAND_TO_SIT', 6),
-    # ('SIT_TO_STAND', 7),
-    # ('SIT_TO_LIE', 8),
-    # ('LIE_TO_SIT', 9),
-    # ('STAND_TO_LIE', 10),
-    # ('LIE_TO_STAND', 11)
-]
-
-DUMMY_ENC_DICT = {
-    0: 'WALKING',
-    1: 'WALKING_UPSTAIRS',
-    2: 'WALKING_DOWNSTAIRS',
-    3: 'SITTING',
-    4: 'STANDING',
-    5: 'LAYING',
-    6: 'STAND_TO_SIT',
-    7: 'SIT_TO_STAND',
-    8: 'SIT_TO_LIE',
-    9: 'LIE_TO_SIT',
-    10: 'STAND_TO_LIE',
-    11: 'LIE_TO_STAND'
-}
-
-DUMMY_CLASSLIST = [ pair[0] for pair in DUMMY_ENC_LIST ]
-
-# Encoding below for actual dataset
-
 ENC_LIST = [
-    ('idle', 0),
+    ('IDLE', 0),
     ('logout', 1),
-    ('number_six', 2)
+    ('Wipers', 2),
+    ('NumberSeven', 3),
+    ('Chicken', 4),
+    ('SideStep', 5),
+    ('Turnclap', 6),
+    # ('NumberSix', 7),
+    # ('Salute', 8),
+    # ('Mermaid', 9),
+    # ('Swing', 10),
+    # ('Cowboy', 11)
 ]
 
 ENC_DICT = {
-    0: 'idle',
+    0: 'IDLE',
     1: 'logout',
-    2: 'number_six'
+    2: 'Wipers',
+    3: 'NumberSeven',
+    4: 'Chicken',
+    5: 'SideStep',
+    6: 'Turnclap',
+    # 7: 'NumberSix',
+    # 8: 'Salute',
+    # 9: 'Mermaid',
+    # 10: 'Swing',
+    # 11: 'Cowboy'
 }
 
 CLASSLIST = [ pair[0] for pair in ENC_LIST ]
@@ -168,8 +144,8 @@ def recordClassProbabilites(pred):
     return class_probabilities
 
 # Record model confidence on every prediction
-def calculatePredictionConfidence(pred):
-    CONFIDENCE_THRESHOLD = 0.65
+def determinePredictionConfidence(pred):
+    CONFIDENCE_THRESHOLD = 0.85
     confidence_list = []
     for probs in pred:
         if max(probs) > CONFIDENCE_THRESHOLD:
@@ -177,10 +153,6 @@ def calculatePredictionConfidence(pred):
         else:
             confidence_list.append("NO")
     return confidence_list
-
-# # Prepare a detailed log of all incorrect cases
-# def logIncorrectCases(..., appendFileNameString):
-#     ...
 
 # Write a list of label and sentence pairs to excel file
 def writeDatasetToExcel(X, y, filepath):
@@ -192,20 +164,6 @@ def writeDatasetToExcel(X, y, filepath):
     writer = pd.ExcelWriter(filepath)
     df.to_excel(writer, "Sheet1", index=False)
     writer.save()
-
-# Obtain a list of all classes for each prediction for which probability is greater than a threshold
-def prob2str_multibucket(probs,sens):
-    enc_dict = dict([(i[1],i[0]) for i in ENC_LIST])
-    cats = []
-    final_sens = []
-    for (prob,sen) in zip(probs,sens):
-        classes = ""
-        for idx,pro in enumerate(prob):
-            if pro >= PROB_THRESHOLD:
-                classes += enc_dict[idx] + ", "
-        cats.append(classes[:-2])
-        final_sens.append(sen)
-    return np.asarray(cats), final_sens
 
 # Initialise neural network model using Keras
 def initialiseModel(X_train):
@@ -225,7 +183,7 @@ def initialiseModel(X_train):
     x = Dense(64)(x)
     x = LeakyReLU()(x)
     x = Dropout(0.2)(x)
-    output = Dense(3, activation = 'softmax')(x)
+    output = Dense(len(ENC_LIST), activation = 'softmax')(x)
     model = Model(inputs = main_input, outputs = output)
     # from keras import optimizers
     # sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
@@ -234,73 +192,22 @@ def initialiseModel(X_train):
 
 # Train the model, monitor on validation loss and save the best model out of given epochs
 def fitModel(X_train, Y_train, X_val, Y_val):
-    # X_train, X_val, Y_train, Y_val = train_test_split(X, Y, shuffle=True)
     model = initialiseModel(X_train)
-    filepath = os.path.join("nn_models", "nn_model_1.hdf5")
+    filepath = os.path.join("nn_models", "nn_model.hdf5")
     checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')
     callbacks_list = [checkpoint]
     sample_weight = compute_sample_weight('balanced', Y_train)
     model.fit(X_train, str2onehot(Y_train), epochs=20, validation_data=(X_val, str2onehot(Y_val)), batch_size=50, callbacks=callbacks_list, sample_weight=sample_weight)
     return model
 
-def loadDataset(X_PATH, Y_PATH):
-    X = []
-    Y = []
-    with open(X_PATH) as x_file:
-        for input in x_file:
-            X.append(list(map(float, input[:-1].split(" "))))
-    with open(Y_PATH) as y_file:
-        for input in y_file:
-            Y.append(ENC_DICT[int(input) - 1])
-    classes_removed = [
-        # 'WALKING',
-        # 'WALKING_UPSTAIRS',
-        # 'WALKING_DOWNSTAIRS',
-        'SITTING',
-        'STANDING',
-        'LAYING',
-        'STAND_TO_SIT',
-        'SIT_TO_STAND',
-        'SIT_TO_LIE',
-        'LIE_TO_SIT',
-        'STAND_TO_LIE',
-        'LIE_TO_STAND'
-    ]
-
-    del_idx = [ idx for idx, val in enumerate(Y) if val in classes_removed ]
-    X = np.delete(X, del_idx, axis=0)
-    Y = np.delete(Y, del_idx)
-    return X, Y
-
-def filterDummyDataset(X, Y, X_test, Y_test):
-    classes_removed = [
-        # 'WALKING',
-        # 'WALKING_UPSTAIRS',
-        # 'WALKING_DOWNSTAIRS',
-        'SITTING',
-        'STANDING',
-        'LAYING',
-        'STAND_TO_SIT',
-        'SIT_TO_STAND',
-        'SIT_TO_LIE',
-        'LIE_TO_SIT',
-        'STAND_TO_LIE',
-        'LIE_TO_STAND'
-    ]
-
-    del_idx = [ idx for idx, val in enumerate(Y) if val in classes_removed ]
-    X = np.delete(X, del_idx, axis=0)
-    Y = np.delete(Y, del_idx)
-
-    del_idx = [ idx for idx, val in enumerate(Y_test) if val in classes_removed ]
-    X_test = np.delete(X_test, del_idx, axis=0)
-    Y_test = np.delete(Y_test, del_idx)
-
-    return X, Y, X_test, Y_test
-
 def filterDataset(X, Y, X_test, Y_test):
     classes_removed = [
-        # No classes need to be removed from self-collected dataset unless experimenting
+    # No classes need to be removed from self-collected dataset unless experimenting
+        'NumberSix',
+        'Salute',
+        'Mermaid',
+        'Swing',
+        'Cowboy'
     ]
 
     del_idx = [ idx for idx, val in enumerate(Y) if val in classes_removed ]
@@ -313,31 +220,16 @@ def filterDataset(X, Y, X_test, Y_test):
 
     return X, Y, X_test, Y_test
 
-X_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\X_train.txt")
-Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\y_train.txt")
-X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\X_test.txt")
-Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\y_test.txt")
-
-DUMMY_DATASET_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
 TRAIN_DATASET_PATH = "dataset\\train.pkl"
 TEST_DATASET_PATH = "dataset\\test.pkl"
 
 if __name__ == "__main__":
 
     # scaler = QuantileTransformer(output_distribution='uniform')
-    scaler = StandardScaler()
     # scaler = MinMaxScaler((-1,1))
+    scaler = StandardScaler()
 
-    # # 1. Use Dummy dataset's provided training and testing set
-    # X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
-    # X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
-
-    # # 2. Use the dataset prepared from Dummy dataset's raw data values
-    # X, Y = pickle.load(open(DUMMY_DATASET_FILEPATH + 'train.pkl', 'rb'))
-    # X_test, Y_test = pickle.load(open(DUMMY_DATASET_FILEPATH + 'test.pkl', 'rb'))
-    # X, Y, X_test, Y_test = filterDummyDataset(X, Y, X_test, Y_test)
-
-    # 3. Use the dataset prepared from self-collected dataset's raw data values
+    # Use the dataset prepared from self-collected dataset's raw data values
     X, Y = pickle.load(open(TRAIN_DATASET_PATH, 'rb'))
     X_test, Y_test = pickle.load(open(TEST_DATASET_PATH, 'rb'))
     X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
@@ -365,11 +257,11 @@ if __name__ == "__main__":
     print("Predicting...")
     train_pred = model.predict(X)
     val_pred = model.predict(X_val)
-    import time
     start = time.time()
     test_pred = model.predict(X_test)
     end = time.time()
-    print("Prediction time: " + str(end-start))
+    timeTaken = (end - start) / len(test_pred)
+    print("Prediction time: " + str(timeTaken))
 
     print("Predictions done! Compiling results...")
 
@@ -383,16 +275,12 @@ if __name__ == "__main__":
     calculatePerformanceMetrics(Y_val_pred, Y_val, "validation")
     calculatePerformanceMetrics(Y_test_pred, Y_test, "testing")
 
-    # Record model confidence on every prediction
-    train_confidence_list = calculatePredictionConfidence(train_pred)
-    val_confidence_list = calculatePredictionConfidence(val_pred)
-    test_confidence_list = calculatePredictionConfidence(test_pred)
+    # # Record model confidence on every prediction
+    # train_confidence_list = determinePredictionConfidence(train_pred)
+    # val_confidence_list = determinePredictionConfidence(val_pred)
+    # test_confidence_list = determinePredictionConfidence(test_pred)
 
-    # Record class probabilities for every prediction
-    train_dict_list = recordClassProbabilites(train_pred)
-    val_dict_list = recordClassProbabilites(val_pred)
-    test_dict_list = recordClassProbabilites(test_pred)
-
-    # # Prepare a detailed log of all incorrect cases on every prediction as text file
-    # logIncorrectCases(..., 'training-crossval')
-    # logIncorrectCases(..., 'testing')
+    # # Record class probabilities for every prediction
+    # train_dict_list = recordClassProbabilites(train_pred)
+    # val_dict_list = recordClassProbabilites(val_pred)
+    # test_dict_list = recordClassProbabilites(test_pred)
