@@ -1,7 +1,6 @@
+import os, pickle, logging
 import numpy as np
 from statsmodels import robust
-import pickle
-import logging
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, QuantileTransformer, Normalizer
 from obspy.signal.filter import highpass
 from scipy.signal import savgol_filter
@@ -13,15 +12,33 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 ENC_LIST = [
-    ('idle', 0),
+    ('IDLE', 0),
     ('logout', 1),
-    ('number_six', 2)
+    ('Wipers', 2),
+    ('NumberSeven', 3),
+    ('Chicken', 4),
+    ('SideStep', 5),
+    ('Turnclap', 6),
+    # ('NumberSix', 7),
+    # ('Salute', 8),
+    # ('Mermaid', 9),
+    # ('Swing', 10),
+    # ('Cowboy', 11)
 ]
 
 ENC_DICT = {
-    0: 'idle',
+    0: 'IDLE',
     1: 'logout',
-    2: 'number_six'
+    2: 'Wipers',
+    3: 'NumberSeven',
+    4: 'Chicken',
+    5: 'SideStep',
+    6: 'Turnclap',
+    # 7: 'NumberSix',
+    # 8: 'Salute',
+    # 9: 'Mermaid',
+    # 10: 'Swing',
+    # 11: 'Cowboy'
 }
 
 CLASSLIST = [ pair[0] for pair in ENC_LIST ]
@@ -48,11 +65,11 @@ def str2onehot(Y):
    return new_Y
 
 # Load model from pickle/hdf5 file
-model = load_model('nn_models\\nn_model.hdf5')
-# model = pickle.load(open('classifier_models\\model_RandomForestClassifier200.pkl', 'rb'))
+model = load_model(os.path.join('nn_models', 'nn_model.hdf5'))
+# model = pickle.load(open(os.path.join('classifier_models', 'model_RandomForestClassifier200.pkl'), 'rb'))
 # Load scalers
-min_max_scaler = pickle.load(open('scaler\\min_max_scaler.pkl', 'rb'))
-standard_scaler = pickle.load(open('scaler\\standard_scaler.pkl', 'rb'))
+min_max_scaler = pickle.load(open(os.path.join('scaler', 'min_max_scaler.pkl'), 'rb'))
+standard_scaler = pickle.load(open(os.path.join('scaler', 'standard_scaler.pkl'), 'rb'))
 
 # for every segment of data, extract the feature vector
 def extract_feature_vector(X):
