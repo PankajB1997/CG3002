@@ -9,6 +9,7 @@ import base64
 import pickle
 
 N = 128
+count = 1
 
 danceMove = "IDLE"
 dancer = "junyang"
@@ -56,5 +57,8 @@ while (data_flag == False):
         for i in range(N): # print from 0->127 = 128 sets of readings
             data = readLineCR(port).split(",")[0:10] # extract acc1[3], acc2[3] and gyro[3] values
             data = [ float(val.strip()) for val in data ]
-            txtfile.write("\t".join(data))
+            output = "\t".join(str(data)) + "\n"
+            txtfile.write(output)
+            print(str(count) + ". " + output)
+            count += 1
     data_flag = True
