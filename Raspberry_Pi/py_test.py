@@ -7,6 +7,8 @@ import sys
 import threading
 import socket
 import base64
+from Crypto import Random
+from Crypto.Cipher import  AES
 
 import numpy as np
 from statsmodels import robust
@@ -19,6 +21,8 @@ from keras.models import load_model
 
 N = 128
 CONFIDENCE_THRESHOLD = 0.85
+
+BLOCK_SIZE = 32 #AES.block_size
 
 '''
 The following move states are used:
@@ -126,15 +130,34 @@ def readLineCR(port):
         if ch == '\r':
             return rv
 
-def testReadLineCR(port):
-    read_flag = 1
-    rv = ""
-    while (read_flag == 1):
-        ch = port.read()
-        rv += ch
-        if ch == '\r':
-            data = rv
-            read_flag = 0
+def inputData():
+    #'#action | voltage | current | power | cumulativepower|'
+    action = str(input('Manually enter data: '))
+    data = '#' + action + '|2.0|1.5|5.6|10.10|'
+    return data
+	
+def encryption(data, secret_key):
+	#Padding
+	length = BLOCK_SIZE-(len(data)%BLOCK_SIZE)
+	msg = data+((chr(length))*(length))
+	print(msg)
+	
+	#encryption
+	iv = Random.new().read(AES.block_size)
+	cipher = AES.new(secret_key, AES.MODE_CBC, iv)
+	encoded = base64.b64encode(iv + cipher.encrypt(msg))
+
+	return encoded
+	
+	
+#Establish socket connection
+#input on console in this format: IP_address Port_number
+TCP_IP = sys.argv[1]
+TCP_PORT = int(sys.argv[2])
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((TCP_IP, TCP_PORT))
+
+secret_key = "1234123412341234"  #must be at least 16
 
 # dataArray = [] # N objects in array, per 20ms
 handshake_flag = False
