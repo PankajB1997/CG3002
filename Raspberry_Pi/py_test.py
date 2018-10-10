@@ -148,7 +148,11 @@ def encryption(data, secret_key):
 	encoded = base64.b64encode(iv + cipher.encrypt(msg))
 
 	return encoded
-	
+
+def sendToServer(s, data):
+	encryptedData = encryption(data, secret_key)
+	s.send(encryptedData)
+	print('sent')
 	
 #Establish socket connection
 #input on console in this format: IP_address Port_number
@@ -209,16 +213,17 @@ while (data_flag == False):
         output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
         if danceMove == "logout":
             output = danceMove # with logout command, no other values are sent
-        # TODO @ Ng Jin: Add code to send output to server below
-
-        # Add code to send output to server above
+        
+		# Send output to server above
+		sendToServer(s, output)
+		
         move_state = 1
     elif move_state == 1 and danceMove == "IDLE":
         move_state = 2
 
-    print("Print array: ")
-    output = "1.0,2.0,3.0,4.0,5.0"
-    output = output.replace(',', '|')
+    #print("Print array: ")
+    #output = "1.0,2.0,3.0,4.0,5.0"
+    #output = output.replace(',', '|')
     print(output)
     action, voltage, current, power, cumulativepower = output.split('|')
     print("action: " + action + '\n' + "voltage: " + voltage + '\n' + "current: " + current + '\n' +
