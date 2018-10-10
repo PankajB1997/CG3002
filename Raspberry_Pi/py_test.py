@@ -159,6 +159,13 @@ s.connect((TCP_IP, TCP_PORT))
 
 secret_key = "1234123412341234"  #must be at least 16
 
+#Check if connected to server
+if (s):
+	print("connected to server")
+else:
+	print("not connected to server")
+
+#Establish arduino-rpi connection
 # dataArray = [] # N objects in array, per 20ms
 handshake_flag = False
 data_flag = False
