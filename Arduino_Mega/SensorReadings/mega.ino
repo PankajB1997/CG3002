@@ -4,12 +4,7 @@
 #include <Wire.h>
 #include<Arduino_FreeRTOS.h>
 #include<task.h>
-#include<avr/io.h>
-#include<semphr.h>
-#define STACK_SIZE 200
-#include<stdio.h>
-#include<stdlib.h>
-
+#define STACK_SIZE 500
 #define DEVICE_A_ACCEL (0x53)    //first ADXL345 device address
 #define DEVICE_B_ACCEL (0x1D)    //second ADXL345 device address
 #define DEVICE_C_GYRO (0x68) // MPU6050 address
@@ -18,10 +13,12 @@
 #define currentSensorPin 1
 #define RS 0.1
 #define RL 10000
+#define PKT_SIZE 32
 
 ADXL345 sensorA = ADXL345(DEVICE_A_ACCEL);
 ADXL345 sensorB = ADXL345(DEVICE_B_ACCEL);
 MPU6050 sensorC = MPU6050(DEVICE_C_GYRO);
+TickType_t xLastWakeTime;
 
 //determining scale factor based on range set
 //Since range in +-2g, range is 4mg/LSB.
@@ -38,9 +35,7 @@ int rangeGyro = 250-(-250);
 const float scaleFactorGyro = rangeGyro/65535.0; 
  
 //declaring variable to store value of volt and amps
-    float vOut;
-    float voltageReading;
-    float currentReading;
+float vOut , voltageReading, currentReading;
 
 //16 bit integer values for raw data of accelerometers
 int16_t xa_raw, ya_raw, za_raw, xb_raw, yb_raw, zb_raw;
@@ -48,17 +43,11 @@ int16_t xa_raw, ya_raw, za_raw, xb_raw, yb_raw, zb_raw;
 //16 bit integer values for offset data of accelerometers
 int16_t xa_offset, ya_offset, za_offset, xb_offset, yb_offset, zb_offset;
 
-//Float values for scaled factors of accelerometers
-float xa, ya, za, xb, yb, zb;
-
 //16 bit integer values for gyroscope readings
 int16_t xg_raw, yg_raw, zg_raw;
 
 //16 bit integer values for offset data of gyroscope
 int16_t xg_offset, yg_offset, zg_offset;
-
-//Float values for scaled values of gyroscopes
-float xg, yg, zg;
 
 //Structure of data packet
 typedef struct Packet {
@@ -69,9 +58,12 @@ typedef struct Packet {
   float current;
   float voltage;
   float energy;
-} Packet;   //Size of packet is 60 (15 of 4 bytes)
+} Packet;   
 
 Packet packet;
+
+
+char databuf[2800];
 
 char* acc1_x;
 char* acc1_y;
@@ -87,87 +79,45 @@ char* current_c;
 char* power_c;
 char* energy_c;
 
-int test_flag = 0;
-int dataReady = 0;
-char databuf[3000];
-
-//Function prototypes
-float remapVoltage(int);
-void calibrateSensors();
-void getScaledReadings();
-void printSensorReadings();
-void sendToPi(void *p);
-
-SemaphoreHandle_t taskSemaphore =  xSemaphoreCreateMutex();
-
-void setup()
-{
-  Wire.begin();        // join i2c bus (address optional for master)
-  Serial.begin(115200);  // start serial for output
-  Serial1.begin(115200); //serial for gpio connection between Mega and Rpi
-  
-  // Initializing sensors 
-  sensorA.initialize();
-  sensorB.initialize();
-  sensorC.initialize();
-
-  // Testing connection by reading device ID of each sensor
-  // Returns false if deviceID not found, Returns true if deviceID is found
-  Serial.println();
-  Serial.println(sensorA.testConnection() ? "Sensor A connected successfully" : "Sensor A failed to connect");
-  Serial.println(sensorB.testConnection() ? "Sensor B connected successfully" : "Sensor B failed to connect");
-  Serial.println(sensorC.testConnection() ? "Sensor C connected successfully" : "Sensor C failed to connect");
-  
-  calibrateSensors();
-    handshake();
-   
-  xTaskCreate(collectData, "collectData", STACK_SIZE, (void *)NULL, 2, NULL);
-  xTaskCreate(sendToPi, "sendToPi", STACK_SIZE, (void *)NULL, 1, NULL);
-   vTaskStartScheduler();
-} 
-
-
-void loop()
-{  
-}
 
 /**
- *  To perform handshake to ensure that communication between Rpi and Aduino is ready
+ * Main Task
  */
-void handshake() {
-  int h_flag = 0;
-  int n_flag = 0;
+void mainTask(void *p) {
 
-  while (h_flag == 0) {
-    if (Serial1.available()) {
-      if ((Serial1.read() == 'H')) {
-        h_flag = 1;
-      }
+  while(1){
+    xLastWakeTime = xTaskGetTickCount();
+    for (int i=0;i <PKT_SIZE; i++) {
+    getData(); 
+    changeFormat();
+    vTaskDelayUntil(&xLastWakeTime, (20/ portTICK_PERIOD_MS));
     }
+   sendToPi();
   }
-
-  while (n_flag == 0) {
-    if (Serial1.available()) {
-      Serial1.write('A');
-      if (Serial1.read() == 'N') {
-        Serial.println("Handshake done");
-        n_flag = 1;
-      }
-    }
-  }
-
 }
 
-/**
+
+/** 
+ *To send to Pi once Pi is ready for communication
+ *Packet is of Type float (4 bytes) 
+ * A sample of 20 packets will be sent to Rpi every 200ms
+ */
+ void sendToPi() {
+      
+   //For checking purpose
+  int len = strlen(databuf);
+        for (int i = 0; i < len; i++) {
+    Serial1.write(databuf[i]);
+        }
+        
+      strcpy(databuf, "");
+}
+
+ /**
  *  To collect readings from all the sensor and package into one packet every 20ms
  */
-void collectData(void *p){
-
-  static TickType_t xLastWakeTime = xTaskGetTickCount();
-  while (1)
-  {
-    if (xSemaphoreTake(taskSemaphore, (TickType_t)portMAX_DELAY) == pdTRUE)
-    {
+void getData(){
+     
       // Read values from different sensors
       getScaledReadings();
     
@@ -179,7 +129,7 @@ void collectData(void *p){
       //Measure voltage out from current sensor to calculate current
       vOut = analogRead(currentSensorPin);
       vOut = remapVoltage(vOut);
-      packet.current = (vOut * 1000) / (RS * RL) * 1000;
+    packet.current = (vOut * 1000) / (RS * RL) * 1000;
 
       //Power is in mW due to current being in mA
       packet.power = packet.current * packet.voltage;
@@ -195,11 +145,6 @@ void collectData(void *p){
       prevTime = millis();
 
       packet.energy = energy;
-
-      xSemaphoreGive(taskSemaphore);      
-    }
-    vTaskDelayUntil(&xLastWakeTime, 1);
-  }
 }
 
  /*
@@ -259,12 +204,41 @@ void calibrateSensors() {
 }
 
 
+/**
+ *  To perform handshake to ensure that communication between Rpi and Aduino is ready
+ */
+void handshake() {
+  int h_flag = 0;
+  int n_flag = 0;
+
+   
+  while (h_flag == 0) {
+    if (Serial1.available()) {
+      if ((Serial1.read() == 'H')) {
+        h_flag = 1;
+      }
+    }
+  }
+
+  while (n_flag == 0) {
+    if (Serial1.available()) {
+      Serial1.write('A');
+      if (Serial1.read() == 'N') {
+        Serial.println("Handshake done");
+        n_flag = 1;
+      }
+    }
+  }
+
+}
+
 /** 
  Change the format of the data from float to string
  */
 void changeFormat(){
-char charbuf[100] ;
+char charbuf[64] ;
 
+  
   acc1_x = dtostrf( packet.acc1[0],3,2,charbuf);
   strcat(databuf, acc1_x); 
   strcat(databuf, ",");
@@ -303,46 +277,39 @@ char charbuf[100] ;
   strcat(databuf, ",");
   power_c = dtostrf( packet.power,3,2,charbuf);
   strcat(databuf, power_c ); 
-  strcat(databuf, ",");
-  
+  strcat(databuf, ","); 
   energy_c = dtostrf( packet.energy,3,2,charbuf);
-  strcat(databuf, energy_c  ); 
+  strcat(databuf, energy_c  );
+ strcat(databuf, "\r");
+}
+
+
+void setup()
+{
+  Wire.begin();        // join i2c bus (address optional for master)
+  Serial.begin(115200);  // start serial for output
+  Serial1.begin(115200); //serial for gpio connection between Mega and Rpi
   
- }
- 
- 
- /** 
- *To send to Pi once Pi is ready for communication
- *Packet is of Type float (4 bytes) thus one packet contains 15 values, a total of 60 bytes
- * A sample of 20 packets will be sent to Rpi every 200ms
- */
- void sendToPi(void *p) {
-  static TickType_t xLastWakeTime = xTaskGetTickCount();
-  while (1)
-  {
-    if (xSemaphoreTake(taskSemaphore, (TickType_t)portMAX_DELAY) == pdTRUE)
-    {
-      changeFormat();
-      strcat(databuf, "\r");
-      int len = strlen(databuf);
-      
+  // Initializing sensors 
+  sensorA.initialize();
+  sensorB.initialize();
+  sensorC.initialize();
 
-      Serial.println();
+  // Testing connection by reading device ID of each sensor
+  // Returns false if deviceID not found, Returns true if deviceID is found
+  Serial.println();
+  Serial.println(sensorA.testConnection() ? "Sensor A connected successfully" : "Sensor A failed to connect");
+  Serial.println(sensorB.testConnection() ? "Sensor B connected successfully" : "Sensor B failed to connect");
+  Serial.println(sensorC.testConnection() ? "Sensor C connected successfully" : "Sensor C failed to connect");
+  
+  calibrateSensors();
+  handshake();
+  xTaskCreate(mainTask, "Main Task", STACK_SIZE, (void *)NULL, 2, NULL);
+} 
 
-       Serial1.write(databuf,sizeof(databuf));
-       
-//      for (int i = 0; i < len; i++) {
-//        Serial.print(databuf[i]);
-//        
-//      }
-  strcpy(databuf, "");
-    
-      xSemaphoreGive(taskSemaphore);      
-    }
-    vTaskDelayUntil(&xLastWakeTime,2);
-  }
+
+void loop()
+{  
 }
  
-
-
 
