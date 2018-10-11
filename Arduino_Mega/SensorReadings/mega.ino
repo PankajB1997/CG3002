@@ -88,30 +88,21 @@ void mainTask(void *p) {
   while(1){
     xLastWakeTime = xTaskGetTickCount();
     for (int i=0;i <PKT_SIZE; i++) {
-    getData(); 
-    changeFormat();
-    vTaskDelayUntil(&xLastWakeTime, (20/ portTICK_PERIOD_MS));
+      getData(); 
+      changeFormat();
+      vTaskDelayUntil(&xLastWakeTime, (20/ portTICK_PERIOD_MS));
     }
-   sendToPi();
+     int len = strlen(databuf);
+     for (int i = 0; i < len; i++) {
+        Serial1.write(databuf[i]);
+     }
+     Serial.println("Sent");
+     strcpy(databuf, "");
+     
   }
 }
 
 
-/** 
- *To send to Pi once Pi is ready for communication
- *Packet is of Type float (4 bytes) 
- * A sample of 20 packets will be sent to Rpi every 200ms
- */
- void sendToPi() {
-      
-   //For checking purpose
-  int len = strlen(databuf);
-        for (int i = 0; i < len; i++) {
-    Serial1.write(databuf[i]);
-        }
-        
-      strcpy(databuf, "");
-}
 
  /**
  *  To collect readings from all the sensor and package into one packet every 20ms
@@ -216,16 +207,19 @@ void handshake() {
     if (Serial1.available()) {
       if ((Serial1.read() == 'H')) {
         h_flag = 1;
+        Serial1.write('A');
       }
     }
   }
 
   while (n_flag == 0) {
     if (Serial1.available()) {
-      Serial1.write('A');
       if (Serial1.read() == 'N') {
         Serial.println("Handshake done");
         n_flag = 1;
+      }
+      else {
+        Serial1.write('A');
       }
     }
   }
@@ -312,4 +306,5 @@ void loop()
 {  
 }
  
+
 
