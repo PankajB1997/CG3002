@@ -1,14 +1,16 @@
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-import re
+from telegram.ext import Updater
 import time
 import threading
-from urllib import request, error
+import socket
 
 def get_ip():
     while True:
         try:
-            req = request.urlopen("http://checkip.dyndns.org").read()
-            return re.findall(b"\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}", req)[0].decode('utf-8')
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+            s.close()
+            return ip
         except:
             print("Oh no")
             time.sleep(5)
@@ -20,7 +22,7 @@ def shutdown():
     updater.is_idle = False
 
 def send_message(bot, job):
-    bot.send_message(chat_id="620733342", text=get_ip())
+    bot.send_message(chat_id="-317074198", text=get_ip())
     threading.Thread(target=shutdown).start()
 
 def main():
