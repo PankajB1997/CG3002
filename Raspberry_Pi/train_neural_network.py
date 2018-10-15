@@ -223,6 +223,7 @@ def filterDataset(X, Y, X_test, Y_test):
 TRAIN_DATASET_PATH = os.path.join("dataset", "train.pkl")
 TEST_DATASET_PATH = os.path.join("dataset", "test.pkl")
 SCALER_SAVEPATH = os.path.join("scaler", "standard_scaler.pkl")
+MODELS_SAVEPATH = os.path.join("nn_models")
 
 if __name__ == "__main__":
 
@@ -254,6 +255,13 @@ if __name__ == "__main__":
     print(str(Counter(Y_test)))
 
     model = fitModel(X, Y, X_val, Y_val)
+
+    modelFiles = os.listdir(MODELS_SAVEPATH).sort(reverse=True)
+    print(modelFiles)
+    for file in modelFiles[1:]:
+        filepath = os.path.join(MODELS_SAVEPATH, file)
+        if os.path.exists(filepath):
+            os.remove(filepath)
 
     print("Predicting...")
     train_pred = model.predict(X)

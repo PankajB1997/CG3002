@@ -86,11 +86,11 @@ def str2onehot(Y):
    return new_Y
 
 # Load model from pickle/hdf5 file
-model = load_model('nn_models\\nn_model.hdf5')
+model = load_model(os.path.join('nn_models', 'nn_model.hdf5'))
 # model = pickle.load(open('classifier_models\\model_RandomForestClassifier200.pkl', 'rb'))
 # Load scalers
-min_max_scaler = pickle.load(open('scaler\\min_max_scaler.pkl', 'rb'))
-standard_scaler = pickle.load(open('scaler\\standard_scaler.pkl', 'rb'))
+min_max_scaler = pickle.load(open(os.path.join('scaler', 'min_max_scaler.pkl'), 'rb'))
+standard_scaler = pickle.load(open(os.path.join('scaler', 'standard_scaler.pkl'), 'rb'))
 
 # for every segment of data (128 sets per segment with 0% overlap for now), extract the feature vector
 def extract_feature_vector(X):
