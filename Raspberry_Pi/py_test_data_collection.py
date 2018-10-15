@@ -38,10 +38,10 @@ data_flag = False
 print("test")
 port = serial.Serial("/dev/serial0", baudrate=115200, timeout=3.0)
 print("set up")
-#port.reset_input_buffer()
-#port.reset_output_buffer()
-port.flushInput()
-port.flushOutput()
+port.reset_input_buffer()
+port.reset_output_buffer()
+#port.flushInput()
+#port.flushOutput()
 
 while (handshake_flag == False):
     port.write("H".encode())
