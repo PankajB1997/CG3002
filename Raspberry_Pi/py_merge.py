@@ -222,9 +222,9 @@ while (data_flag == False):
     #print("Print array: ")
     #output = "1.0,2.0,3.0,4.0,5.0"
     #output = output.replace(',', '|')
-    print(output)
-    action, voltage, current, power, cumulativepower = output.split('|')
-    print("action: " + action + '\n' + "voltage: " + voltage + '\n' + "current: " + current + '\n' +
-          "power: " + power + '\n' + "cumulativepower: " + cumulativepower + '\n')
+    #print(output)
+    #action, voltage, current, power, cumulativepower = output.split('|')
+    #print("action: " + action + '\n' + "voltage: " + voltage + '\n' + "current: " + current + '\n' +
+    #      "power: " + power + '\n' + "cumulativepower: " + cumulativepower + '\n')
 
     data_flag = True

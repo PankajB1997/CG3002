@@ -256,12 +256,15 @@ if __name__ == "__main__":
 
     model = fitModel(X, Y, X_val, Y_val)
 
-    modelFiles = os.listdir(MODELS_SAVEPATH).sort(reverse=True)
-    print(modelFiles)
+    # Store only best model file and discard the rest
+    modelFiles = os.listdir(MODELS_SAVEPATH)
+    modelFiles.sort(reverse=True)
     for file in modelFiles[1:]:
         filepath = os.path.join(MODELS_SAVEPATH, file)
         if os.path.exists(filepath):
             os.remove(filepath)
+    print("Renaming " + str(os.path.join(MODELS_SAVEPATH, modelFiles[0])) + " to " + str(os.path.join(MODELS_SAVEPATH, 'nn_model.hdf5')))
+    os.rename(os.path.join(MODELS_SAVEPATH, modelFiles[0]), os.path.join(MODELS_SAVEPATH, 'nn_model.hdf5'))
 
     print("Predicting...")
     train_pred = model.predict(X)
