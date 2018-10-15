@@ -135,13 +135,13 @@ def inputData():
     action = str(input('Manually enter data: '))
     data = '#' + action + '|2.0|1.5|5.6|10.10|'
     return data
-	
+
 def encryption(data, secret_key):
 	#Padding
 	length = BLOCK_SIZE-(len(data)%BLOCK_SIZE)
 	msg = data+((chr(length))*(length))
 	print(msg)
-	
+
 	#encryption
 	iv = Random.new().read(AES.block_size)
 	cipher = AES.new(secret_key, AES.MODE_CBC, iv)
@@ -152,8 +152,8 @@ def encryption(data, secret_key):
 def sendToServer(s, data):
 	encryptedData = encryption(data, secret_key)
 	s.send(encryptedData)
-	print('sent')
-	
+	print('output sent to server')
+
 #Establish socket connection
 #input on console in this format: IP_address Port_number
 TCP_IP = sys.argv[1]
@@ -213,10 +213,8 @@ while (data_flag == False):
         output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
         if danceMove == "logout":
             output = danceMove # with logout command, no other values are sent
-        
-            # Send output to server above
-            sendToServer(s, output)
-		
+        # Send output to server above
+        sendToServer(s, output)
         move_state = 1
     elif move_state == 1 and danceMove == "IDLE":
         move_state = 2
