@@ -3,7 +3,7 @@ import os, pickle
 RAW_DATASET_PATH = os.path.join("dataset", "RawData")
 SAVEPATH = os.path.join("dataset", "data_by_move.pkl")
 
-moves = [ 'IDLE', 'logout', 'Wipers', 'NumberSeven', 'Chicken', 'SideStep', 'Turnclap', 'NumberSix', 'Salute', 'Mermaid', 'Swing', 'Cowboy' ]
+moves = [ 'IDLE', 'logout', 'wipers', 'number7', 'chicken', 'sidestep', 'turnclap', 'numbersix', 'salute', 'mermaid', 'swing', 'cowboy' ]
 
 data_by_move = {}
 

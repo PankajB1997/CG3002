@@ -39,31 +39,31 @@ move_state = 1
 ENC_LIST = [
     ('IDLE', 0),
     ('logout', 1),
-    ('Wipers', 2),
-    ('NumberSeven', 3),
-    ('Chicken', 4),
-    ('SideStep', 5),
-    ('Turnclap', 6),
-    # ('NumberSix', 7),
-    # ('Salute', 8),
-    # ('Mermaid', 9),
-    # ('Swing', 10),
-    # ('Cowboy', 11)
+    ('wipers', 2),
+    ('number7', 3),
+    ('chicken', 4),
+    ('sidestep', 5),
+    ('turnclap', 6),
+    # ('numbersix', 7),
+    # ('salute', 8),
+    # ('mermaid', 9),
+    # ('swing', 10),
+    # ('cowboy', 11)
 ]
 
 ENC_DICT = {
     0: 'IDLE',
     1: 'logout',
-    2: 'Wipers',
-    3: 'NumberSeven',
-    4: 'Chicken',
-    5: 'SideStep',
-    6: 'Turnclap',
-    # 7: 'NumberSix',
-    # 8: 'Salute',
-    # 9: 'Mermaid',
-    # 10: 'Swing',
-    # 11: 'Cowboy'
+    2: 'wipers',
+    3: 'number7',
+    4: 'chicken',
+    5: 'sidestep',
+    6: 'turnclap',
+    # 7: 'numbersix',
+    # 8: 'salute',
+    # 9: 'mermaid',
+    # 10: 'swing',
+    # 11: 'cowboy'
 }
 
 CLASSLIST = [ pair[0] for pair in ENC_LIST ]
