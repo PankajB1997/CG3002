@@ -11,7 +11,7 @@ import pickle
 N = 128
 count = 1
 
-danceMove = "number7"
+danceMove = "chicken"
 dancer = "junyang"
 SAVEPATH = os.path.join("dataset", "RawData", dancer, danceMove + ".txt")
 
