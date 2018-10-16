@@ -18,7 +18,7 @@ from scipy.signal import savgol_filter
 from keras.models import load_model
 
 N = 128
-CONFIDENCE_THRESHOLD = 0.85
+CONFIDENCE_THRESHOLD = 0.95
 
 '''
 The following move states are used:
