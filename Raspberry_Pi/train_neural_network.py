@@ -19,6 +19,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+CONFIDENCE_THRESHOLD = 0.95
+
 ENC_LIST = [
     ('IDLE', 0),
     ('logout', 1),
@@ -143,16 +145,37 @@ def recordClassProbabilites(pred):
         class_probabilities.append(prob_per_sentence)
     return class_probabilities
 
-# Record model confidence on every prediction
-def determinePredictionConfidence(pred):
-    CONFIDENCE_THRESHOLD = 0.85
-    confidence_list = []
-    for probs in pred:
-        if max(probs) > CONFIDENCE_THRESHOLD:
-            confidence_list.append("YES")
-        else:
-            confidence_list.append("NO")
-    return confidence_list
+# Print model confidence for every correct prediction
+def printConfidenceForCorrectPredictions(pred_prob, pred_lbl, true_lbl):
+    pred_prob, pred_lbl, true_lbl = zip(*sorted(zip(pred_prob, pred_lbl, true_lbl), key = lambda x: (x[2], x[0], x[1])))
+    with open(os.path.join('logs', 'correct_predictions_log.txt'), 'w') as logfile:
+        confident_correct_pred_count = 0
+        correct_pred_count = 0
+        for i in range(len(pred_prob)):
+            if pred_lbl[i] == true_lbl[i]:
+                logfile.write("The actual move " + str(true_lbl[i]) + " was predicted as " + str(pred_lbl[i]) + " with a prediction confidence of " + str(pred_prob[i]) + ".\n")
+                if pred_prob[i] > CONFIDENCE_THRESHOLD:
+                    confident_correct_pred_count += 1
+                correct_pred_count += 1
+        logfile.write("\nTotal correct predictions made with " + str(CONFIDENCE_THRESHOLD * 100) + "% confidence or more: " + str(confident_correct_pred_count))
+        logfile.write("\nTotal correct predictions made overall: " + str(correct_pred_count))
+        logfile.write("\nTotal number of test cases: " + str(len(pred_prob)))
+
+# Print model confidence for every wrong prediction
+def printConfidenceForIncorrectPredictions(pred_prob, pred_lbl, true_lbl):
+    pred_prob, pred_lbl, true_lbl = zip(*sorted(zip(pred_prob, pred_lbl, true_lbl), key = lambda x: (x[2], x[0], x[1])))
+    with open(os.path.join('logs', 'incorrect_predictions_log.txt'), 'w') as logfile:
+        confident_mistake_count = 0
+        incorrect_pred_count = 0
+        for i in range(len(pred_prob)):
+            if pred_lbl[i] != true_lbl[i]:
+                logfile.write("The actual move " + str(true_lbl[i]) + " was predicted as " + str(pred_lbl[i]) + " with a prediction confidence of " + str(pred_prob[i]) + ".\n")
+                if pred_prob[i] > CONFIDENCE_THRESHOLD:
+                    confident_mistake_count += 1
+                incorrect_pred_count += 1
+        logfile.write("\nTotal mistakes made with " + str(CONFIDENCE_THRESHOLD * 100) + "% confidence or more: " + str(confident_mistake_count))
+        logfile.write("\nTotal mistakes made overall: " + str(incorrect_pred_count))
+        logfile.write("\nTotal number of test cases: " + str(len(pred_prob)))
 
 # Write a list of label and sentence pairs to excel file
 def writeDatasetToExcel(X, y, filepath):
@@ -287,12 +310,12 @@ if __name__ == "__main__":
     calculatePerformanceMetrics(Y_val_pred, Y_val, "validation")
     calculatePerformanceMetrics(Y_test_pred, Y_test, "testing")
 
-    # # Record model confidence on every prediction
-    # train_confidence_list = determinePredictionConfidence(train_pred)
-    # val_confidence_list = determinePredictionConfidence(val_pred)
-    # test_confidence_list = determinePredictionConfidence(test_pred)
-
-    # # Record class probabilities for every prediction
-    # train_dict_list = recordClassProbabilites(train_pred)
-    # val_dict_list = recordClassProbabilites(val_pred)
-    # test_dict_list = recordClassProbabilites(test_pred)
+    pred_prob = train_pred.tolist() + val_pred.tolist() + test_pred.tolist()
+    pred_lbl = Y_train_pred.tolist() + Y_val_pred.tolist() + Y_test_pred.tolist()
+    true_lbl = Y.tolist() + Y_val.tolist() + Y_test.tolist()
+    for i in range(len(pred_prob)):
+        pred_prob[i] = max(pred_prob[i])
+    # Print model confidence for every wrong prediction
+    printConfidenceForIncorrectPredictions(pred_prob, pred_lbl, true_lbl)
+    # Print model confidence for every correct prediction
+    printConfidenceForCorrectPredictions(pred_prob, pred_lbl, true_lbl)
