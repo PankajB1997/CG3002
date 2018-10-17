@@ -23,32 +23,32 @@ CONFIDENCE_THRESHOLD = 0.95
 
 ENC_LIST = [
     ('IDLE', 0),
-    ('logout', 1),
-    ('wipers', 2),
-    ('number7', 3),
-    ('chicken', 4),
-    ('sidestep', 5),
-    ('turnclap', 6),
-    # ('numbersix', 7),
-    # ('salute', 8),
-    # ('mermaid', 9),
-    # ('swing', 10),
-    # ('cowboy', 11)
+    ('wipers', 1),
+    ('number7', 2),
+    ('chicken', 3),
+    ('sidestep', 4),
+    ('turnclap', 5),
+    # ('numbersix', 6),
+    # ('salute', 7),
+    # ('mermaid', 8),
+    # ('swing', 9),
+    # ('cowboy', 10),
+    # ('logout', 11)
 ]
 
 ENC_DICT = {
     0: 'IDLE',
-    1: 'logout',
-    2: 'wipers',
-    3: 'number7',
-    4: 'chicken',
-    5: 'sidestep',
-    6: 'turnclap',
-    # 7: 'numbersix',
-    # 8: 'salute',
-    # 9: 'mermaid',
-    # 10: 'swing',
-    # 11: 'cowboy'
+    1: 'wipers',
+    2: 'number7',
+    3: 'chicken',
+    4: 'sidestep',
+    5: 'turnclap',
+    # 6: 'numbersix',
+    # 7: 'salute',
+    # 8: 'mermaid',
+    # 9: 'swing',
+    # 10: 'cowboy',
+    # 11: 'logout'
 }
 
 CLASSLIST = [ pair[0] for pair in ENC_LIST ]

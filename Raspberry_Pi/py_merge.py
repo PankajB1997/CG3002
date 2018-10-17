@@ -36,34 +36,39 @@ When dance move is successfully determined and sent to the server, it moves back
 # Begin with IDLE state
 move_state = 1
 
+STATE = {
+    1: 'IDLE',
+    2: 'DETERMINING_DANCE_MOVE'
+}
+
 ENC_LIST = [
     ('IDLE', 0),
-    ('logout', 1),
-    ('wipers', 2),
-    ('number7', 3),
-    ('chicken', 4),
-    ('sidestep', 5),
-    ('turnclap', 6),
-    # ('numbersix', 7),
-    # ('salute', 8),
-    # ('mermaid', 9),
-    # ('swing', 10),
-    # ('cowboy', 11)
+    ('wipers', 1),
+    ('number7', 2),
+    ('chicken', 3),
+    ('sidestep', 4),
+    ('turnclap', 5),
+    # ('numbersix', 6),
+    # ('salute', 7),
+    # ('mermaid', 8),
+    # ('swing', 9),
+    # ('cowboy', 10),
+    # ('logout', 11)
 ]
 
 ENC_DICT = {
     0: 'IDLE',
-    1: 'logout',
-    2: 'wipers',
-    3: 'number7',
-    4: 'chicken',
-    5: 'sidestep',
-    6: 'turnclap',
-    # 7: 'numbersix',
-    # 8: 'salute',
-    # 9: 'mermaid',
-    # 10: 'swing',
-    # 11: 'cowboy'
+    1: 'wipers',
+    2: 'number7',
+    3: 'chicken',
+    4: 'sidestep',
+    5: 'turnclap',
+    # 6: 'numbersix',
+    # 7: 'salute',
+    # 8: 'mermaid',
+    # 9: 'swing',
+    # 10: 'cowboy',
+    # 11: 'logout'
 }
 
 CLASSLIST = [ pair[0] for pair in ENC_LIST ]
@@ -208,16 +213,24 @@ while (data_flag == False):
     # Precondition 1: dataArray has values for acc1[3], acc2[3], gyro[3], voltage[1], current[1], power[1] and energy[1] in that order
     # Precondition 2: dataArray has N sets of readings, where N is the segment size, hence it has dimensions N*13
     danceMove, predictionConfidence = predict_dance_move(movementData)
+    isStateChanged = False
     if move_state == 2 and not danceMove == "IDLE" and predictionConfidence >= CONFIDENCE_THRESHOLD:
         voltage, current, power, energy = tuple(map(tuple, np.mean(otherData, axis=0)))
         output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
         if danceMove == "logout":
             output = danceMove # with logout command, no other values are sent
-        # Send output to server above
+        # Send output to server
         sendToServer(s, output)
+        print("Sent to server: " + str(output) + ". System moves from DETERMINING_DANCE_MOVE to IDLE state.")
         move_state = 1
+        isStateChanged = True
     elif move_state == 1 and danceMove == "IDLE":
+        print("System moves from IDLE to DETERMINING_DANCE_MOVE state.")
         move_state = 2
+        isStateChanged = True
+
+    if isStateChanged == False:
+        print("System did not change state. Dance move is " + str(danceMove) + " and move state is " + str(STATE[move_state]) + ".")
 
     #print("Print array: ")
     #output = "1.0,2.0,3.0,4.0,5.0"
