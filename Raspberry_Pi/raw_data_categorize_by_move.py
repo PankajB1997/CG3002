@@ -11,6 +11,7 @@ for move in moves:
     data_by_move[move] = []
     for dancer in os.listdir(RAW_DATASET_PATH):
         move_data_current_dancer = os.path.join(RAW_DATASET_PATH, dancer, move + '.txt')
+        print(move_data_current_dancer)
         data_count = 0
         dancerDataAvailable = False
         if os.path.exists(move_data_current_dancer):
@@ -25,7 +26,7 @@ for move in moves:
                     data_count += 1
                     dancerDataAvailable = True
         if dancerDataAvailable == True:
-            print(move_data_current_dancer + " : " + str(data_count))
+            print("Recorded for " + move_data_current_dancer + " : " + str(data_count))
 
 for move in data_by_move:
     print(move + ": " + str(len(data_by_move[move])))
