@@ -124,6 +124,7 @@ def extract_feature_vector(X):
 def predict_dance_move(segment):
     X = extract_feature_vector(segment)
     Y = model.predict(X)
+    print(Y)
     # return model.predict(X).tolist()[0]
     return onehot2str(Y)[0], max(Y[0])
 
@@ -206,8 +207,8 @@ while (data_flag == False):
     for i in range(N): # extract from 0->N-1 = N sets of readings
         data = readLineCR(port).split(',')
         data = [ float(val.strip()) for val in data ]
-        movementData.append(data[:10]) # extract acc1[3], acc2[3] and gyro[3] values
-        otherData.append(data[10:]) # extract voltage, current, power and cumulativepower
+        movementData.append(data[:9]) # extract acc1[3], acc2[3] and gyro[3] values
+        otherData.append(data[9:]) # extract voltage, current, power and cumulativepower
 
     # Add ML Logic
     # Precondition 1: dataArray has values for acc1[3], acc2[3], gyro[3], voltage[1], current[1], power[1] and energy[1] in that order
@@ -215,7 +216,11 @@ while (data_flag == False):
     danceMove, predictionConfidence = predict_dance_move(movementData)
     isStateChanged = False
     if move_state == 2 and not danceMove == "IDLE" and predictionConfidence >= CONFIDENCE_THRESHOLD:
-        voltage, current, power, energy = tuple(map(tuple, np.mean(otherData, axis=0)))
+        # voltage, current, power, energy = tuple(map(tuple, np.mean(otherData, axis=0)))
+        voltage = 0
+        current = 0
+        power = 0
+        energy = 0
         output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
         if danceMove == "logout":
             output = danceMove # with logout command, no other values are sent
@@ -230,7 +235,7 @@ while (data_flag == False):
         isStateChanged = True
 
     if isStateChanged == False:
-        print("System did not change state. Dance move is " + str(danceMove) + " and move state is " + str(STATE[move_state]) + ".")
+        print("System did not change state. Dance move is " + str(danceMove) + " and move state is " + str(STATE[move_state]) + " with prediction confidence " + str(predictionConfidence) + ".")
 
     #print("Print array: ")
     #output = "1.0,2.0,3.0,4.0,5.0"
@@ -240,4 +245,4 @@ while (data_flag == False):
     #print("action: " + action + '\n' + "voltage: " + voltage + '\n' + "current: " + current + '\n' +
     #      "power: " + power + '\n' + "cumulativepower: " + cumulativepower + '\n')
 
-    data_flag = True
+    # data_flag = True
