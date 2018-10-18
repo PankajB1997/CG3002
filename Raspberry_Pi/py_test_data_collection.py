@@ -10,6 +10,9 @@ import pickle
 
 N = 128
 count = 1
+MAX_BUF_LEN = 2800 # bytes
+TOTAL_PACKETS = 20
+PACKET_SIZE = 64 # number of elements in list = len(array); actual size = sys.getsizeof(array)
 
 danceMove = "turnclap"
 dancer = "pankaj"
@@ -32,6 +35,22 @@ def testReadLineCR(port):
         if ch == "\r":
             data = rv
             read_flag = 0
+
+def comppute_checksum(data):
+	data, correct_checksum = data.rsplit("," , 1)
+	data = data.split(",")
+    for i in range(len(data)):
+		cs ^= data[i] #to be changed
+	
+	return cs
+
+def handle_checksum(cs):
+	if (cs):
+		print("Packet OK")
+		return True
+	else:
+		print("Packet Bad Checksum ")
+		return False
 
 handshake_flag = False
 data_flag = False
@@ -58,13 +77,18 @@ while (handshake_flag == False):
         time.sleep(0.5)
     
 print("connected")
-#port.flush() #waits till all in buffer is written then flush
+#port.flush() # waits till all in buffer is written then flush
 
 while (data_flag == False):
     print("ENTERING")
     with open(SAVEPATH, "a") as txtfile:
         for i in range(N): # print from 0->127 = 128 sets of readings
             data = readLineCR(port)
+			
+			#checksum
+			cs = compute_checksum(data)
+			data_flag = handle_checksum(cs)
+			
             data = data.split(",")[0:9] # extract acc1[3], acc2[3] and gyro[3] values
             data = [ val.strip() for val in data ]
             output = "\t".join(data) + "\n"
