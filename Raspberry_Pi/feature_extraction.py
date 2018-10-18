@@ -13,9 +13,9 @@ logger.setLevel(logging.INFO)
 
 DATASET_FILEPATH = "dataset"
 
-# Default: 128 sets per segment with 50% overlap; currently, 8 segments per set is used due to insufficient data
-SEGMENT_SIZE = 8
-OVERLAP = 0.5
+# Default: 128 sets per segment with 0% overlap
+SEGMENT_SIZE = 128
+OVERLAP = 0
 
 # for every segment of data, extract the feature vector
 def extract_feature_vector(X):

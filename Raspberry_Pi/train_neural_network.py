@@ -23,10 +23,10 @@ CONFIDENCE_THRESHOLD = 0.95
 
 ENC_LIST = [
     ('IDLE', 0),
-    ('wipers', 1),
+    ('sidestep', 1),
     ('number7', 2),
     ('chicken', 3),
-    ('sidestep', 4),
+    ('wipers', 4),
     ('turnclap', 5),
     # ('numbersix', 6),
     # ('salute', 7),
@@ -38,10 +38,10 @@ ENC_LIST = [
 
 ENC_DICT = {
     0: 'IDLE',
-    1: 'wipers',
+    1: 'sidestep',
     2: 'number7',
     3: 'chicken',
-    4: 'sidestep',
+    4: 'wipers',
     5: 'turnclap',
     # 6: 'numbersix',
     # 7: 'salute',
@@ -226,11 +226,15 @@ def fitModel(X_train, Y_train, X_val, Y_val):
 def filterDataset(X, Y, X_test, Y_test):
     classes_removed = [
     # No classes need to be removed from self-collected dataset unless experimenting
-        'NumberSix',
-        'Salute',
-        'Mermaid',
-        'Swing',
-        'Cowboy'
+        # 'wipers',
+        # 'number7',
+        # 'turnclap',
+        # 'chicken',
+        'numbersix',
+        'salute',
+        'mermaid',
+        'swing',
+        'cowboy'
     ]
 
     del_idx = [ idx for idx, val in enumerate(Y) if val in classes_removed ]
