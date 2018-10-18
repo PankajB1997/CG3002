@@ -24,7 +24,9 @@ CONFIDENCE_THRESHOLD = 0.95
 
 BLOCK_SIZE = 32 #AES.block_size
 
-SLEEP_DELAY = 1
+SLEEP_DELAY = 3
+
+BUFFER_SIZE = 3
 
 '''
 The following move states are used:
@@ -162,6 +164,10 @@ def sendToServer(s, data):
 	s.send(encryptedData)
 	print('output sent to server')
 
+def lastXDanceMovesSame(danceMoveBuffer):
+        lastXMoves = danceMoveBuffer[-BUFFER_SIZE:]
+        return len(set(lastXMoves)) == 1
+
 #Establish socket connection
 #input on console in this format: IP_address Port_number
 TCP_IP = sys.argv[1]
@@ -204,6 +210,8 @@ while (data_flag == False):
 
     print("ENTERING")
 
+    danceMoveBuffer = []
+
     movementData = []
     otherData = []
     for i in range(N): # extract from 0->N-1 = N sets of readings
@@ -212,13 +220,18 @@ while (data_flag == False):
         movementData.append(data[:9]) # extract acc1[3], acc2[3] and gyro[3] values
         otherData.append(data[9:]) # extract voltage, current, power and cumulativepower
 
+    
     # Add ML Logic
     # Precondition 1: dataArray has values for acc1[3], acc2[3], gyro[3], voltage[1], current[1], power[1] and energy[1] in that order
     # Precondition 2: dataArray has N sets of readings, where N is the segment size, hence it has dimensions N*13
     danceMove, predictionConfidence = predict_dance_move(movementData)
+    
+    if predictionConfidence > CONFIDENCE_THRESHOLD:
+       danceMoveBuffer.append(danceMove)
+    print(danceMoveBuffer)
 
     isMoveSent = False
-    if predictionConfidence > CONFIDENCE_THRESHOLD:
+    if len(danceMoveBuffer) >= BUFFER_SIZE and lastXDanceMovesSame(danceMoveBuffer) == True:
         isMoveSent = True
         # voltage, current, power, energy = tuple(map(tuple, np.mean(otherData, axis=0)))
         voltage = 0
@@ -231,7 +244,8 @@ while (data_flag == False):
         # Send output to server
         sendToServer(s, output)
         print("Sent to server: " + str(output) + ".")
-        time.sleep(SLEEP_DELAY)
+	danceMoveBuffer = []
+        # time.sleep(SLEEP_DELAY)
 
     if isMoveSent == False:
         print("System did not change state. Dance move is " + str(danceMove) + " with prediction confidence " + str(predictionConfidence) + ".")
