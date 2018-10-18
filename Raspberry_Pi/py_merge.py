@@ -24,6 +24,8 @@ CONFIDENCE_THRESHOLD = 0.95
 
 BLOCK_SIZE = 32 #AES.block_size
 
+SLEEP_DELAY = 1
+
 '''
 The following move states are used:
 IDLE (with move_state as 1)
@@ -42,12 +44,12 @@ STATE = {
 }
 
 ENC_LIST = [
-    ('IDLE', 0),
-    ('sidestep', 1),
-    ('number7', 2),
-    ('chicken', 3),
-    ('wipers', 4),
-    ('turnclap', 5),
+    ('sidestep', 0),
+    ('number7', 1),
+    ('chicken', 2),
+    ('wipers', 3),
+    ('turnclap', 4),
+    # ('IDLE', 5),
     # ('numbersix', 6),
     # ('salute', 7),
     # ('mermaid', 8),
@@ -57,12 +59,12 @@ ENC_LIST = [
 ]
 
 ENC_DICT = {
-    0: 'IDLE',
-    1: 'sidestep',
-    2: 'number7',
-    3: 'chicken',
-    4: 'wipers',
-    5: 'turnclap',
+    0: 'sidestep',
+    1: 'number7',
+    2: 'chicken',
+    3: 'wipers',
+    4: 'turnclap',
+    # 5: 'IDLE',
     # 6: 'numbersix',
     # 7: 'salute',
     # 8: 'mermaid',
@@ -214,8 +216,10 @@ while (data_flag == False):
     # Precondition 1: dataArray has values for acc1[3], acc2[3], gyro[3], voltage[1], current[1], power[1] and energy[1] in that order
     # Precondition 2: dataArray has N sets of readings, where N is the segment size, hence it has dimensions N*13
     danceMove, predictionConfidence = predict_dance_move(movementData)
-    isStateChanged = False
-    if move_state == 2 and not danceMove == "IDLE" and predictionConfidence >= CONFIDENCE_THRESHOLD:
+
+    isMoveSent = False
+    if predictionConfidence > CONFIDENCE_THRESHOLD:
+        isMoveSent = True
         # voltage, current, power, energy = tuple(map(tuple, np.mean(otherData, axis=0)))
         voltage = 0
         current = 0
@@ -226,23 +230,34 @@ while (data_flag == False):
             output = danceMove # with logout command, no other values are sent
         # Send output to server
         sendToServer(s, output)
-        print("Sent to server: " + str(output) + ". System moves from DETERMINING_DANCE_MOVE to IDLE state.")
-        move_state = 1
-        isStateChanged = True
-    elif move_state == 1 and danceMove == "IDLE":
-        print("System moves from IDLE to DETERMINING_DANCE_MOVE state.")
-        move_state = 2
-        isStateChanged = True
+        print("Sent to server: " + str(output) + ".")
+        time.sleep(SLEEP_DELAY)
 
-    if isStateChanged == False:
-        print("System did not change state. Dance move is " + str(danceMove) + " and move state is " + str(STATE[move_state]) + " with prediction confidence " + str(predictionConfidence) + ".")
+    if isMoveSent == False:
+        print("System did not change state. Dance move is " + str(danceMove) + " with prediction confidence " + str(predictionConfidence) + ".")
 
-    #print("Print array: ")
-    #output = "1.0,2.0,3.0,4.0,5.0"
-    #output = output.replace(',', '|')
-    #print(output)
-    #action, voltage, current, power, cumulativepower = output.split('|')
-    #print("action: " + action + '\n' + "voltage: " + voltage + '\n' + "current: " + current + '\n' +
-    #      "power: " + power + '\n' + "cumulativepower: " + cumulativepower + '\n')
+
+    # isStateChanged = False
+    # if move_state == 2 and not danceMove == "IDLE" and predictionConfidence >= CONFIDENCE_THRESHOLD:
+    #     # voltage, current, power, energy = tuple(map(tuple, np.mean(otherData, axis=0)))
+    #     voltage = 0
+    #     current = 0
+    #     power = 0
+    #     energy = 0
+    #     output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
+    #     if danceMove == "logout":
+    #         output = danceMove # with logout command, no other values are sent
+    #     # Send output to server
+    #     sendToServer(s, output)
+    #     print("Sent to server: " + str(output) + ". System moves from DETERMINING_DANCE_MOVE to IDLE state.")
+    #     move_state = 1
+    #     isStateChanged = True
+    # elif move_state == 1 and danceMove == "IDLE":
+    #     print("System moves from IDLE to DETERMINING_DANCE_MOVE state.")
+    #     move_state = 2
+    #     isStateChanged = True
+    #
+    # if isStateChanged == False:
+    #     print("System did not change state. Dance move is " + str(danceMove) + " and move state is " + str(STATE[move_state]) + " with prediction confidence " + str(predictionConfidence) + ".")
 
     # data_flag = True
