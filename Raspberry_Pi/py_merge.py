@@ -21,12 +21,10 @@ from keras.models import load_model
 
 N = 64
 CONFIDENCE_THRESHOLD = 0.95
+WAIT = 3000 # in milliseconds
+MOVE_BUFFER_MIN_SIZE = 3
 
 BLOCK_SIZE = 32 #AES.block_size
-
-SLEEP_DELAY = 3
-
-BUFFER_SIZE = 3
 
 '''
 The following move states are used:
@@ -76,6 +74,8 @@ ENC_DICT = {
 }
 
 CLASSLIST = [ pair[0] for pair in ENC_LIST ]
+
+danceMoveBuffer = []
 
 # Obtain best class from a given list of class probabilities for every prediction
 def onehot2str(onehot):
@@ -165,7 +165,7 @@ def sendToServer(s, data):
 	print('output sent to server')
 
 def lastXDanceMovesSame(danceMoveBuffer):
-        lastXMoves = danceMoveBuffer[-BUFFER_SIZE:]
+        lastXMoves = danceMoveBuffer[-MOVE_BUFFER_MIN_SIZE:]
         return len(set(lastXMoves)) == 1
 
 #Establish socket connection
@@ -210,8 +210,6 @@ while (data_flag == False):
 
     print("ENTERING")
 
-    danceMoveBuffer = []
-
     movementData = []
     otherData = []
     for i in range(N): # extract from 0->N-1 = N sets of readings
@@ -220,36 +218,37 @@ while (data_flag == False):
         movementData.append(data[:9]) # extract acc1[3], acc2[3] and gyro[3] values
         otherData.append(data[9:]) # extract voltage, current, power and cumulativepower
 
-    
+    if int(round(time.time() * 1000)) - stoptime <= WAIT:
+        continue
+
     # Add ML Logic
     # Precondition 1: dataArray has values for acc1[3], acc2[3], gyro[3], voltage[1], current[1], power[1] and energy[1] in that order
     # Precondition 2: dataArray has N sets of readings, where N is the segment size, hence it has dimensions N*13
     danceMove, predictionConfidence = predict_dance_move(movementData)
-    
+
     if predictionConfidence > CONFIDENCE_THRESHOLD:
        danceMoveBuffer.append(danceMove)
     print(danceMoveBuffer)
 
     isMoveSent = False
-    if len(danceMoveBuffer) >= BUFFER_SIZE and lastXDanceMovesSame(danceMoveBuffer) == True:
+    if len(danceMoveBuffer) >= MOVE_BUFFER_MIN_SIZE and lastXDanceMovesSame(danceMoveBuffer) == True:
         isMoveSent = True
-        # voltage, current, power, energy = tuple(map(tuple, np.mean(otherData, axis=0)))
-        voltage = 0
-        current = 0
-        power = 0
-        energy = 0
+        otherData = np.mean(otherData, axis=0).tolist()
+        voltage = otherData[0]
+        current = otherData[1]
+        power = otherData[2]
+        energy = otherData[3]
         output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
         if danceMove == "logout":
             output = danceMove # with logout command, no other values are sent
         # Send output to server
         sendToServer(s, output)
         print("Sent to server: " + str(output) + ".")
-	danceMoveBuffer = []
-        # time.sleep(SLEEP_DELAY)
+        danceMoveBuffer = []
+        stoptime = int(round(time.time() * 1000))
 
     if isMoveSent == False:
-        print("System did not change state. Dance move is " + str(danceMove) + " with prediction confidence " + str(predictionConfidence) + ".")
-
+        print("System did not change state. Dance move is " + str(danceMove) + " with prediction confidence " + str(predictionConfidence) + " and move buffer size is " + str(len(danceMoveBuffer)) + ".")
 
     # isStateChanged = False
     # if move_state == 2 and not danceMove == "IDLE" and predictionConfidence >= CONFIDENCE_THRESHOLD:
