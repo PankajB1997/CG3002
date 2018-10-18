@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import time
+import traceback
 import serial
 import os
 import sys
@@ -21,7 +22,7 @@ from keras.models import load_model
 
 N = 64
 CONFIDENCE_THRESHOLD = 0.95
-WAIT = 3000 # in milliseconds
+WAIT = 2000 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 3
 
 BLOCK_SIZE = 32 #AES.block_size
@@ -98,12 +99,23 @@ def str2onehot(Y):
    new_Y = np.vstack(new_Y)
    return new_Y
 
-# Load model from pickle/hdf5 file
-model = load_model(os.path.join('nn_models', 'nn_model.hdf5'))
-# model = pickle.load(open('classifier_models\\model_RandomForestClassifier200.pkl', 'rb'))
-# Load scalers
-min_max_scaler = pickle.load(open(os.path.join('scaler', 'min_max_scaler.pkl'), 'rb'))
-standard_scaler = pickle.load(open(os.path.join('scaler', 'standard_scaler.pkl'), 'rb'))
+try:
+    # Load model from pickle/hdf5 file
+    model = load_model(os.path.join('nn_models', 'nn_model.hdf5'))
+    # model = pickle.load(open('classifier_models\\model_RandomForestClassifier200.pkl', 'rb'))
+except:
+    traceback.print_exc()
+    print("Error in loading pretrained model!")
+    exit()
+
+try:
+    # Load scalers
+    min_max_scaler = pickle.load(open(os.path.join('scaler', 'min_max_scaler.pkl'), 'rb'))
+    standard_scaler = pickle.load(open(os.path.join('scaler', 'standard_scaler.pkl'), 'rb'))
+except:
+    traceback.print_exc()
+    print("Error in loading scaler objects!")
+    exit()
 
 # for every segment of data (128 sets per segment with 0% overlap for now), extract the feature vector
 def extract_feature_vector(X):
@@ -168,12 +180,17 @@ def lastXDanceMovesSame(danceMoveBuffer):
         lastXMoves = danceMoveBuffer[-MOVE_BUFFER_MIN_SIZE:]
         return len(set(lastXMoves)) == 1
 
-#Establish socket connection
-#input on console in this format: IP_address Port_number
-TCP_IP = sys.argv[1]
-TCP_PORT = int(sys.argv[2])
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((TCP_IP, TCP_PORT))
+try:
+    #Establish socket connection
+    #input on console in this format: IP_address Port_number
+    TCP_IP = sys.argv[1]
+    TCP_PORT = int(sys.argv[2])
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((TCP_IP, TCP_PORT))
+except:
+    traceback.print_exc()
+    print("Error in establishing socket connection with the server!")
+    exit()
 
 secret_key = "1234123412341234"  #must be at least 16
 
@@ -193,14 +210,18 @@ print("set up")
 # port.reset_input_buffer()
 # port.reset_output_buffer()
 while (handshake_flag == False):
-    port.write('H'.encode())
-    print("H sent")
-    response = port.read()
-    if (response.decode() == 'A'):
-        print("A received, sending N")
-        port.write('N'.encode())
-        handshake_flag= True
-        port.read()
+    try:
+        port.write('H'.encode())
+        print("H sent")
+        response = port.read()
+        if (response.decode() == 'A'):
+            print("A received, sending N")
+            port.write('N'.encode())
+            handshake_flag= True
+            port.read()
+    except:
+        traceback.print_exc()
+        print("Error while attempting a handshake!")
 
 # port.reset_input_buffer()
 # port.reset_output_buffer()
@@ -212,11 +233,15 @@ while (data_flag == False):
 
     movementData = []
     otherData = []
-    for i in range(N): # extract from 0->N-1 = N sets of readings
-        data = readLineCR(port).split(',')
-        data = [ float(val.strip()) for val in data ]
-        movementData.append(data[:9]) # extract acc1[3], acc2[3] and gyro[3] values
-        otherData.append(data[9:]) # extract voltage, current, power and cumulativepower
+    try:
+        for i in range(N): # extract from 0->N-1 = N sets of readings
+            data = readLineCR(port).split(',')
+            data = [ float(val.strip()) for val in data ]
+            movementData.append(data[:9]) # extract acc1[3], acc2[3] and gyro[3] values
+            otherData.append(data[9:]) # extract voltage, current, power and cumulativepower
+    except:
+        traceback.print_exc()
+        print("Error while reading the packet!")
 
     if int(round(time.time() * 1000)) - stoptime <= WAIT:
         continue
@@ -232,20 +257,24 @@ while (data_flag == False):
 
     isMoveSent = False
     if len(danceMoveBuffer) >= MOVE_BUFFER_MIN_SIZE and lastXDanceMovesSame(danceMoveBuffer) == True:
-        isMoveSent = True
-        otherData = np.mean(otherData, axis=0).tolist()
-        voltage = otherData[0]
-        current = otherData[1]
-        power = otherData[2]
-        energy = otherData[3]
-        output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
-        if danceMove == "logout":
-            output = danceMove # with logout command, no other values are sent
-        # Send output to server
-        sendToServer(s, output)
-        print("Sent to server: " + str(output) + ".")
-        danceMoveBuffer = []
-        stoptime = int(round(time.time() * 1000))
+        try:
+            otherData = np.mean(otherData, axis=0).tolist()
+            voltage = otherData[0]
+            current = otherData[1]
+            power = otherData[2]
+            energy = otherData[3]
+            output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
+            if danceMove == "logout":
+                output = danceMove # with logout command, no other values are sent
+            # Send output to server
+            sendToServer(s, output)
+            print("Sent to server: " + str(output) + ".")
+            danceMoveBuffer = []
+            stoptime = int(round(time.time() * 1000))
+            isMoveSent = True
+        except:
+            traceback.print_exc()
+            print("Error in sending dance move to the server!")
 
     if isMoveSent == False:
         print("System did not change state. Dance move is " + str(danceMove) + " with prediction confidence " + str(predictionConfidence) + " and move buffer size is " + str(len(danceMoveBuffer)) + ".")
