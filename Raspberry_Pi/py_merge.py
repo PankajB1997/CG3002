@@ -19,7 +19,7 @@ from obspy.signal.filter import highpass
 from scipy.signal import savgol_filter
 from keras.models import load_model
 
-N = 128
+N = 64
 CONFIDENCE_THRESHOLD = 0.95
 
 BLOCK_SIZE = 32 #AES.block_size
