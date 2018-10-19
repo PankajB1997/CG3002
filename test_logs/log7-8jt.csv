@@ -1,0 +1,4 @@
+timestamp,action,goal,time_delta,correct,voltage,current,power,cumpower
+1539937902.5342832,sidestep,chicken,0.9039638042449951,False,0.0,2.54,0.0,0.0
+1539937907.2734008,wipers,wipers,4.729035377502441,True,0.0,2.54,0.0,0.0
+1539937911.9159956,wipers,number7,4.629891872406006,False,0.0,2.54,0.0,0.0
