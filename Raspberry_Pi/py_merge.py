@@ -214,14 +214,14 @@ while (handshake_flag == False):
         port.write("H".encode())
         print("H sent")
         response = port.read(1)
-		time.sleep(0.5)
+        time.sleep(0.5)
         if (response.decode() == "A"):
             print("A received, sending N")
             port.write("N".encode())
-			time.sleep(0.5)
+            time.sleep(0.5)
             handshake_flag= True
-		else:
-		    time.sleep(0.5)
+        else:
+            time.sleep(0.5)
     except:
         traceback.print_exc()
         print("Error while attempting a handshake!")
@@ -265,8 +265,8 @@ while (data_flag == False):
         try:
             otherData = np.mean(otherData, axis=0).tolist()
             voltage = otherData[0]
-            current = otherData[1]
-            power = otherData[2]
+            current = otherData[1]/1000.0
+            power = otherData[2]/1000.0
             energy = otherData[3]
             output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
             if danceMove == "logout":
