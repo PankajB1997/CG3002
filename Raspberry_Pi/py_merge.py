@@ -259,6 +259,8 @@ while (data_flag == False):
     if int(round(time.time() * 1000)) - stoptime <= WAIT:
         continue
 
+    # print(otherData)
+
     # Add ML Logic
     # Precondition 1: dataArray has values for acc1[3], acc2[3], gyro[3], voltage[1], current[1], power[1] and energy[1] in that order
     # Precondition 2: dataArray has N sets of readings, where N is the segment size, hence it has dimensions N*13
