@@ -23,7 +23,7 @@ from keras.models import load_model
 N = 64
 CONFIDENCE_THRESHOLD = 0.95
 WAIT = 2000 # in milliseconds
-MOVE_BUFFER_MIN_SIZE = 3
+MOVE_BUFFER_MIN_SIZE = 2
 
 secret_key = "1234123412341234"  #must be at least 16
 BLOCK_SIZE = 32 #AES.block_size
@@ -229,6 +229,8 @@ while (handshake_flag == False):
 port.reset_input_buffer()
 port.reset_output_buffer()
 print("connected")
+
+stoptime = int(round(time.time() * 1000))
 
 while (data_flag == False):
 
