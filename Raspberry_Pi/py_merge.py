@@ -25,6 +25,7 @@ CONFIDENCE_THRESHOLD = 0.95
 WAIT = 2000 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 3
 
+secret_key = "1234123412341234"  #must be at least 16
 BLOCK_SIZE = 32 #AES.block_size
 
 '''
@@ -149,7 +150,7 @@ def readLineCR(port):
     while True:
         ch = port.read().decode()
         rv += ch
-        if ch == '\r':
+        if ch == "\r" or ch == "":
             return rv
 
 def inputData():
@@ -192,8 +193,6 @@ except:
     print("Error in establishing socket connection with the server!")
     exit()
 
-secret_key = "1234123412341234"  #must be at least 16
-
 #Check if connected to server
 if (s):
 	print("connected to server")
@@ -207,24 +206,28 @@ data_flag = False
 print("test")
 port=serial.Serial("/dev/serial0", baudrate=115200, timeout=3.0)
 print("set up")
-# port.reset_input_buffer()
-# port.reset_output_buffer()
+port.reset_input_buffer()
+port.reset_output_buffer()
+
 while (handshake_flag == False):
     try:
-        port.write('H'.encode())
+        port.write("H".encode())
         print("H sent")
-        response = port.read()
-        if (response.decode() == 'A'):
+        response = port.read(1)
+		time.sleep(0.5)
+        if (response.decode() == "A"):
             print("A received, sending N")
-            port.write('N'.encode())
+            port.write("N".encode())
+			time.sleep(0.5)
             handshake_flag= True
-            port.read()
+		else:
+		    time.sleep(0.5)
     except:
         traceback.print_exc()
         print("Error while attempting a handshake!")
 
-# port.reset_input_buffer()
-# port.reset_output_buffer()
+port.reset_input_buffer()
+port.reset_output_buffer()
 print("connected")
 
 while (data_flag == False):
