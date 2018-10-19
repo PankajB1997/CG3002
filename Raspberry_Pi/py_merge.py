@@ -1,6 +1,9 @@
 #!/usr/bin/python3
 
 import time
+
+wait_time = int(round(time.time() * 1000))
+
 import traceback
 import serial
 import os
@@ -22,8 +25,8 @@ from keras.models import load_model
 
 N = 64
 CONFIDENCE_THRESHOLD = 0.95
-WAIT = 2000 # in milliseconds
-MOVE_BUFFER_MIN_SIZE = 3
+WAIT = 3000 # in milliseconds
+MOVE_BUFFER_MIN_SIZE = 2
 
 secret_key = "1234123412341234"  #must be at least 16
 BLOCK_SIZE = 32 #AES.block_size
@@ -214,14 +217,14 @@ while (handshake_flag == False):
         port.write("H".encode())
         print("H sent")
         response = port.read(1)
-		time.sleep(0.5)
+        time.sleep(0.5)
         if (response.decode() == "A"):
             print("A received, sending N")
             port.write("N".encode())
-			time.sleep(0.5)
+            time.sleep(0.5)
             handshake_flag= True
-		else:
-		    time.sleep(0.5)
+        else:
+            time.sleep(0.5)
     except:
         traceback.print_exc()
         print("Error while attempting a handshake!")
@@ -229,6 +232,8 @@ while (handshake_flag == False):
 port.reset_input_buffer()
 port.reset_output_buffer()
 print("connected")
+
+stoptime = int(round(time.time() * 1000))
 
 while (data_flag == False):
 
@@ -245,9 +250,16 @@ while (data_flag == False):
     except:
         traceback.print_exc()
         print("Error while reading the packet!")
+    
+    print("Before " + str(wait_time))
+    if int(round(time.time() * 1000)) - wait_time <= 65000:
+        continue
+    print("After " + str(wait_time))
 
     if int(round(time.time() * 1000)) - stoptime <= WAIT:
         continue
+
+    # print(otherData)
 
     # Add ML Logic
     # Precondition 1: dataArray has values for acc1[3], acc2[3], gyro[3], voltage[1], current[1], power[1] and energy[1] in that order
@@ -263,8 +275,8 @@ while (data_flag == False):
         try:
             otherData = np.mean(otherData, axis=0).tolist()
             voltage = otherData[0]
-            current = otherData[1]
-            power = otherData[2]
+            current = otherData[1]/1000.0
+            power = otherData[2]/1000.0
             energy = otherData[3]
             output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
             if danceMove == "logout":
