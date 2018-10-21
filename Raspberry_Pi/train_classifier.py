@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-CG3002_FILEPATH = os.path.join('\\', 'Users', 'pankaj', 'Documents', 'CG3002')
+CG3002_FILEPATH = os.path.join('/', 'CG3002')
 # "\\Users\\pankaj\\Documents\\CG3002"
 
 # set constant flag for which classifier to use
@@ -58,52 +58,36 @@ MODEL_UNIQUE_IDS = {
     9: 'QuadraticDiscriminantAnalysis'
 }
 
-# Encoding below for dummy dataset
-
-DUMMY_ENC_LIST = [
-    ('WALKING', 0),
-    ('WALKING_UPSTAIRS', 1),
-    ('WALKING_DOWNSTAIRS', 2),
-    # ('SITTING', 3),
-    # ('STANDING', 4),
-    # ('LAYING', 5),
-    # ('STAND_TO_SIT', 6),
-    # ('SIT_TO_STAND', 7),
-    # ('SIT_TO_LIE', 8),
-    # ('LIE_TO_SIT', 9),
-    # ('STAND_TO_LIE', 10),
-    # ('LIE_TO_STAND', 11)
-]
-
-DUMMY_ENC_DICT = {
-    0: 'WALKING',
-    1: 'WALKING_UPSTAIRS',
-    2: 'WALKING_DOWNSTAIRS',
-    3: 'SITTING',
-    4: 'STANDING',
-    5: 'LAYING',
-    6: 'STAND_TO_SIT',
-    7: 'SIT_TO_STAND',
-    8: 'SIT_TO_LIE',
-    9: 'LIE_TO_SIT',
-    10: 'STAND_TO_LIE',
-    11: 'LIE_TO_STAND'
-}
-
-DUMMY_CLASSLIST = [ pair[0] for pair in DUMMY_ENC_LIST ]
-
-# Encoding below for actual dataset
+CONFIDENCE_THRESHOLD = 0.95
 
 ENC_LIST = [
-    ('idle', 0),
-    ('logout', 1),
-    ('number_six', 2)
+    ('sidestep', 0),
+    ('number7', 1),
+    ('chicken', 2),
+    ('wipers', 3),
+    ('turnclap', 4),
+    # ('IDLE', 5),
+    # ('numbersix', 6),
+    # ('salute', 7),
+    # ('mermaid', 8),
+    # ('swing', 9),
+    # ('cowboy', 10),
+    # ('logout', 11)
 ]
 
 ENC_DICT = {
-    0: 'idle',
-    1: 'logout',
-    2: 'number_six'
+    0: 'sidestep',
+    1: 'number7',
+    2: 'chicken',
+    3: 'wipers',
+    4: 'turnclap',
+    # 5: 'IDLE',
+    # 6: 'numbersix',
+    # 7: 'salute',
+    # 8: 'mermaid',
+    # 9: 'swing',
+    # 10: 'cowboy',
+    # 11: 'logout'
 }
 
 CLASSLIST = [ pair[0] for pair in ENC_LIST ]
@@ -188,7 +172,7 @@ def calculatePerformanceMetrics(Y_pred, Y_true, dataset_type):
     # logger.info("Weighted f1: " + str(micro_macro_weighted_scores['weighted_f1']))
 
     logger.info("Confusion Matrix below " + str(CLASSLIST) + " : ")
-    logger.info(str(cf_matrix))
+    logger.info("\n" + str(cf_matrix))
 
 # Obtain a list of class probability values for every prediction
 def recordClassProbabilites(pred):
@@ -351,14 +335,14 @@ def filterDataset(X, Y, X_test, Y_test):
 
     return X, Y, X_test, Y_test
 
-X_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\X_train.txt")
-Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Train\\y_train.txt")
-X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\X_test.txt")
-Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi\\dummy_dataset\\Test\\y_test.txt")
+X_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi/dummy_dataset/Train/X_train.txt")
+Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi/dummy_dataset/Train/y_train.txt")
+X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi/dummy_dataset/Test/X_test.txt")
+Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi/dummy_dataset/Test/y_test.txt")
 
-DUMMY_DATASET_FILEPATH = "dummy_dataset\\RawData_ByMove\\"
-TRAIN_DATASET_PATH = "dataset\\train.pkl"
-TEST_DATASET_PATH = "dataset\\test.pkl"
+DUMMY_DATASET_FILEPATH = "dummy_dataset/RawData_ByMove/"
+TRAIN_DATASET_PATH = "dataset/train.pkl"
+TEST_DATASET_PATH = "dataset/test.pkl"
 
 if __name__ == "__main__":
 

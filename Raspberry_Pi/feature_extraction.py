@@ -4,7 +4,8 @@ from statsmodels import robust
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, QuantileTransformer, Normalizer
 from obspy.signal.filter import highpass
-from scipy.signal import savgol_filter
+from scipy.signal import savgol_filter, periodogram, welch
+from scipy.fftpack import fft, ifft, rfft
 
 # initialise logger
 logging.basicConfig(level=logging.INFO)
@@ -27,10 +28,20 @@ def extract_feature_vector(X):
     X_off = np.subtract(X_max, X_min)
     X_mad = robust.mad(X, axis=0)
     # extract frequency domain features
-    X_psd = []
+    X_fft_mean = np.mean(rfft(X), axis=0)
+    X_fft_var = np.var(rfft(X), axis=0)
+    X_fft_max = np.max(rfft(X), axis=0)
+    X_fft_min = np.min(rfft(X), axis=0)
+    # logger.info("hello ")
+    # logger.info(X_fft)
+
+    # X_psd = np.mean(periodogram(X))
+    # logger.info("hello ")
+    # logger.info(X_psd)
+
     X_peakF = []
     # return feature vector by appending all vectors above as one d-dimension feature vector
-    return np.append(X_mean, [X_var, X_max, X_min, X_off, X_mad])
+    return np.append(X_mean, [X_var, X_max, X_min, X_off, X_mad, X_fft_mean, X_fft_var, X_fft_max, X_fft_min])
 
 # segment data from the raw data files, return list of tuples (segments, move_class)
 # where every tuple represents raw data for that segment and the move_class for that segment

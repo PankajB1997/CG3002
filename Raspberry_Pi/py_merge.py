@@ -250,7 +250,7 @@ while (data_flag == False):
     except:
         traceback.print_exc()
         print("Error while reading the packet!")
-    
+
     print("Before " + str(wait_time))
     if int(round(time.time() * 1000)) - wait_time <= 65000:
         continue
