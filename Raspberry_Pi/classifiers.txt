@@ -1,3 +1,4 @@
+// without fft
 INFO:root:Cross validation score for model RandomForestClassifier200: 0.9851108106362517
 INFO:root:Cross validation score for model RandomForestClassifier10: 0.9549337206667883
 INFO:root:Cross validation score for model MLPClassifier: 0.994319386564803
@@ -8,6 +9,7 @@ INFO:root:Cross validation score for model DecisionTreeClassifier: 0.93495111289
 INFO:root:Cross validation score for model AdaBoostClassifier: 0.5986616340603506
 INFO:root:Cross validation score for model GaussianNB: 0.9702109145198532
 
+// with fft but without abs
 INFO:root:Cross validation score for model RandomForestClassifier200: 0.9833457225028017
 INFO:root:Cross validation score for model RandomForestClassifier10: 0.9480633620004415
 INFO:root:Cross validation score for model MLPClassifier: 0.9953013331740085
