@@ -324,7 +324,14 @@ def filterDummyDataset(X, Y, X_test, Y_test):
 
 def filterDataset(X, Y, X_test, Y_test):
     classes_removed = [
-        # No classes need to be removed from self-collected dataset unless experimenting
+    # No classes need to be removed from self-collected dataset unless experimenting
+        'numbersix',
+        'salute',
+        'mermaid',
+        'swing',
+        'cowboy',
+        'IDLE',
+        'logout'
     ]
 
     del_idx = [ idx for idx, val in enumerate(Y) if val in classes_removed ]
