@@ -28,7 +28,7 @@ def extract_feature_vector(X):
     X_off = np.subtract(X_max, X_min)
     X_mad = robust.mad(X, axis=0)
     # extract frequency domain features
-    X_fft_abs = fft(X) #np.abs() if you want the absolute val of complex number
+    X_fft_abs = np.abs(fft(X)) #np.abs() if you want the absolute val of complex number
     X_fft_mean = np.mean(X_fft_abs, axis=0)
     X_fft_var = np.var(X_fft_abs, axis=0)
     X_fft_max = np.max(X_fft_abs, axis=0)
