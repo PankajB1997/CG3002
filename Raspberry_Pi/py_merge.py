@@ -24,6 +24,9 @@ from scipy.signal import savgol_filter
 from keras.models import load_model
 
 N = 64
+OVERLAP = 0
+EXTRACT_SIZE = int((1 - OVERLAP) * N)
+
 CONFIDENCE_THRESHOLD = 0.95
 WAIT = 3000 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
@@ -81,6 +84,8 @@ ENC_DICT = {
 CLASSLIST = [ pair[0] for pair in ENC_LIST ]
 
 danceMoveBuffer = []
+
+previousPacketData = []
 
 # Obtain best class from a given list of class probabilities for every prediction
 def onehot2str(onehot):
@@ -250,7 +255,7 @@ while (data_flag == False):
     except:
         traceback.print_exc()
         print("Error while reading the packet!")
-    
+
     print("Before " + str(wait_time))
     if int(round(time.time() * 1000)) - wait_time <= 65000:
         continue
@@ -261,10 +266,18 @@ while (data_flag == False):
 
     # print(otherData)
 
+    # Add overlapping logic
+    if len(previousPacketData) == N - EXTRACT_SIZE and not EXTRACT_SIZE == N:
+        rawData = previousPacketData + movementData[:EXTRACT_SIZE]
+        print("Overlap done")
+    else:
+        rawData = movementData
+        print("Overlap not done")
+
     # Add ML Logic
     # Precondition 1: dataArray has values for acc1[3], acc2[3], gyro[3], voltage[1], current[1], power[1] and energy[1] in that order
     # Precondition 2: dataArray has N sets of readings, where N is the segment size, hence it has dimensions N*13
-    danceMove, predictionConfidence = predict_dance_move(movementData)
+    danceMove, predictionConfidence = predict_dance_move(rawData)
 
     if predictionConfidence > CONFIDENCE_THRESHOLD:
        danceMoveBuffer.append(danceMove)
@@ -293,6 +306,12 @@ while (data_flag == False):
 
     if isMoveSent == False:
         print("System did not change state. Dance move is " + str(danceMove) + " with prediction confidence " + str(predictionConfidence) + " and move buffer size is " + str(len(danceMoveBuffer)) + ".")
+
+    # Add overlapping logic
+    if EXTRACT_SIZE >= 0 and EXTRACT_SIZE < N:
+        previousPacketData = movementData[EXTRACT_SIZE:]
+    else:
+        previousPacketData = []
 
     # isStateChanged = False
     # if move_state == 2 and not danceMove == "IDLE" and predictionConfidence >= CONFIDENCE_THRESHOLD:
