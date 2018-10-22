@@ -1,23 +1,44 @@
-The actual move chicken was predicted as sidestep with a prediction confidence of 0.5307811498641968.
-The actual move chicken was predicted as sidestep with a prediction confidence of 0.6827171444892883.
-The actual move chicken was predicted as sidestep with a prediction confidence of 0.993440568447113.
-The actual move chicken was predicted as sidestep with a prediction confidence of 0.9942038655281067.
-The actual move chicken was predicted as sidestep with a prediction confidence of 0.9987213015556335.
-The actual move sidestep was predicted as chicken with a prediction confidence of 0.9998667240142822.
+The actual move chicken was predicted as sidestep with a prediction confidence of 0.5041430592536926.
+The actual move chicken was predicted as sidestep with a prediction confidence of 0.7078129053115845.
+The actual move chicken was predicted as sidestep with a prediction confidence of 0.9734130501747131.
+The actual move chicken was predicted as turnclap with a prediction confidence of 0.9792675971984863.
+The actual move chicken was predicted as sidestep with a prediction confidence of 0.9877718687057495.
+The actual move chicken was predicted as sidestep with a prediction confidence of 0.9950215816497803.
+The actual move chicken was predicted as sidestep with a prediction confidence of 0.9989727735519409.
+The actual move chicken was predicted as turnclap with a prediction confidence of 1.0.
+The actual move number7 was predicted as wipers with a prediction confidence of 0.9766204357147217.
+The actual move number7 was predicted as wipers with a prediction confidence of 0.9998038411140442.
+The actual move number7 was predicted as wipers with a prediction confidence of 1.0.
+The actual move sidestep was predicted as chicken with a prediction confidence of 0.9999569654464722.
 The actual move sidestep was predicted as chicken with a prediction confidence of 1.0.
-The actual move turnclap was predicted as chicken with a prediction confidence of 0.6531157493591309.
-The actual move turnclap was predicted as chicken with a prediction confidence of 0.6637856960296631.
-The actual move turnclap was predicted as number7 with a prediction confidence of 0.6656151413917542.
-The actual move turnclap was predicted as chicken with a prediction confidence of 0.9050545692443848.
-The actual move turnclap was predicted as chicken with a prediction confidence of 0.9342504739761353.
-The actual move turnclap was predicted as number7 with a prediction confidence of 0.9381574392318726.
-The actual move turnclap was predicted as chicken with a prediction confidence of 0.9660550951957703.
-The actual move turnclap was predicted as chicken with a prediction confidence of 0.9671740531921387.
-The actual move turnclap was predicted as chicken with a prediction confidence of 0.9721567034721375.
-The actual move turnclap was predicted as number7 with a prediction confidence of 0.9904980063438416.
-The actual move turnclap was predicted as number7 with a prediction confidence of 0.9962064027786255.
-The actual move turnclap was predicted as number7 with a prediction confidence of 1.0.
+The actual move turnclap was predicted as chicken with a prediction confidence of 0.5249125957489014.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.6113958358764648.
+The actual move turnclap was predicted as chicken with a prediction confidence of 0.658245861530304.
+The actual move turnclap was predicted as sidestep with a prediction confidence of 0.6600863933563232.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.6700076460838318.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.7415092587471008.
+The actual move turnclap was predicted as chicken with a prediction confidence of 0.7605507373809814.
+The actual move turnclap was predicted as chicken with a prediction confidence of 0.761211633682251.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.7676061391830444.
+The actual move turnclap was predicted as chicken with a prediction confidence of 0.8133845925331116.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.8253231048583984.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.8310723304748535.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.8584256768226624.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.8712220191955566.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.8953121304512024.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.8987112045288086.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.9299216866493225.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.9347620606422424.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.9353122711181641.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.9463356733322144.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.961064338684082.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.9880523681640625.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.9960689544677734.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.998551070690155.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.9999613761901855.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.9999656677246094.
+The actual move turnclap was predicted as number7 with a prediction confidence of 0.9999902248382568.
 
-Total mistakes made with 95.0% confidence or more: 11
-Total mistakes made overall: 19
+Total mistakes made with 95.0% confidence or more: 18
+Total mistakes made overall: 40
 Total number of test cases: 5359

@@ -50,12 +50,12 @@ MODEL_UNIQUE_IDS = {
     1: 'RandomForestClassifier10',
     2: 'MLPClassifier',
     3: 'LinearSVC',
-    4: 'KNeighborsClassifier',
-    5: 'GammaSVC',
-    6: 'DecisionTreeClassifier',
-    7: 'AdaBoostClassifier',
-    8: 'GaussianNB',
-    9: 'QuadraticDiscriminantAnalysis'
+    # 4: 'KNeighborsClassifier',
+    # 5: 'GammaSVC',
+    # 6: 'DecisionTreeClassifier',
+    # 7: 'AdaBoostClassifier',
+    # 8: 'GaussianNB',
+    # 9: 'QuadraticDiscriminantAnalysis'
 }
 
 CONFIDENCE_THRESHOLD = 0.95
