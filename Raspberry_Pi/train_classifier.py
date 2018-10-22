@@ -233,12 +233,12 @@ def initialiseModel(model_index):
         RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
         MLPClassifier(alpha=1),
         SVC(kernel="linear", C=0.025),
-        KNeighborsClassifier(5),
-        SVC(gamma=2, C=1),
-        DecisionTreeClassifier(max_depth=5),
-        AdaBoostClassifier(),
-        GaussianNB(),
-        QuadraticDiscriminantAnalysis(),
+        # KNeighborsClassifier(5),
+        # SVC(gamma=2, C=1),
+        # DecisionTreeClassifier(max_depth=5),
+        # AdaBoostClassifier(),
+        # GaussianNB(),
+        # QuadraticDiscriminantAnalysis(),
     ]
     return classifiers[model_index]
 
@@ -247,7 +247,7 @@ def fitModel(X, Y):
     models = []
     scores = []
 
-    for i in range(0, 10):
+    for i in range(0, 4):
         model = initialiseModel(i)
         accuracy_scores = cross_val_score(model, X, Y, cv=10, scoring="accuracy", n_jobs=-1)
         scores.append(accuracy_scores.mean())
