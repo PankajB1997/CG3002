@@ -134,11 +134,16 @@ def extract_feature_vector(X):
     X_min = np.min(X, axis=0)
     X_off = np.subtract(X_max, X_min)
     X_mad = robust.mad(X, axis=0)
-    # extract frequency domain features - unused for now
-    X_psd = []
-    X_peakF = []
+    # extract frequency domain features
+    X_fft_abs = np.abs(fft(X)) #np.abs() if you want the absolute val of complex number
+    X_fft_mean = np.mean(X_fft_abs, axis=0)
+    X_fft_var = np.var(X_fft_abs, axis=0)
+    X_fft_max = np.max(X_fft_abs, axis=0)
+    X_fft_min = np.min(X_fft_abs, axis=0)
+    # X_psd = []
+    # X_peakF = []
     # obtain feature vector by appending all vectors above as one d-dimension feature vector
-    X = np.append(X_mean, [X_var, X_max, X_min, X_off, X_mad])
+    X = np.append(X_mean, [X_var, X_max, X_min, X_off, X_mad, X_fft_mean, X_fft_var, X_fft_max, X_fft_min])
     return standard_scaler.transform([X])
 
 def predict_dance_move(segment):
