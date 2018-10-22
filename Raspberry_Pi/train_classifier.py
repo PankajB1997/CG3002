@@ -145,6 +145,8 @@ def calculatePerformanceMetrics(Y_pred, Y_true, dataset_type):
     assert len(Y_pred) == len(Y_true)
 
     num_incorrect = len(Y_true) - accuracy_score(Y_true, Y_pred, normalize=False)
+    logger.info(len(Y_true))
+    logger.info(accuracy_score(Y_true, Y_pred, normalize=False))
     accuracy = accuracy_score(Y_true, Y_pred)
     metrics = precision_recall_f1(Y_pred, Y_true, CLASSLIST)
     # micro_macro_weighted_scores = micro_macro_weighted(Y_pred, Y_true)
