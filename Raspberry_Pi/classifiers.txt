@@ -1,0 +1,32 @@
+// without fft
+INFO:root:Cross validation score for model RandomForestClassifier200: 0.9851108106362517
+INFO:root:Cross validation score for model RandomForestClassifier10: 0.9549337206667883
+INFO:root:Cross validation score for model MLPClassifier: 0.994319386564803
+INFO:root:Cross validation score for model LinearSVC: 0.9947134665969009
+INFO:root:Cross validation score for model KNeighborsClassifier: 0.9966735030719143
+INFO:root:Cross validation score for model GammaSVC: 0.6232344212572449
+INFO:root:Cross validation score for model DecisionTreeClassifier: 0.9349511128935681
+INFO:root:Cross validation score for model AdaBoostClassifier: 0.5986616340603506
+INFO:root:Cross validation score for model GaussianNB: 0.9702109145198532
+
+// with fft but without abs
+INFO:root:Cross validation score for model RandomForestClassifier200: 0.9833457225028017
+INFO:root:Cross validation score for model RandomForestClassifier10: 0.9480633620004415
+INFO:root:Cross validation score for model MLPClassifier: 0.9953013331740085
+INFO:root:Cross validation score for model LinearSVC: 0.9955001007061064
+INFO:root:Cross validation score for model KNeighborsClassifier: 0.9970656659656152
+INFO:root:Cross validation score for model GammaSVC: 0.45023743162960095
+INFO:root:Cross validation score for model DecisionTreeClassifier: 0.9331867680929878
+INFO:root:Cross validation score for model AdaBoostClassifier: 0.6259283042952124
+INFO:root:Cross validation score for model GaussianNB: 0.960412577430402
+
+// with fft with abs
+INFO:root:Cross validation score for model RandomForestClassifier200: 0.9770814318702188
+INFO:root:Cross validation score for model RandomForestClassifier10: 0.9304423860002154
+INFO:root:Cross validation score for model MLPClassifier: 0.9951056294906018
+INFO:root:Cross validation score for model LinearSVC: 0.9955035542480826
+INFO:root:Cross validation score for model KNeighborsClassifier: 0.996870353465615
+INFO:root:Cross validation score for model GammaSVC: 0.426519995236336
+INFO:root:Cross validation score for model DecisionTreeClassifier: 0.933775384183283
+INFO:root:Cross validation score for model AdaBoostClassifier: 0.6424171838931704
+INFO:root:Cross validation score for model GaussianNB: 0.966102001421547
