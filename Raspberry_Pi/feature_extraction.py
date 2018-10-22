@@ -28,12 +28,13 @@ def extract_feature_vector(X):
     X_off = np.subtract(X_max, X_min)
     X_mad = robust.mad(X, axis=0)
     # extract frequency domain features
-    X_fft_mean = np.mean(rfft(X), axis=0)
-    X_fft_var = np.var(rfft(X), axis=0)
-    X_fft_max = np.max(rfft(X), axis=0)
-    X_fft_min = np.min(rfft(X), axis=0)
+    # X_fft_abs = np.abs(fft(X))
+    # X_fft_mean = np.mean(X_fft_abs, axis=0)
+    # X_fft_var = np.var(X_fft_abs, axis=0)
+    # X_fft_max = np.max(X_fft_abs, axis=0)
+    # X_fft_min = np.min(X_fft_abs, axis=0)
     # logger.info("hello ")
-    # logger.info(X_fft)
+    # logger.info(X)
 
     # X_psd = np.mean(periodogram(X))
     # logger.info("hello ")
@@ -41,7 +42,8 @@ def extract_feature_vector(X):
 
     X_peakF = []
     # return feature vector by appending all vectors above as one d-dimension feature vector
-    return np.append(X_mean, [X_var, X_max, X_min, X_off, X_mad, X_fft_mean, X_fft_var, X_fft_max, X_fft_min])
+    return np.append(X_mean, [X_var, X_max, X_min, X_off, X_mad])
+    # , X_fft_mean, X_fft_var, X_fft_max, X_fft_min
 
 # segment data from the raw data files, return list of tuples (segments, move_class)
 # where every tuple represents raw data for that segment and the move_class for that segment
@@ -78,7 +80,8 @@ if __name__ == "__main__":
         segments = get_all_segments(raw_data[move], move, scaler)
         for segment in segments:
             X = extract_feature_vector(segment)
-            logger.info(move + " " + str(X))
+            logger.info(move)
+            logger.info("\n" + str(X))
             data.append((X, move))
     X, Y = zip(*data)
     X_train, X_val, Y_train, Y_val = train_test_split(X, Y, test_size=0.2, random_state=42, shuffle=True, stratify=Y)
