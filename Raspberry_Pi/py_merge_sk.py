@@ -260,7 +260,7 @@ while (data_flag == False):
         for i in range(N): # extract from 0->N-1 = N sets of readings
             data = readLineCR(port).split(',')
             data = [ float(val.strip()) for val in data ]
-            movementData.append(data[:9]) # extract acc1[3], acc2[3] and gyro[3] values
+            movementData.append(data[:6]) # extract acc1[3], and acc2[3] values
             otherData.append(data[9:]) # extract voltage, current, power and cumulativepower
     except:
         traceback.print_exc()

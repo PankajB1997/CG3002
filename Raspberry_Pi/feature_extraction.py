@@ -49,6 +49,7 @@ def extract_feature_vector(X):
 # where every tuple represents raw data for that segment and the move_class for that segment
 def get_all_segments(raw_data, move_class, scaler):
     # preprocess data
+    raw_data = [ data[:6] for data in raw_data ]
     raw_data = savgol_filter(raw_data, 3, 2)
     raw_data = highpass(raw_data, 3, 50)
     raw_data = scaler.transform(raw_data)
@@ -73,6 +74,7 @@ if __name__ == "__main__":
     raw_data_all = []
     for move in raw_data:
         raw_data_all.extend(raw_data[move])
+    raw_data_all = [ data[:6] for data in raw_data_all ]
     scaler.fit(raw_data_all)
     pickle.dump(scaler, open(os.path.join('scaler', 'min_max_scaler.pkl'), 'wb'))
     data = []

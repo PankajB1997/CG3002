@@ -1,4 +1,0 @@
-timestamp,action,goal,time_delta,correct,voltage,current,power,cumpower
-1539588721.865307,None,sidestep,60.015573263168335,False,0,0,0,0
-1539588781.9417999,None,sidestep,60.00188636779785,False,0,0,0,0
-1539588841.9861102,None,number7,60.00180745124817,False,0,0,0,0
