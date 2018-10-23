@@ -28,7 +28,7 @@ OVERLAP = 0
 EXTRACT_SIZE = int((1 - OVERLAP) * N)
 
 CONFIDENCE_THRESHOLD = 0.95
-WAIT = 3000 # in milliseconds
+WAIT = 2500 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
 
 secret_key = "1234123412341234"  #must be at least 16
@@ -262,7 +262,7 @@ while (data_flag == False):
         print("Error while reading the packet!")
 
     print("Before " + str(wait_time))
-    if int(round(time.time() * 1000)) - wait_time <= 65000:
+    if int(round(time.time() * 1000)) - wait_time <= 62500:
         continue
     print("After " + str(wait_time))
 
