@@ -16,7 +16,7 @@ DATASET_FILEPATH = "dataset"
 
 # Default: 64 sets per segment with 50% overlap
 SEGMENT_SIZE = 64
-OVERLAP = 0.5
+OVERLAP = 0
 
 # for every segment of data, extract the feature vector
 def extract_feature_vector(X):

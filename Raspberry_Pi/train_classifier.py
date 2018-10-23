@@ -19,6 +19,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from sklearn.multiclass import OneVsRestClassifier
 
 # initialise logger
 logging.basicConfig(level=logging.INFO)
@@ -34,12 +35,14 @@ CG3002_FILEPATH = os.path.join('/', 'CG3002')
 1: RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
 2: MLPClassifier(alpha=1),
 3: SVC(kernel="linear", C=0.025),
-4: KNeighborsClassifier(3),
-5: SVC(gamma=2, C=1),
-6: DecisionTreeClassifier(max_depth=5),
-7: AdaBoostClassifier(),
-8: GaussianNB(),
-9: QuadraticDiscriminantAnalysis()
+4: OneVsRestClassifier(estimator = MLPClassifier()),
+5: OneVsRestClassifier(estimator = SVC(kernel="linear", C=0.025)),
+6: KNeighborsClassifier(3),
+7: SVC(gamma=2, C=1),
+8: DecisionTreeClassifier(max_depth=5),
+9: AdaBoostClassifier(),
+10: GaussianNB(),
+11: QuadraticDiscriminantAnalysis()
 '''
 
 # set probability threshold for multibucketing
@@ -50,12 +53,14 @@ MODEL_UNIQUE_IDS = {
     1: 'RandomForestClassifier10',
     2: 'MLPClassifier',
     3: 'LinearSVC',
-    # 4: 'KNeighborsClassifier',
-    # 5: 'GammaSVC',
-    # 6: 'DecisionTreeClassifier',
-    # 7: 'AdaBoostClassifier',
-    # 8: 'GaussianNB',
-    # 9: 'QuadraticDiscriminantAnalysis'
+    4: 'OneVsRestClassifierMLP',
+    5: 'OneVsRestClassifierSVC',
+    # 6: KNeighborsClassifier(3),
+    # 7: SVC(gamma=2, C=1),
+    # 8: DecisionTreeClassifier(max_depth=5),
+    # 9: AdaBoostClassifier(),
+    # 10: GaussianNB(),
+    # 11: QuadraticDiscriminantAnalysis()
 }
 
 CONFIDENCE_THRESHOLD = 0.95
@@ -233,6 +238,8 @@ def initialiseModel(model_index):
         RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
         MLPClassifier(alpha=1),
         SVC(kernel="linear", C=0.025),
+        OneVsRestClassifier(estimator = MLPClassifier()),
+        OneVsRestClassifier(estimator = SVC(kernel="linear", C=0.025)),
         # KNeighborsClassifier(5),
         # SVC(gamma=2, C=1),
         # DecisionTreeClassifier(max_depth=5),
@@ -247,7 +254,7 @@ def fitModel(X, Y):
     models = []
     scores = []
 
-    for i in range(0, 4):
+    for i in range(0, 6):
         model = initialiseModel(i)
         accuracy_scores = cross_val_score(model, X, Y, cv=10, scoring="accuracy", n_jobs=-1)
         scores.append(accuracy_scores.mean())
@@ -266,61 +273,6 @@ def fitModel(X, Y):
     logger.info("Best model is " + str(MODEL_UNIQUE_IDS[max_index]) + " with accuracy of " + str(max_accuracy_score))
 
     return models[max_index]
-
-def loadDataset(X_PATH, Y_PATH):
-    X = []
-    Y = []
-    with open(X_PATH) as x_file:
-        for input in x_file:
-            X.append(list(map(float, input[:-1].split(" "))))
-    with open(Y_PATH) as y_file:
-        for input in y_file:
-            Y.append(ENC_DICT[int(input) - 1])
-    classes_removed = [
-        # 'WALKING',
-        # 'WALKING_UPSTAIRS',
-        # 'WALKING_DOWNSTAIRS',
-        # 'SITTING',
-        # 'STANDING',
-        # 'LAYING',
-        'STAND_TO_SIT',
-        'SIT_TO_STAND',
-        'SIT_TO_LIE',
-        'LIE_TO_SIT',
-        'STAND_TO_LIE',
-        'LIE_TO_STAND'
-    ]
-
-    del_idx = [ idx for idx, val in enumerate(Y) if val in classes_removed ]
-    X = np.delete(X, del_idx, axis=0)
-    Y = np.delete(Y, del_idx)
-    return X, Y
-
-def filterDummyDataset(X, Y, X_test, Y_test):
-    classes_removed = [
-        # 'WALKING',
-        # 'WALKING_UPSTAIRS',
-        # 'WALKING_DOWNSTAIRS',
-        # 'SITTING',
-        # 'STANDING',
-        # 'LAYING',
-        'STAND_TO_SIT',
-        'SIT_TO_STAND',
-        'SIT_TO_LIE',
-        'LIE_TO_SIT',
-        'STAND_TO_LIE',
-        'LIE_TO_STAND'
-    ]
-
-    del_idx = [ idx for idx, val in enumerate(Y) if val in classes_removed ]
-    X = np.delete(X, del_idx, axis=0)
-    Y = np.delete(Y, del_idx)
-
-    del_idx = [ idx for idx, val in enumerate(Y_test) if val in classes_removed ]
-    X_test = np.delete(X_test, del_idx, axis=0)
-    Y_test = np.delete(Y_test, del_idx)
-
-    return X, Y, X_test, Y_test
 
 def filterDataset(X, Y, X_test, Y_test):
     classes_removed = [
@@ -344,12 +296,6 @@ def filterDataset(X, Y, X_test, Y_test):
 
     return X, Y, X_test, Y_test
 
-X_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi/dummy_dataset/Train/X_train.txt")
-Y_TRAIN_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi/dummy_dataset/Train/y_train.txt")
-X_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi/dummy_dataset/Test/X_test.txt")
-Y_TEST_TXT_PATH = os.path.join(CG3002_FILEPATH, "Raspberry_Pi/dummy_dataset/Test/y_test.txt")
-
-DUMMY_DATASET_FILEPATH = "dummy_dataset/RawData_ByMove/"
 TRAIN_DATASET_PATH = "dataset/train.pkl"
 TEST_DATASET_PATH = "dataset/test.pkl"
 
@@ -361,16 +307,7 @@ if __name__ == "__main__":
     scaler = StandardScaler()
     # scaler = MinMaxScaler((-1,1))
 
-    # # 1. Use Dummy dataset's provided training and testing set
-    # X, Y = loadDataset(X_TRAIN_TXT_PATH, Y_TRAIN_TXT_PATH)
-    # X_test, Y_test = loadDataset(X_TEST_TXT_PATH, Y_TEST_TXT_PATH)
-
-    # # 2. Use the dataset prepared from Dummy dataset's raw data values
-    # X, Y = pickle.load(open(DUMMY_DATASET_FILEPATH + 'train.pkl', 'rb'))
-    # X_test, Y_test = pickle.load(open(DUMMY_DATASET_FILEPATH + 'test.pkl', 'rb'))
-    # X, Y, X_test, Y_test = filterDummyDataset(X, Y, X_test, Y_test)
-
-    # 3. Use the dataset prepared from self-collected dataset's raw data values
+    # Use the dataset prepared from self-collected dataset's raw data values
     X, Y = pickle.load(open(TRAIN_DATASET_PATH, 'rb'))
     X_test, Y_test = pickle.load(open(TEST_DATASET_PATH, 'rb'))
     X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)

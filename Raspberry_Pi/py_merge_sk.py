@@ -111,7 +111,7 @@ def str2onehot(Y):
 try:
     # Load model from pickle/hdf5 file
     # model = load_model(os.path.join('nn_models', 'nn_model.hdf5'))
-    model = pickle.load(open(os.path.join('classifier_models', 'model_MLPClassifier.pkl'), 'rb'))
+    model = pickle.load(open(os.path.join('classifier_models', 'model_LinearSVC.pkl'), 'rb'))
 except:
     traceback.print_exc()
     print("Error in loading pretrained model!")
