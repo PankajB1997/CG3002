@@ -257,7 +257,7 @@ while (data_flag == False):
         print("Error while reading the packet!")
 
     print("Before " + str(wait_time))
-    if int(round(time.time() * 1000)) - wait_time <= 65000:
+    if int(round(time.time() * 1000)) - wait_time <= 62500:
         continue
     print("After " + str(wait_time))
 
@@ -296,6 +296,7 @@ while (data_flag == False):
                 output = danceMove # with logout command, no other values are sent
             # Send output to server
             sendToServer(s, output)
+            print(rawData)
             print("Sent to server: " + str(output) + ".")
             danceMoveBuffer = []
             stoptime = int(round(time.time() * 1000))

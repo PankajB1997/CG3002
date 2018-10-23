@@ -21,14 +21,15 @@ import logging
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, QuantileTransformer, Normalizer
 from obspy.signal.filter import highpass
 from scipy.signal import savgol_filter
+from scipy.fftpack import fft, ifft, rfft
 # from keras.models import load_model
 
 N = 64
 OVERLAP = 0
 EXTRACT_SIZE = int((1 - OVERLAP) * N)
 
-CONFIDENCE_THRESHOLD = 0.95
-WAIT = 2500 # in milliseconds
+CONFIDENCE_THRESHOLD = 0.85
+WAIT = 2000 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
 
 secret_key = "1234123412341234"  #must be at least 16
@@ -128,35 +129,39 @@ except:
 
 # for every segment of data (128 sets per segment with 0% overlap for now), extract the feature vector
 def extract_feature_vector(X):
-    # preprocess data
-    X = savgol_filter(X, 3, 2)
-    X = highpass(X, 3, 50)
-    X = min_max_scaler.transform(X)
-    # extract time domain features
-    X_mean = np.mean(X, axis=0)
-    X_var = np.var(X, axis=0)
-    X_max = np.max(X, axis=0)
-    X_min = np.min(X, axis=0)
-    X_off = np.subtract(X_max, X_min)
-    X_mad = robust.mad(X, axis=0)
-    # extract frequency domain features
-    X_fft_abs = np.abs(fft(X)) #np.abs() if you want the absolute val of complex number
-    X_fft_mean = np.mean(X_fft_abs, axis=0)
-    X_fft_var = np.var(X_fft_abs, axis=0)
-    X_fft_max = np.max(X_fft_abs, axis=0)
-    X_fft_min = np.min(X_fft_abs, axis=0)
-    # X_psd = []
-    # X_peakF = []
-    # obtain feature vector by appending all vectors above as one d-dimension feature vector
-    X = np.append(X_mean, [X_var, X_max, X_min, X_off, X_mad, X_fft_mean, X_fft_var, X_fft_max, X_fft_min])
-    return standard_scaler.transform([X])
+    try:
+        # preprocess data
+        X = savgol_filter(X, 3, 2)
+        X = highpass(X, 3, 50)
+        X = min_max_scaler.transform(X)
+        # extract time domain features
+        X_mean = np.mean(X, axis=0)
+        X_var = np.var(X, axis=0)
+        X_max = np.max(X, axis=0)
+        X_min = np.min(X, axis=0)
+        X_off = np.subtract(X_max, X_min)
+        X_mad = robust.mad(X, axis=0)
+        # extract frequency domain features
+        X_fft_abs = np.abs(fft(X)) #np.abs() if you want the absolute val of complex number
+        X_fft_mean = np.mean(X_fft_abs, axis=0)
+        X_fft_var = np.var(X_fft_abs, axis=0)
+        X_fft_max = np.max(X_fft_abs, axis=0)
+        X_fft_min = np.min(X_fft_abs, axis=0)
+        # X_psd = []
+        # X_peakF = []
+        # obtain feature vector by appending all vectors above as one d-dimension feature vector
+        X = np.append(X_mean, [X_var, X_max, X_min, X_off, X_mad, X_fft_mean, X_fft_var, X_fft_max, X_fft_min])
+        return standard_scaler.transform([X])
+    except:
+        traceback.print_exc()
+        print("Error in extracting features!")
 
 def predict_dance_move(segment):
     X = extract_feature_vector(segment)
     Y = model.predict(X)
-    print(Y)
+    probs = model.predict_proba(X)
     # return model.predict(X).tolist()[0]
-    return onehot2str(Y)[0], max(Y[0])
+    return Y[0], max(probs[0])
 
 def readLineCR(port):
     rv = ""
@@ -259,11 +264,11 @@ while (data_flag == False):
             otherData.append(data[9:]) # extract voltage, current, power and cumulativepower
     except:
         traceback.print_exc()
-        print("Error while reading the packet!")
+        print("Error in reading packet!")
 
     print("Before " + str(wait_time))
     if int(round(time.time() * 1000)) - wait_time <= 62500:
-        continue
+       continue
     print("After " + str(wait_time))
 
     if int(round(time.time() * 1000)) - stoptime <= WAIT:
@@ -279,6 +284,8 @@ while (data_flag == False):
         rawData = movementData
         print("Overlap not done")
 
+    print(movementData)
+    continue
     # Add ML Logic
     # Precondition 1: dataArray has values for acc1[3], acc2[3], gyro[3], voltage[1], current[1], power[1] and energy[1] in that order
     # Precondition 2: dataArray has N sets of readings, where N is the segment size, hence it has dimensions N*13
@@ -293,9 +300,9 @@ while (data_flag == False):
         try:
             otherData = np.mean(otherData, axis=0).tolist()
             voltage = otherData[0]
-            current = otherData[1]/1000.0
-            power = otherData[2]/1000.0
-            energy = otherData[3]
+            current = otherData[1]
+            power = otherData[2]
+            energy = otherData[3]*1000.0 # to maintain energy in joules
             output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
             if danceMove == "logout":
                 output = danceMove # with logout command, no other values are sent
