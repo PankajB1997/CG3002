@@ -1,4 +1,0 @@
-timestamp,action,goal,time_delta,correct,voltage,current,power,cumpower
-1540285902.3197463,number7,chicken,37.84207630157471,False,5.21,2.57,13.43,1182.81
-1540285908.427907,turnclap,turnclap,6.10018253326416,True,5.13,2.53,12.97,1262.66
-1540285936.232064,number7,chicken,27.799169063568115,False,5.34,2.63,14.04,1625.0
