@@ -28,6 +28,7 @@ logger.setLevel(logging.INFO)
 
 CG3002_FILEPATH = os.path.join('/', 'CG3002')
 # "\\Users\\pankaj\\Documents\\CG3002"
+# "/Users/bryanlee/CG3002"
 
 # set constant flag for which classifier to use
 '''
@@ -98,25 +99,25 @@ ENC_DICT = {
 CLASSLIST = [ pair[0] for pair in ENC_LIST ]
 
 # Obtain best class from a given list of class probabilities for every prediction
-def onehot2str(onehot):
-       enc_dict = dict([(i[1],i[0]) for i in ENC_LIST])
-       idx_list = np.argmax(onehot, axis=1).tolist()
-       result_str = []
-       for i in idx_list:
-               result_str.append(enc_dict[i])
-       return np.asarray(result_str)
+# def onehot2str(onehot):
+#        enc_dict = dict([(i[1],i[0]) for i in ENC_LIST])
+#        idx_list = np.argmax(onehot, axis=1).tolist()
+#        result_str = []
+#        for i in idx_list:
+#                result_str.append(enc_dict[i])
+#        return np.asarray(result_str)
 
 # Convert a class to its corresponding one hot vector
-def str2onehot(Y):
-   enc_dict = dict(ENC_LIST)
-   new_Y = []
-   for y in Y:
-       vec = np.zeros((1,len(ENC_LIST)),dtype='float64')
-       vec[ 0, enc_dict[y] ] = 1.
-       new_Y.append(vec)
-   del Y
-   new_Y = np.vstack(new_Y)
-   return new_Y
+# def str2onehot(Y):
+#    enc_dict = dict(ENC_LIST)
+#    new_Y = []
+#    for y in Y:
+#        vec = np.zeros((1,len(ENC_LIST)),dtype='float64')
+#        vec[ 0, enc_dict[y] ] = 1.
+#        new_Y.append(vec)
+#    del Y
+#    new_Y = np.vstack(new_Y)
+#    return new_Y
 
 # Computes precision, recall and F1 scores for every class
 def precision_recall_f1(Y_pred, Y_test, classlist):
@@ -270,9 +271,9 @@ def fitModel(X, Y):
         if scores[i] > max_accuracy_score:
             max_accuracy_score = scores[i]
             max_index = i
-    logger.info("Best model is " + str(MODEL_UNIQUE_IDS[max_index]) + " with accuracy of " + str(max_accuracy_score))
+    logger.info("Best model is " + str(MODEL_UNIQUE_IDS[3]) + " with accuracy of " + str(max_accuracy_score))
 
-    return models[max_index]
+    return models[0]
 
 def filterDataset(X, Y, X_test, Y_test):
     classes_removed = [
@@ -330,6 +331,7 @@ if __name__ == "__main__":
     # X_val, X_test, Y_val, Y_test = train_test_split(X_test, Y_test, test_size=0.5, random_state=42, shuffle=True, stratify=Y_test)
 
     model = fitModel(X, Y)
+    logger.info(model)
 
     logger.info("Predicting...")
     train_pred = model.predict(X)
