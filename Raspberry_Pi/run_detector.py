@@ -158,11 +158,15 @@ def extract_feature_vector(X):
         print("Error in extracting features!")
 
 def predict_dance_move(segment):
-    X = extract_feature_vector(segment)
-    Y = model.predict(X)
-    probs = model.predict_proba(X)
-    # return model.predict(X).tolist()[0]
-    return Y[0], max(probs[0])
+    try:
+        X = extract_feature_vector(segment)
+        Y = model.predict(X)
+        probs = model.predict_proba(X)
+        # return model.predict(X).tolist()[0]
+        return Y[0], max(probs[0])
+    except:
+        traceback.print_exc()
+        print("Error in predicting dance move!")
 
 def readLineCR(port):
     rv = ""
@@ -266,6 +270,7 @@ while (data_flag == False):
     except:
         traceback.print_exc()
         print("Error in reading packet!")
+        continue
 
     print("Before " + str(wait_time))
     if int(round(time.time() * 1000)) - wait_time <= INITIAL_WAIT:
@@ -275,7 +280,7 @@ while (data_flag == False):
     if int(round(time.time() * 1000)) - stoptime <= WAIT:
         continue
 
-    # print(otherData)
+    print(otherData)
 
     # Add overlapping logic
     if len(previousPacketData) == N - EXTRACT_SIZE and not EXTRACT_SIZE == N:
@@ -288,11 +293,15 @@ while (data_flag == False):
     # Add ML Logic
     # Precondition 1: dataArray has values for acc1[3], acc2[3], gyro[3], voltage[1], current[1], power[1] and energy[1] in that order
     # Precondition 2: dataArray has N sets of readings, where N is the segment size, hence it has dimensions N*13
-    danceMove, predictionConfidence = predict_dance_move(movementData)
-
-    if predictionConfidence > CONFIDENCE_THRESHOLD:
-       danceMoveBuffer.append(danceMove)
-    print(danceMoveBuffer)
+    try:
+        danceMove, predictionConfidence = predict_dance_move(movementData)
+        if predictionConfidence > CONFIDENCE_THRESHOLD:
+            danceMoveBuffer.append(danceMove)
+        print(danceMoveBuffer)
+    except:
+        traceback.print_exc()
+        print("Error in prediction!")
+        continue
 
     isMoveSent = False
     if len(danceMoveBuffer) >= MOVE_BUFFER_MIN_SIZE and lastXDanceMovesSame(danceMoveBuffer) == True:
@@ -301,7 +310,7 @@ while (data_flag == False):
             voltage = otherData[0]
             current = otherData[1]
             power = otherData[2]
-            energy = otherData[3]*1000.0 # to maintain energy in joules
+            energy = otherData[3]
             output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
             if danceMove == "logout":
                 output = danceMove # with logout command, no other values are sent
@@ -314,6 +323,7 @@ while (data_flag == False):
         except:
             traceback.print_exc()
             print("Error in sending dance move to the server!")
+            continue
 
     if isMoveSent == False:
         print("System did not change state. Dance move is " + str(danceMove) + " with prediction confidence " + str(predictionConfidence) + " and move buffer size is " + str(len(danceMoveBuffer)) + ".")
