@@ -27,8 +27,9 @@ N = 64
 OVERLAP = 0
 EXTRACT_SIZE = int((1 - OVERLAP) * N)
 
-CONFIDENCE_THRESHOLD = 0.95
-WAIT = 2500 # in milliseconds
+CONFIDENCE_THRESHOLD = 0.85
+INITIAL_WAIT = 62500
+WAIT = 2000 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
 
 secret_key = "1234123412341234"  #must be at least 16
@@ -255,7 +256,7 @@ while (data_flag == False):
         for i in range(N): # extract from 0->N-1 = N sets of readings
             data = readLineCR(port).split(',')
             data = [ float(val.strip()) for val in data ]
-            movementData.append(data[:6]) # extract acc1[3], and acc2[3] values
+            movementData.append(data[:9]) # extract acc1[3], and acc2[3] values
             otherData.append(data[9:]) # extract voltage, current, power and cumulativepower
     except:
         traceback.print_exc()
@@ -293,9 +294,9 @@ while (data_flag == False):
         try:
             otherData = np.mean(otherData, axis=0).tolist()
             voltage = otherData[0]
-            current = otherData[1]/1000.0
-            power = otherData[2]/1000.0
-            energy = otherData[3]
+            current = otherData[1]
+            power = otherData[2]
+            energy = otherData[3]*1000.0
             output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
             if danceMove == "logout":
                 output = danceMove # with logout command, no other values are sent
