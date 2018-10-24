@@ -14,7 +14,7 @@ from sklearn.datasets.samples_generator import make_blobs
 
 from pandas.tools.plotting import parallel_coordinates
 
-# initialise logger
+# initialise logger test
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
