@@ -264,9 +264,11 @@ while (data_flag == False):
     try:
         for i in range(N): # extract from 0->N-1 = N sets of readings
             data = readLineCR(port).split(',')
+            if not len(data) == 13:
+               continue
             data = [ float(val.strip()) for val in data ]
             movementData.append(data[:9]) # extract acc1[3], and acc2[3] values
-            otherData.append(data[9:]) # extract voltage, current, power and cumulativepower
+            otherData.append(data[9:]) # extract voltage, current, power and cumulative power
     except:
         traceback.print_exc()
         print("Error in reading packet!")
@@ -280,7 +282,7 @@ while (data_flag == False):
     if int(round(time.time() * 1000)) - stoptime <= WAIT:
         continue
 
-    print(otherData)
+    # print(otherData)
 
     # Add overlapping logic
     if len(previousPacketData) == N - EXTRACT_SIZE and not EXTRACT_SIZE == N:
