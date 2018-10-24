@@ -263,7 +263,7 @@ while (data_flag == False):
         print("Error while reading the packet!")
 
     print("Before " + str(wait_time))
-    if int(round(time.time() * 1000)) - wait_time <= 62500:
+    if int(round(time.time() * 1000)) - wait_time <= INITIAL_WAIT:
         continue
     print("After " + str(wait_time))
 
