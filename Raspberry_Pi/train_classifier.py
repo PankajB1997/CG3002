@@ -32,12 +32,12 @@ CG3002_FILEPATH = os.path.join('/', 'CG3002')
 
 # set constant flag for which classifier to use
 '''
-0: RandomForestClassifier(max_depth=5, n_estimators=200, max_features=1),
-1: RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
-2: MLPClassifier(alpha=1),
-3: SVC(kernel="linear", C=0.025),
-4: OneVsRestClassifier(estimator = MLPClassifier()),
-5: OneVsRestClassifier(estimator = SVC(kernel="linear", C=0.025)),
+0: OneVsRestClassifier(estimator = MLPClassifier()),
+1: OneVsRestClassifier(estimator = SVC(kernel="linear", C=0.025)),
+2: RandomForestClassifier(max_depth=5, n_estimators=200, max_features=1),
+3: RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
+4: MLPClassifier(alpha=1),
+5: SVC(kernel="linear", C=0.025),
 6: KNeighborsClassifier(3),
 7: SVC(gamma=2, C=1),
 8: DecisionTreeClassifier(max_depth=5),
@@ -50,12 +50,12 @@ CG3002_FILEPATH = os.path.join('/', 'CG3002')
 # PROB_THRESHOLD = 0.20
 
 MODEL_UNIQUE_IDS = {
-    0: 'RandomForestClassifier200',
-    1: 'RandomForestClassifier10',
-    2: 'MLPClassifier',
-    3: 'LinearSVC',
-    4: 'OneVsRestClassifierMLP',
-    5: 'OneVsRestClassifierSVC',
+    0: 'OneVsRestClassifierMLP',
+    1: 'OneVsRestClassifierSVC',
+    2: 'RandomForestClassifier200',
+    3: 'RandomForestClassifier10',
+    4: 'MLPClassifier',
+    5: 'LinearSVC',
     # 6: KNeighborsClassifier(3),
     # 7: SVC(gamma=2, C=1),
     # 8: DecisionTreeClassifier(max_depth=5),
@@ -235,12 +235,12 @@ def writeDatasetToExcel(X, y, filepath):
 # Initialise neural network model using classifier
 def initialiseModel(model_index):
     classifiers = [
+        OneVsRestClassifier(estimator = MLPClassifier()),
+        OneVsRestClassifier(estimator = SVC(kernel="linear", C=0.025)),
         RandomForestClassifier(max_depth=5, n_estimators=200, max_features=1),
         RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
         MLPClassifier(alpha=1),
         SVC(kernel="linear", C=0.025),
-        OneVsRestClassifier(estimator = MLPClassifier()),
-        OneVsRestClassifier(estimator = SVC(kernel="linear", C=0.025)),
         # KNeighborsClassifier(5),
         # SVC(gamma=2, C=1),
         # DecisionTreeClassifier(max_depth=5),

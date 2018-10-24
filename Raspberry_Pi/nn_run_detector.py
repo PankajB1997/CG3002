@@ -291,7 +291,7 @@ while (data_flag == False):
             voltage = otherData[0]
             current = otherData[1]
             power = otherData[2]
-            energy = otherData[3]*1000.0 # to maintain energy in joules
+            energy = otherData[3]
             output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
             if danceMove == "logout":
                 output = danceMove # with logout command, no other values are sent

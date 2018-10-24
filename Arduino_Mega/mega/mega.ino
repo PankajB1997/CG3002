@@ -131,7 +131,7 @@ void getData(){
       static float energy = 0;
       //Power / 1000.0 because converting mW to W
       //This allows joules to  be in W per seconds
-      energy += secondsPassed * (packet.power /1000.0);
+      energy += secondsPassed * packet.power;
 
       prevTime = millis();
 
@@ -296,7 +296,7 @@ void setup()
   Serial.println(sensorB.testConnection() ? "Sensor B connected successfully" : "Sensor B failed to connect");
   Serial.println(sensorC.testConnection() ? "Sensor C connected successfully" : "Sensor C failed to connect");
   
-  calibrateSensors();
+  // calibrateSensors();
   handshake();
   xTaskCreate(mainTask, "Main Task", STACK_SIZE, (void *)NULL, 2, NULL);
 } 
