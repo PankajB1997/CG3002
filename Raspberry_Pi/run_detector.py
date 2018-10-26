@@ -29,8 +29,8 @@ OVERLAP = 0
 EXTRACT_SIZE = int((1 - OVERLAP) * N)
 
 CONFIDENCE_THRESHOLD = 0.85
-INITIAL_WAIT = 62500
-WAIT = 2000 # in milliseconds
+INITIAL_WAIT = 61500
+WAIT = 2500 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
 
 secret_key = "1234123412341234"  #must be at least 16
@@ -173,7 +173,9 @@ def readLineCR(port):
     while True:
         ch = port.read().decode()
         rv += ch
+        # print("I'm reading " + ch)
         if ch == "\r" or ch == "":
+        # if ch == "\r":
             return rv
 
 def inputData():
@@ -264,6 +266,7 @@ while (data_flag == False):
     try:
         for i in range(N): # extract from 0->N-1 = N sets of readings
             data = readLineCR(port).split(',')
+            print(data)
             if not len(data) == 13:
                continue
             data = [ float(val.strip()) for val in data ]
