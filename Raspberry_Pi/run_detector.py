@@ -59,13 +59,13 @@ ENC_LIST = [
     ('chicken', 2),
     ('wipers', 3),
     ('turnclap', 4),
-    # ('IDLE', 5),
-    # ('numbersix', 6),
-    # ('salute', 7),
-    # ('mermaid', 8),
-    # ('swing', 9),
-    # ('cowboy', 10),
-    # ('logout', 11)
+    ('numbersix', 5),
+    ('salute', 6),
+    ('mermaid', 7),
+    ('swing', 8),
+    ('cowboy', 9),
+    ('logout', 10)
+    # ('IDLE', 11),
 ]
 
 ENC_DICT = {
@@ -74,13 +74,13 @@ ENC_DICT = {
     2: 'chicken',
     3: 'wipers',
     4: 'turnclap',
-    # 5: 'IDLE',
-    # 6: 'numbersix',
-    # 7: 'salute',
-    # 8: 'mermaid',
-    # 9: 'swing',
-    # 10: 'cowboy',
-    # 11: 'logout'
+    5: 'numbersix',
+    6: 'salute',
+    7: 'mermaid',
+    8: 'swing',
+    9: 'cowboy',
+    10: 'logout'
+    # 11: 'IDLE',
 }
 
 CLASSLIST = [ pair[0] for pair in ENC_LIST ]
