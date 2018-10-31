@@ -1,55 +1,62 @@
-Datasets:-
-
-Traning set - 'STANDING': 1423, 'LAYING': 1413, 'SITTING': 1293, 'WALKING': 1226, 'WALKING_UPSTAIRS': 1073, 'WALKING_DOWNSTAIRS': 987
-Testing set - 'STANDING': 556, 'LAYING': 545, 'SITTING': 508, 'WALKING': 496, 'WALKING_UPSTAIRS': 471, 'WALKING_DOWNSTAIRS': 420
-
-Cross-validation scores:-
-
-Cross validation score for model KNeighborsClassifier: 0.9033569811357752
-Cross validation score for model LinearSVC: 0.945426698191547
-Cross validation score for model GammaSVC: 0.19190842719623963
-Cross validation score for model DecisionTreeClassifier: 0.8467958787813968
-Cross validation score for model RandomForestClassifier10: 0.7393389125555231
-Cross validation score for model RandomForestClassifier200: 0.8046213060176578
-Cross validation score for model MLPClassifier: 0.9378787481003259
-Cross validation score for model AdaBoostClassifier: 0.5564511324369151
-Cross validation score for model GaussianNB: 0.7002486362421314
-Cross validation score for model QuadraticDiscriminantAnalysis: 0.8557597786676674
-
-Best model is LinearSVC with accuracy of 0.945426698191547
-
-Predictions on training and testing sets using LinearSVC model:-
-
-Results for training set...
-Number of cases that were incorrect: 125
-Accuracy: 0.983142279163857
-Recall WALKING: 0.9991843393148451
-Recall WALKING_UPSTAIRS: 0.9953401677539608
-Recall WALKING_DOWNSTAIRS: 1.0
-Recall SITTING: 0.9528228924980665
-Recall STANDING: 0.9592410400562192
-Recall LAYING: 1.0
-Confusion Matrix below ['WALKING', 'WALKING_UPSTAIRS', 'WALKING_DOWNSTAIRS', 'SITTING', 'STANDING', 'LAYING'] :
-[[1225    1    0    0    0    0]
- [   4 1068    1    0    0    0]
- [   0    0  987    0    0    0]
- [   0    0    0 1232   60    1]
- [   0    0    0   58 1365    0]
- [   0    0    0    0    0 1413]]
-
-Results for testing set...
-Number of cases that were incorrect: 129
-Accuracy: 0.9569425901201603
-Recall WALKING: 0.9919354838709677
-Recall WALKING_UPSTAIRS: 0.9532908704883227
-Recall WALKING_DOWNSTAIRS: 0.9476190476190476
-Recall SITTING: 0.889763779527559
-Recall STANDING: 0.9550359712230215
-Recall LAYING: 1.0
-Confusion Matrix below ['WALKING', 'WALKING_UPSTAIRS', 'WALKING_DOWNSTAIRS', 'SITTING', 'STANDING', 'LAYING'] :
-[[492   1   3   0   0   0]
- [ 21 449   1   0   0   0]
- [  4  18 398   0   0   0]
- [  0   3   0 452  53   0]
- [  0   0   0  25 531   0]
- [  0   0   0   0   0 545]]
+INFO:root:Best model is OneVsRestClassifierMLP with accuracy of 0.9964652581003133
+INFO:root:Predicting...
+INFO:root:Prediction time: 0.041887760162353516
+INFO:root:Predictions done! Compiling results...
+INFO:root:6511
+INFO:root:6510
+INFO:root:Results for training set...
+INFO:root:Number of cases that were incorrect: 1
+INFO:root:Accuracy: 0.999846413761327
+INFO:root:Recall sidestep: 0.9989010989010989
+INFO:root:Recall number7: 1.0
+INFO:root:Recall chicken: 1.0
+INFO:root:Recall wipers: 1.0
+INFO:root:Recall turnclap: 1.0
+INFO:root:Recall numbersix: 1.0
+INFO:root:Recall salute: 1.0
+INFO:root:Recall mermaid: 1.0
+INFO:root:Recall swing: 1.0
+INFO:root:Recall cowboy: 1.0
+INFO:root:Recall logout: 1.0
+INFO:root:Confusion Matrix below ['sidestep', 'number7', 'chicken', 'wipers', 'turnclap', 'numbersix', 'salute', 'mermaid', 'swing', 'cowboy', 'logout'] :
+INFO:root:
+[[909   0   1   0   0   0   0   0   0   0   0]
+ [  0 905   0   0   0   0   0   0   0   0   0]
+ [  0   0 912   0   0   0   0   0   0   0   0]
+ [  0   0   0 921   0   0   0   0   0   0   0]
+ [  0   0   0   0 664   0   0   0   0   0   0]
+ [  0   0   0   0   0 460   0   0   0   0   0]
+ [  0   0   0   0   0   0 470   0   0   0   0]
+ [  0   0   0   0   0   0   0 456   0   0   0]
+ [  0   0   0   0   0   0   0   0 447   0   0]
+ [  0   0   0   0   0   0   0   0   0 213   0]
+ [  0   0   0   0   0   0   0   0   0   0 153]]
+INFO:root:1629
+INFO:root:1627
+INFO:root:Results for testing set...
+INFO:root:Number of cases that were incorrect: 2
+INFO:root:Accuracy: 0.9987722529158993
+INFO:root:Recall sidestep: 1.0
+INFO:root:Recall number7: 0.995575221238938
+INFO:root:Recall chicken: 1.0
+INFO:root:Recall wipers: 1.0
+INFO:root:Recall turnclap: 0.9939759036144579
+INFO:root:Recall numbersix: 1.0
+INFO:root:Recall salute: 1.0
+INFO:root:Recall mermaid: 1.0
+INFO:root:Recall swing: 1.0
+INFO:root:Recall cowboy: 1.0
+INFO:root:Recall logout: 1.0
+INFO:root:Confusion Matrix below ['sidestep', 'number7', 'chicken', 'wipers', 'turnclap', 'numbersix', 'salute', 'mermaid', 'swing', 'cowboy', 'logout'] :
+INFO:root:
+[[228   0   0   0   0   0   0   0   0   0   0]
+ [  0 225   0   0   1   0   0   0   0   0   0]
+ [  0   0 228   0   0   0   0   0   0   0   0]
+ [  0   0   0 230   0   0   0   0   0   0   0]
+ [  0   0   0   0 165   0   1   0   0   0   0]
+ [  0   0   0   0   0 115   0   0   0   0   0]
+ [  0   0   0   0   0   0 118   0   0   0   0]
+ [  0   0   0   0   0   0   0 114   0   0   0]
+ [  0   0   0   0   0   0   0   0 112   0   0]
+ [  0   0   0   0   0   0   0   0   0  54   0]
+ [  0   0   0   0   0   0   0   0   0   0  38]]

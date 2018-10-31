@@ -1,64 +1,78 @@
-Datasets:-
-
-Training - 'STANDING': 1423, 'LAYING': 1413, 'SITTING': 1293, 'WALKING': 1226, 'WALKING_UPSTAIRS': 1073, 'WALKING_DOWNSTAIRS': 987
-Validation - 'STANDING': 278, 'LAYING': 272, 'SITTING': 254, 'WALKING': 248, 'WALKING_UPSTAIRS': 236, 'WALKING_DOWNSTAIRS': 210
-Testing - 'STANDING': 278, 'LAYING': 273, 'SITTING': 254, 'WALKING': 248, 'WALKING_UPSTAIRS': 235, 'WALKING_DOWNSTAIRS': 210
-
----
-
-Trained on 7415 samples, validated on 1498 samples
-
----
-
-Predictions:-
-
 Results for training set...
-Number of cases that were incorrect: 100
-Accuracy: 0.9865138233310856
-Recall WALKING: 1.0
-Recall WALKING_UPSTAIRS: 1.0
-Recall WALKING_DOWNSTAIRS: 1.0
-Recall SITTING: 0.9273008507347255
-Recall STANDING: 0.9957835558678847
-Recall LAYING: 1.0
-Confusion Matrix below ['WALKING', 'WALKING_UPSTAIRS', 'WALKING_DOWNSTAIRS', 'SITTING', 'STANDING', 'LAYING'] :
-[[1226    0    0    0    0    0]
- [   0 1073    0    0    0    0]
- [   0    0  987    0    0    0]
- [   0    0    0 1199   94    0]
- [   0    0    0    6 1417    0]
- [   0    0    0    0    0 1413]]
-
+Number of cases that were incorrect: 55
+Accuracy: 0.9915527568729842
+Recall sidestep: 0.9901098901098901
+Recall number7: 0.9779005524861878
+Recall chicken: 0.9846491228070176
+Recall wipers: 1.0
+Recall turnclap: 0.9954819277108434
+Recall numbersix: 0.9978260869565218
+Recall salute: 0.9893617021276596
+Recall mermaid: 1.0
+Recall swing: 0.9932885906040269
+Recall cowboy: 1.0
+Recall logout: 1.0
+Confusion Matrix below ['sidestep', 'number7', 'chicken', 'wipers', 'turnclap', 'numbersix', 'salute', 'mermaid', 'swing', 'cowboy', 'logout'] :
+[[901   0   1   0   0   0   8   0   0   0   0]
+ [  0 885   0   0   0   0  20   0   0   0   0]
+ [  2   1 898   0   2   0   7   1   1   0   0]
+ [  0   0   0 921   0   0   0   0   0   0   0]
+ [  0   0   0   0 661   0   2   0   0   1   0]
+ [  0   0   0   0   1 459   0   0   0   0   0]
+ [  0   5   0   0   0   0 465   0   0   0   0]
+ [  0   0   0   0   0   0   0 456   0   0   0]
+ [  0   3   0   0   0   0   0   0 444   0   0]
+ [  0   0   0   0   0   0   0   0   0 213   0]
+ [  0   0   0   0   0   0   0   0   0   0 153]]
 Results for validation set...
-Number of cases that were incorrect: 70
-Accuracy: 0.9532710280373832
-Recall WALKING: 0.9959677419354839
-Recall WALKING_UPSTAIRS: 0.9745762711864406
-Recall WALKING_DOWNSTAIRS: 0.9619047619047619
-Recall SITTING: 0.8031496062992126
-Recall STANDING: 0.9856115107913669
-Recall LAYING: 0.9963235294117647
-Confusion Matrix below ['WALKING', 'WALKING_UPSTAIRS', 'WALKING_DOWNSTAIRS', 'SITTING', 'STANDING', 'LAYING'] :
-[[247   0   1   0   0   0]
- [  5 230   1   0   0   0]
- [  1   7 202   0   0   0]
- [  0   2   0 204  48   0]
- [  0   0   0   4 274   0]
- [  0   0   0   0   1 271]]
-
+Number of cases that were incorrect: 11
+Accuracy: 0.9864864864864865
+Recall sidestep: 1.0
+Recall number7: 0.9557522123893806
+Recall chicken: 1.0
+Recall wipers: 1.0
+Recall turnclap: 0.9759036144578314
+Recall numbersix: 0.9824561403508771
+Recall salute: 0.9491525423728814
+Recall mermaid: 1.0
+Recall swing: 1.0
+Recall cowboy: 1.0
+Recall logout: 1.0
+Confusion Matrix below ['sidestep', 'number7', 'chicken', 'wipers', 'turnclap', 'numbersix', 'salute', 'mermaid', 'swing', 'cowboy', 'logout'] :
+[[114   0   0   0   0   0   0   0   0   0   0]
+ [  0 108   0   0   0   0   5   0   0   0   0]
+ [  0   0 114   0   0   0   0   0   0   0   0]
+ [  0   0   0 115   0   0   0   0   0   0   0]
+ [  0   0   0   0  81   0   2   0   0   0   0]
+ [  0   0   1   0   0  56   0   0   0   0   0]
+ [  0   2   0   0   0   0  56   0   1   0   0]
+ [  0   0   0   0   0   0   0  57   0   0   0]
+ [  0   0   0   0   0   0   0   0  56   0   0]
+ [  0   0   0   0   0   0   0   0   0  27   0]
+ [  0   0   0   0   0   0   0   0   0   0  19]]
 Results for testing set...
-Number of cases that were incorrect: 76
-Accuracy: 0.9492656875834445
-Recall WALKING: 0.9919354838709677
-Recall WALKING_UPSTAIRS: 0.9446808510638298
-Recall WALKING_DOWNSTAIRS: 0.9809523809523809
-Recall SITTING: 0.7874015748031497
-Recall STANDING: 0.9892086330935251
-Recall LAYING: 1.0
-Confusion Matrix below ['WALKING', 'WALKING_UPSTAIRS', 'WALKING_DOWNSTAIRS', 'SITTING', 'STANDING', 'LAYING'] :
-[[246   1   1   0   0   0]
- [ 13 222   0   0   0   0]
- [  2   2 206   0   0   0]
- [  0   1   0 200  53   0]
- [  0   0   0   3 275   0]
- [  0   0   0   0   0 273]]
+Number of cases that were incorrect: 13
+Accuracy: 0.9840490797546012
+Recall sidestep: 0.9912280701754386
+Recall number7: 0.9292035398230089
+Recall chicken: 0.9824561403508771
+Recall wipers: 1.0
+Recall turnclap: 0.9879518072289156
+Recall numbersix: 1.0
+Recall salute: 0.9830508474576272
+Recall mermaid: 1.0
+Recall swing: 1.0
+Recall cowboy: 1.0
+Recall logout: 1.0
+Confusion Matrix below ['sidestep', 'number7', 'chicken', 'wipers', 'turnclap', 'numbersix', 'salute', 'mermaid', 'swing', 'cowboy', 'logout'] :
+[[113   0   0   0   0   0   1   0   0   0   0]
+ [  0 105   0   0   2   0   6   0   0   0   0]
+ [  1   0 112   0   0   0   1   0   0   0   0]
+ [  0   0   0 115   0   0   0   0   0   0   0]
+ [  0   0   0   0  82   0   1   0   0   0   0]
+ [  0   0   0   0   0  58   0   0   0   0   0]
+ [  0   0   0   0   1   0  58   0   0   0   0]
+ [  0   0   0   0   0   0   0  57   0   0   0]
+ [  0   0   0   0   0   0   0   0  56   0   0]
+ [  0   0   0   0   0   0   0   0   0  27   0]
+ [  0   0   0   0   0   0   0   0   0   0  19]]

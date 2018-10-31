@@ -72,18 +72,16 @@ class Server(threading.Thread):
 
                         'turnclap', 'turnclap', 'turnclap', 'turnclap'
 
-                      'numbersix', 'numbersix', 'numbersix', 'numbersix',
+                        'numbersix', 'numbersix', 'numbersix', 'numbersix',
 
-                      'salute', 'salute', 'salute', 'salute',
+                        'salute', 'salute', 'salute', 'salute',
 
-                      'mermaid', 'mermaid', 'mermaid', 'mermaid',
+                        'mermaid', 'mermaid', 'mermaid', 'mermaid',
 
-                      'swing', 'swing', 'swing', 'swing',
+                        'swing', 'swing', 'swing', 'swing',
 
-                      'cowboy', 'cowboy', 'cowboy', 'cowboy',
-                      
-                      'logout', 'logout', 'logout', 'logout'
-                      ]
+                        'cowboy', 'cowboy', 'cowboy', 'cowboy'
+                        ]
 
 
 
