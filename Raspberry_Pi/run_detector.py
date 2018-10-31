@@ -255,6 +255,7 @@ port.reset_input_buffer()
 port.reset_output_buffer()
 print("connected")
 
+countMovesSent = 0
 stoptime = int(round(time.time() * 1000))
 
 while (data_flag == False):
@@ -319,12 +320,15 @@ while (data_flag == False):
             output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
             if danceMove == "logout":
                 output = danceMove # with logout command, no other values are sent
+                if not countMovesSent == 40:
+                    continue
             # Send output to server
             sendToServer(s, output)
             print("Sent to server: " + str(output) + ".")
             danceMoveBuffer = []
             stoptime = int(round(time.time() * 1000))
             isMoveSent = True
+            countMovesSent += 1
         except:
             traceback.print_exc()
             print("Error in sending dance move to the server!")
@@ -338,28 +342,5 @@ while (data_flag == False):
         previousPacketData = movementData[EXTRACT_SIZE:]
     else:
         previousPacketData = []
-
-    # isStateChanged = False
-    # if move_state == 2 and not danceMove == "IDLE" and predictionConfidence >= CONFIDENCE_THRESHOLD:
-    #     # voltage, current, power, energy = tuple(map(tuple, np.mean(otherData, axis=0)))
-    #     voltage = 0
-    #     current = 0
-    #     power = 0
-    #     energy = 0
-    #     output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
-    #     if danceMove == "logout":
-    #         output = danceMove # with logout command, no other values are sent
-    #     # Send output to server
-    #     sendToServer(s, output)
-    #     print("Sent to server: " + str(output) + ". System moves from DETERMINING_DANCE_MOVE to IDLE state.")
-    #     move_state = 1
-    #     isStateChanged = True
-    # elif move_state == 1 and danceMove == "IDLE":
-    #     print("System moves from IDLE to DETERMINING_DANCE_MOVE state.")
-    #     move_state = 2
-    #     isStateChanged = True
-    #
-    # if isStateChanged == False:
-    #     print("System did not change state. Dance move is " + str(danceMove) + " and move state is " + str(STATE[move_state]) + " with prediction confidence " + str(predictionConfidence) + ".")
 
     # data_flag = True

@@ -239,6 +239,7 @@ port.reset_input_buffer()
 port.reset_output_buffer()
 print("connected")
 
+countMovesSent = 0
 stoptime = int(round(time.time() * 1000))
 
 while (data_flag == False):
@@ -295,6 +296,8 @@ while (data_flag == False):
             output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
             if danceMove == "logout":
                 output = danceMove # with logout command, no other values are sent
+                if not countMovesSent == 40:
+                    continue
             # Send output to server
             sendToServer(s, output)
             print(rawData)
@@ -302,6 +305,7 @@ while (data_flag == False):
             danceMoveBuffer = []
             stoptime = int(round(time.time() * 1000))
             isMoveSent = True
+            countMovesSent += 1
         except:
             traceback.print_exc()
             print("Error in sending dance move to the server!")
