@@ -63,7 +63,7 @@ typedef struct Packet {
 Packet packet;
 
 
-char databuf[2800];
+char databuf[2850];
 
 char* acc1_x;
 char* acc1_y;
@@ -78,29 +78,46 @@ char* voltage_c;
 char* current_c;
 char* power_c;
 char* energy_c;
-
-
+char checksum_c[4];
+int checkSum;
+int FcheckSum;
 /**
  * Main Task
  */
 void mainTask(void *p) {
+ int len ;
 
-  while(1){
+
+   while(1){
     xLastWakeTime = xTaskGetTickCount();
     for (int i=0;i <PKT_SIZE; i++) {
-      getData(); 
-      changeFormat();
-      vTaskDelayUntil(&xLastWakeTime, (20/ portTICK_PERIOD_MS));
+    getData(); 
+    changeFormat();
+    vTaskDelayUntil(&xLastWakeTime, (20/ portTICK_PERIOD_MS));
     }
-     int len = strlen(databuf);
-     for (int i = 0; i < len; i++) {
-        Serial1.write(databuf[i]);
-     }
-     Serial.println("Sent");
-     strcpy(databuf, "");
-     
+
+  
+   char *data  = databuf ;
+   while (*data){
+    checkSum ^= (int)*data++;
+   }
+
+  itoa(checkSum, checksum_c, 10); 
+  strcat(databuf, ",");
+  strcat(databuf, checksum_c);
+
+    for (int i = 0; i < strlen(databuf); i++) {
+    Serial1.write(databuf[i]);
+    Serial.print(databuf[i]);
+    
+    }
+    
+    strcpy(databuf, "");  
+    Serial.println(); 
+    checkSum =0;
   }
 }
+
 
 
 
@@ -120,7 +137,7 @@ void getData(){
       //Measure voltage out from current sensor to calculate current
       vOut = analogRead(currentSensorPin);
       vOut = remapVoltage(vOut);
-    packet.current = ((vOut * 1000) / (RS * RL) * 1000) / 1000;
+      packet.current = ((vOut * 1000) / (RS * RL) * 1000);
 
       //Power is in mW due to current being in mA
       packet.power = packet.current * packet.voltage;
@@ -131,7 +148,7 @@ void getData(){
       static float energy = 0;
       //Power / 1000.0 because converting mW to W
       //This allows joules to  be in W per seconds
-      energy += secondsPassed * (packet.power /1000.0);
+      energy += secondsPassed * packet.power;
 
       prevTime = millis();
 
@@ -153,19 +170,19 @@ float remapVoltage(int volt) {
  */
 void getScaledReadings() {
   sensorA.getAcceleration(&xa_raw, &ya_raw, &za_raw);
-  packet.acc1[0] = (xa_raw + xa_offset)*scaleFactorAccel;
-  packet.acc1[1] = (ya_raw + ya_offset)*scaleFactorAccel;
-  packet.acc1[2] = (za_raw + za_offset)*scaleFactorAccel;
+  packet.acc1[0] = (xa_raw)*scaleFactorAccel;
+  packet.acc1[1] = (ya_raw)*scaleFactorAccel;
+  packet.acc1[2] = (za_raw)*scaleFactorAccel;
   
   sensorB.getAcceleration(&xb_raw, &yb_raw, &zb_raw);
-  packet.acc2[0] = (xb_raw + xb_offset)*scaleFactorAccel;
-  packet.acc2[1] = (yb_raw + yb_offset)*scaleFactorAccel;
-  packet.acc2[2] = (zb_raw + zb_offset)*scaleFactorAccel;
+  packet.acc2[0] = (xb_raw)*scaleFactorAccel;
+  packet.acc2[1] = (yb_raw)*scaleFactorAccel;
+  packet.acc2[2] = (zb_raw)*scaleFactorAccel;
   
   sensorC.getRotation(&xg_raw, &yg_raw, &zg_raw);
-  packet.gyro[0] = (xg_raw + xg_offset)*scaleFactorGyro;
-  packet.gyro[1]= (yg_raw + yg_offset)*scaleFactorGyro;
-  packet.gyro[2] = (zg_raw + zg_offset)*scaleFactorGyro;
+  packet.gyro[0] = (xg_raw)*scaleFactorGyro;
+  packet.gyro[1]= (yg_raw)*scaleFactorGyro;
+  packet.gyro[2] = (zg_raw)*scaleFactorGyro;
  }
 
 
@@ -283,6 +300,18 @@ void setup()
   Wire.begin();        // join i2c bus (address optional for master)
   Serial.begin(115200);  // start serial for output
   Serial1.begin(115200); //serial for gpio connection between Mega and Rpi
+    
+  xa_offset = 0;
+  ya_offset = 0;
+  za_offset = 0;
+  xb_offset = 0;
+  yb_offset = 0;
+  zb_offset = 0;
+  
+  xg_offset = 0;
+  yg_offset = 0;
+  zg_offset = 0;
+
   
   // Initializing sensors 
   sensorA.initialize();
@@ -291,13 +320,14 @@ void setup()
 
   // Testing connection by reading device ID of each sensor
   // Returns false if deviceID not found, Returns true if deviceID is found
-  Serial.println();
+  //Serial.println();
   Serial.println(sensorA.testConnection() ? "Sensor A connected successfully" : "Sensor A failed to connect");
   Serial.println(sensorB.testConnection() ? "Sensor B connected successfully" : "Sensor B failed to connect");
   Serial.println(sensorC.testConnection() ? "Sensor C connected successfully" : "Sensor C failed to connect");
   
-  calibrateSensors();
-  handshake();
+  // calibrateSensors();
+  //handshake();
+  Serial.print("Starting");
   xTaskCreate(mainTask, "Main Task", STACK_SIZE, (void *)NULL, 2, NULL);
 } 
 
@@ -306,5 +336,4 @@ void loop()
 {  
 }
  
-
 
