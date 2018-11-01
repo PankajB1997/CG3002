@@ -314,9 +314,9 @@ while (data_flag == False):
         try:
             otherData = np.mean(otherData, axis=0).tolist()
             voltage = otherData[0]
-            current = otherData[1]/1000.0
-            power = otherData[2]/1000.0
-            energy = otherData[3]/1000.0
+            current = otherData[1]
+            power = otherData[2]
+            energy = otherData[3]
             output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
             if danceMove == "logout":
                 output = danceMove # with logout command, no other values are sent
