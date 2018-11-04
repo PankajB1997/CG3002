@@ -119,7 +119,7 @@ void getData(){
       //Measure voltage out from current sensor to calculate current
       vOut = analogRead(currentSensorPin);
       vOut = remapVoltage(vOut);
-      packet.current = ((vOut * 1000) / (RS * RL) * 1000);
+      packet.current = ((vOut * 1000) / (RS * RL));
 
       //Power is in mW due to current being in mA
       packet.power = packet.current * packet.voltage;

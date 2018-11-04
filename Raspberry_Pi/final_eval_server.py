@@ -70,7 +70,7 @@ class Server(threading.Thread):
 
                         'sidestep', 'sidestep', 'sidestep', 'sidestep',
 
-                        'turnclap', 'turnclap', 'turnclap', 'turnclap'
+                        'turnclap', 'turnclap', 'turnclap', 'turnclap',
 
                         'numbersix', 'numbersix', 'numbersix', 'numbersix',
 
