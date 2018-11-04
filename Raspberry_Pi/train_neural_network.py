@@ -9,7 +9,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, QuantileTransformer, Normalizer
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.utils.class_weight import compute_sample_weight
-from keras.models import load_model, Model
+import keras
+from keras.models import load_model, Model, Sequential
 from keras.layers import *
 from keras.optimizers import *
 from keras.callbacks import ModelCheckpoint
@@ -190,27 +191,42 @@ def writeDatasetToExcel(X, y, filepath):
 
 # Initialise neural network model using Keras
 def initialiseModel(X_train):
-    main_input = Input(shape=(X_train[0].size,))
-    x = Dense(512)(main_input)
-    x = LeakyReLU()(x)
-    x = Dropout(0.2)(x)
-    x = Dense(512)(x)
-    x = LeakyReLU()(x)
-    x = Dropout(0.2)(x)
-    x = Dense(256)(x)
-    x = LeakyReLU()(x)
-    x = Dropout(0.2)(x)
-    x = Dense(128)(x)
-    x = LeakyReLU()(x)
-    x = Dropout(0.2)(x)
-    x = Dense(64)(x)
-    x = LeakyReLU()(x)
-    x = Dropout(0.2)(x)
-    output = Dense(len(ENC_LIST), activation = 'softmax')(x)
-    model = Model(inputs = main_input, outputs = output)
+    model = Sequential()
+    model.add(Conv1D(32, kernel_size=3,
+                     activation='relu',
+                     input_shape=(X_train.shape[1], X_train.shape[2])))
+    model.add(Conv1D(64, 3, activation='relu'))
+    model.add(MaxPooling1D(pool_size=2))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(128, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(len(ENC_LIST), activation='softmax'))
+    model.compile(loss=keras.losses.categorical_crossentropy,
+              optimizer=keras.optimizers.Adadelta(),
+              metrics=['accuracy'])
+
+    # main_input = Input(shape=(X_train[0].size,))
+    # x = Dense(512)(main_input)
+    # x = LeakyReLU()(x)
+    # # x = Dropout(0.2)(x)
+    # x = Dense(512)(x)
+    # x = LeakyReLU()(x)
+    # # x = Dropout(0.2)(x)
+    # x = Dense(256)(x)
+    # x = LeakyReLU()(x)
+    # # x = Dropout(0.2)(x)
+    # x = Dense(128)(x)
+    # x = LeakyReLU()(x)
+    # # x = Dropout(0.2)(x)
+    # x = Dense(64)(x)
+    # x = LeakyReLU()(x)
+    # # x = Dropout(0.2)(x)
+    # output = Dense(len(ENC_LIST), activation = 'softmax')(x)
+    # model = Model(inputs = main_input, outputs = output)
     # from keras import optimizers
     # sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-    model.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics = ['accuracy'])
+    # model.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics = ['accuracy'])
     return model
 
 # Train the model, monitor on validation loss and save the best model out of given epochs
@@ -225,7 +241,6 @@ def fitModel(X_train, Y_train, X_val, Y_val):
 
 def filterDataset(X, Y, X_test, Y_test):
     classes_removed = [
-    # No classes need to be removed from self-collected dataset unless experimenting
         'IDLE',
     ]
 
@@ -272,6 +287,10 @@ if __name__ == "__main__":
     print(str(Counter(Y)))
     print(str(Counter(Y_val)))
     print(str(Counter(Y_test)))
+
+    X = np.expand_dims(X, axis=2)
+    X_val = np.expand_dims(X_val, axis=2)
+    X_test = np.expand_dims(X_test, axis=2)
 
     model = fitModel(X, Y, X_val, Y_val)
 

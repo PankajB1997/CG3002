@@ -27,7 +27,7 @@ N = 64
 OVERLAP = 0
 EXTRACT_SIZE = int((1 - OVERLAP) * N)
 
-CONFIDENCE_THRESHOLD = 0.90
+CONFIDENCE_THRESHOLD = 0.95
 INITIAL_WAIT = 61500
 WAIT = 1220 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
@@ -149,7 +149,7 @@ def extract_feature_vector(X):
 
 def predict_dance_move(segment):
     X = extract_feature_vector(segment)
-    Y = model.predict(X)
+    Y = model.predict(np.expand_dims(X, axis=2))
     print(Y)
     # return model.predict(X).tolist()[0]
     return onehot2str(Y)[0], max(Y[0])
