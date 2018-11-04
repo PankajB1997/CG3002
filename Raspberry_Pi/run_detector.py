@@ -28,13 +28,13 @@ N = 64
 OVERLAP = 0
 EXTRACT_SIZE = int((1 - OVERLAP) * N)
 
-CONFIDENCE_THRESHOLD = 0.85
+CONFIDENCE_THRESHOLD = 0.90
 INITIAL_WAIT = 61500
-WAIT = 2500 # in milliseconds
+WAIT = 1220 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
 
-secret_key = "1234123412341234"  #must be at least 16
-BLOCK_SIZE = 32 #AES.block_size
+secret_key = "1234123412341234"  # must be at least 16
+BLOCK_SIZE = 32 # AES.block_size
 
 '''
 The following move states are used:
@@ -314,13 +314,13 @@ while (data_flag == False):
         try:
             otherData = np.mean(otherData, axis=0).tolist()
             voltage = otherData[0]
-            current = otherData[1]/1000.0
-            power = otherData[2]/1000.0
-            energy = otherData[3]/1000.0
+            current = otherData[1]
+            power = otherData[2]
+            energy = otherData[3]
             output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
             if danceMove == "logout":
                 output = danceMove # with logout command, no other values are sent
-                if not countMovesSent == 40:
+                if not countMovesSent == 40: # only allow logout to be sent once 40 moves have been sent
                     continue
             # Send output to server
             sendToServer(s, output)
