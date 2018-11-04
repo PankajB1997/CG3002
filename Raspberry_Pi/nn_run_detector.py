@@ -29,7 +29,7 @@ EXTRACT_SIZE = int((1 - OVERLAP) * N)
 
 CONFIDENCE_THRESHOLD = 0.95
 INITIAL_WAIT = 61500
-WAIT = 1220 # in milliseconds
+WAIT = 1000 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
 
 secret_key = "1234123412341234"  # must be at least 16
