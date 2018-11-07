@@ -1,0 +1,4 @@
+timestamp,action,goal,time_delta,correct,voltage,current,power,cumpower
+1540449354.2984862,None,sidestep,60.22176790237427,False,0,0,0,0
+1540449414.3913355,None,turnclap,60.00297522544861,False,0,0,0,0
+1540449474.3964646,None,chicken,60.001147508621216,False,0,0,0,0

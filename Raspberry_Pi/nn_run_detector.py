@@ -27,13 +27,13 @@ N = 64
 OVERLAP = 0
 EXTRACT_SIZE = int((1 - OVERLAP) * N)
 
-CONFIDENCE_THRESHOLD = 0.85
-INITIAL_WAIT = 62500
-WAIT = 2000 # in milliseconds
+CONFIDENCE_THRESHOLD = 0.95
+INITIAL_WAIT = 61500
+WAIT = 1000 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
 
-secret_key = "1234123412341234"  #must be at least 16
-BLOCK_SIZE = 32 #AES.block_size
+secret_key = "1234123412341234"  # must be at least 16
+BLOCK_SIZE = 32 # AES.block_size
 
 '''
 The following move states are used:
@@ -149,7 +149,7 @@ def extract_feature_vector(X):
 
 def predict_dance_move(segment):
     X = extract_feature_vector(segment)
-    Y = model.predict(X)
+    Y = model.predict(np.expand_dims(X, axis=2))
     print(Y)
     # return model.predict(X).tolist()[0]
     return onehot2str(Y)[0], max(Y[0])
@@ -296,7 +296,7 @@ while (data_flag == False):
             output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
             if danceMove == "logout":
                 output = danceMove # with logout command, no other values are sent
-                if not countMovesSent == 40:
+                if not countMovesSent == 40: # only allow logout to be sent once 40 moves have been sent
                     continue
             # Send output to server
             sendToServer(s, output)

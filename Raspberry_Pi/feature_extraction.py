@@ -14,7 +14,7 @@ logger.setLevel(logging.INFO)
 
 DATASET_FILEPATH = "dataset"
 
-# Default: 64 sets per segment with 50% overlap
+# Default: 64 sets per segment with 0% overlap
 SEGMENT_SIZE = 64
 OVERLAP = 0
 
