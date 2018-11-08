@@ -80,7 +80,7 @@ char* power_c;
 char* energy_c;
 char checksum_c[4];
 int checkSum;
-int FcheckSum;
+
 /**
  * Main Task
  */
@@ -104,7 +104,6 @@ void mainTask(void *p) {
 
   itoa(checkSum, checksum_c, 10); 
   strcat(databuf, checksum_c);
-  strcat(databuf, ",");
   strcat(databuf, "\r");
 
     for (int i = 0; i < strlen(databuf); i++) {
@@ -322,13 +321,13 @@ void setup()
   // Testing connection by reading device ID of each sensor
   // Returns false if deviceID not found, Returns true if deviceID is found
   //Serial.println();
+  Serial.print("Starting");
   Serial.println(sensorA.testConnection() ? "Sensor A connected successfully" : "Sensor A failed to connect");
   Serial.println(sensorB.testConnection() ? "Sensor B connected successfully" : "Sensor B failed to connect");
   Serial.println(sensorC.testConnection() ? "Sensor C connected successfully" : "Sensor C failed to connect");
   
   // calibrateSensors();
   handshake();
-  Serial.print("Starting");
   xTaskCreate(mainTask, "Main Task", STACK_SIZE, (void *)NULL, 2, NULL);
 } 
 
