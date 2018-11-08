@@ -24,13 +24,13 @@ from scipy.signal import savgol_filter
 from scipy.fftpack import fft, ifft, rfft
 # from keras.models import load_model
 
-N = 128
+N = 64
 OVERLAP = 0.75
 EXTRACT_SIZE = int((1 - OVERLAP) * N)
 
 CONFIDENCE_THRESHOLD = 0.90
 INITIAL_WAIT = 61500
-WAIT = 1220 # in milliseconds
+WAIT = 1000 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
 
 secret_key = "1234123412341234"  # must be at least 16
@@ -257,7 +257,7 @@ print("connected")
 
 countMovesSent = 0
 stoptime = int(round(time.time() * 1000))
-
+iter = N
 while (data_flag == False):
 
     print("ENTERING")
@@ -265,7 +265,9 @@ while (data_flag == False):
     movementData = []
     otherData = []
     try:
-        for i in range(N): # extract from 0->N-1 = N sets of readings
+        if not len(previousPacketData) == 0:
+            iter = EXTRACT_SIZE
+        for i in range(iter): # extract from 0->N-1 = N sets of readings
             data = readLineCR(port).split(',')
             print(data)
             if not len(data) == 13:
@@ -319,7 +321,7 @@ while (data_flag == False):
             energy = otherData[3]
             output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
             if danceMove == "logout":
-                output = danceMove # with logout command, no other values are sent
+                # output = danceMove # with logout command, no other values are sent
                 if not countMovesSent >= 40: # only allow logout to be sent once 40 moves have been sent
                     continue
             # Send output to server
