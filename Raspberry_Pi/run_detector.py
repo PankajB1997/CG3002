@@ -320,7 +320,7 @@ while (data_flag == False):
             output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
             if danceMove == "logout":
                 output = danceMove # with logout command, no other values are sent
-                if not countMovesSent == 40: # only allow logout to be sent once 40 moves have been sent
+                if not countMovesSent >= 40: # only allow logout to be sent once 40 moves have been sent
                     continue
             # Send output to server
             sendToServer(s, output)
