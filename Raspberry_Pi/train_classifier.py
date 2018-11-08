@@ -256,7 +256,7 @@ def fitModel(X, Y):
 
     for i in range(0, 6):
         model = initialiseModel(i)
-        accuracy_scores = cross_val_score(model, X, Y, cv=10, scoring="accuracy", n_jobs=-1)
+        accuracy_scores = cross_val_score(model, X, Y, cv=5, scoring="accuracy", n_jobs=-1)
         scores.append(accuracy_scores.mean())
         logger.info("Cross validation score for model " + str(MODEL_UNIQUE_IDS[i]) + ": " + str(accuracy_scores.mean()))
         model.fit(X, Y)
@@ -289,6 +289,39 @@ def filterDataset(X, Y, X_test, Y_test):
     Y_test = np.delete(Y_test, del_idx)
 
     return X, Y, X_test, Y_test
+
+# Print model confidence for every correct prediction
+def printConfidenceForCorrectPredictions(pred_prob, pred_lbl, true_lbl):
+    pred_prob, pred_lbl, true_lbl = zip(*sorted(zip(pred_prob, pred_lbl, true_lbl), key = lambda x: (x[2], x[0], x[1])))
+    with open(os.path.join('logs', 'correct_predictions_log.txt'), 'w') as logfile:
+        confident_correct_pred_count = 0
+        correct_pred_count = 0
+        for i in range(len(pred_prob)):
+            if pred_lbl[i] == true_lbl[i]:
+                logfile.write("The actual move " + str(true_lbl[i]) + " was predicted as " + str(pred_lbl[i]) + " with a prediction confidence of " + str(pred_prob[i]) + ".\n")
+                if pred_prob[i] > CONFIDENCE_THRESHOLD:
+                    confident_correct_pred_count += 1
+                correct_pred_count += 1
+        logfile.write("\nTotal correct predictions made with " + str(CONFIDENCE_THRESHOLD * 100) + "% confidence or more: " + str(confident_correct_pred_count))
+        logfile.write("\nTotal correct predictions made overall: " + str(correct_pred_count))
+        logfile.write("\nTotal number of test cases: " + str(len(pred_prob)))
+
+# Print model confidence for every wrong prediction
+def printConfidenceForIncorrectPredictions(pred_prob, pred_lbl, true_lbl):
+    pred_prob, pred_lbl, true_lbl = zip(*sorted(zip(pred_prob, pred_lbl, true_lbl), key = lambda x: (x[2], x[0], x[1])))
+    with open(os.path.join('logs', 'incorrect_predictions_log.txt'), 'w') as logfile:
+        confident_mistake_count = 0
+        incorrect_pred_count = 0
+        for i in range(len(pred_prob)):
+            if pred_lbl[i] != true_lbl[i]:
+                logfile.write("The actual move " + str(true_lbl[i]) + " was predicted as " + str(pred_lbl[i]) + " with a prediction confidence of " + str(pred_prob[i]) + ".\n")
+                if pred_prob[i] > CONFIDENCE_THRESHOLD:
+                    confident_mistake_count += 1
+                incorrect_pred_count += 1
+        logfile.write("\nTotal mistakes made with " + str(CONFIDENCE_THRESHOLD * 100) + "% confidence or more: " + str(confident_mistake_count))
+        logfile.write("\nTotal mistakes made overall: " + str(incorrect_pred_count))
+        logfile.write("\nTotal number of test cases: " + str(len(pred_prob)))
+
 
 TRAIN_DATASET_PATH = "dataset/train.pkl"
 TEST_DATASET_PATH = "dataset/test.pkl"
@@ -347,17 +380,12 @@ if __name__ == "__main__":
     # calculatePerformanceMetrics(val_pred, Y_val, "validation")
     calculatePerformanceMetrics(test_pred, Y_test, "testing")
 
-    # # Record model confidence on every prediction
-    # train_confidence_list = calculatePredictionConfidence(train_pred)
-    # # val_confidence_list = calculatePredictionConfidence(val_pred)
-    # test_confidence_list = calculatePredictionConfidence(test_pred)
-
-    # # Record class probabilities for every prediction
-    # train_dict_list = recordClassProbabilites(train_pred)
-    # # val_dict_list = recordClassProbabilites(val_pred)
-    # test_dict_list = recordClassProbabilites(test_pred)
-
-    # # Prepare a detailed log of all incorrect cases on every prediction as text file
-    # logIncorrectCases(..., 'training')
-    # logIncorrectCases(..., 'validation')
-    # logIncorrectCases(..., 'testing')
+    # pred_prob = train_pred.tolist() + test_pred.tolist()
+    # pred_lbl = Y_train_pred.tolist() + Y_test_pred.tolist()
+    # true_lbl = Y.tolist() + Y_test.tolist()
+    # for i in range(len(pred_prob)):
+    #     pred_prob[i] = max(pred_prob[i])
+    # # Print model confidence for every wrong prediction
+    # printConfidenceForIncorrectPredictions(pred_prob, pred_lbl, true_lbl)
+    # # Print model confidence for every correct prediction
+    # printConfidenceForCorrectPredictions(pred_prob, pred_lbl, true_lbl)

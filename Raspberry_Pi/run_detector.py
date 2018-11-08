@@ -24,8 +24,8 @@ from scipy.signal import savgol_filter
 from scipy.fftpack import fft, ifft, rfft
 # from keras.models import load_model
 
-N = 64
-OVERLAP = 0
+N = 128
+OVERLAP = 0.75
 EXTRACT_SIZE = int((1 - OVERLAP) * N)
 
 CONFIDENCE_THRESHOLD = 0.90
