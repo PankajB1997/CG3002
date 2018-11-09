@@ -59,7 +59,7 @@ typedef struct Packet {
 Packet packet;
 
 
-char databuf[2800];
+char databuf[4000];
 
 char* acc1_x;
 char* acc1_y;
@@ -75,21 +75,42 @@ char* current_c;
 char* power_c;
 char* energy_c;
 
+int ledflag = HIGH;
+int countLED = 0;
+
+  int h_flag = 0;
+  int n_flag = 0;
+
+int i;
+  
 /**
  * Main Task
  */
 void mainTask(void *p) {
-
+  
   while(1){
+//  Serial.println("Enter mainTask");
     xLastWakeTime = xTaskGetTickCount();
-    for (int i=0;i <PKT_SIZE; i++) {
+    for (i=0;i <PKT_SIZE; i++) {
+    countLED++;
+    if (countLED >= 50) {
+    if(ledflag == LOW) {
+      ledflag = HIGH;
+    }
+    else {
+      ledflag = LOW;
+    }
+     digitalWrite(LED_BUILTIN, ledflag);  
+      countLED = 0;  
+    }
       getData(); 
       changeFormat();
       vTaskDelayUntil(&xLastWakeTime, (20/ portTICK_PERIOD_MS));
     }
-     int len = strlen(databuf);
-     for (int i = 0; i < len; i++) {
+     for (i = 0; i < strlen(databuf); i++) {
         Serial1.write(databuf[i]);
+//        Serial.print(databuf[i]);
+//        Serial.println();
      }
      //Serial.println("Sent");
      strcpy(databuf, "");
@@ -121,12 +142,11 @@ void getData(){
       packet.power = packet.current * packet.voltage;
 
       static long prevTime = 0;
-      float secondsPassed = (millis()-prevTime) / (1000.0);
-
       static float energy = 0;
+      
       //Power / 1000.0 because converting mW to W
       //This allows joules to  be in W per seconds
-      energy += secondsPassed * packet.power;
+      energy += ((millis()-prevTime) / (1000.0)) * packet.power;
 
       prevTime = millis();
 
@@ -137,9 +157,7 @@ void getData(){
  * Data processing
  */
 float remapVoltage(int volt) {
-  float analogToDigital;
-  analogToDigital = (5.0/1023) * volt;  
-  return analogToDigital;
+  return (5.0/1023) * volt;
 }
 
 
@@ -167,9 +185,6 @@ void getScaledReadings() {
  *  To perform handshake to ensure that communication between Rpi and Aduino is ready
  */
 void handshake() {
-  int h_flag = 0;
-  int n_flag = 0;
-
    
   while (h_flag == 0) {
     if (Serial1.available()) {
@@ -281,11 +296,11 @@ void powerSavings() {
 
   // Changing all the rest of the digital pins that are not used to OUTPUT LOW
   // This should save ~9mA
-  for(int i = 0; i <=16; i++) {
+  for(i = 0; i <=16; i++) {
     pinMode(i, OUTPUT);
     digitalWrite(i, LOW);
   }
-  for(int i = 22; i <=53; i++) {  
+  for(i = 22; i <=53; i++) {  
     pinMode(i, OUTPUT);
     digitalWrite(i, LOW);
   }
@@ -303,6 +318,7 @@ void setup()
   Wire.begin();        // join i2c bus (address optional for master)
   Serial.begin(115200);  // start serial for output
   Serial1.begin(115200); //serial for gpio connection between Mega and Rpi
+  pinMode(LED_BUILTIN, OUTPUT);
 
   powerSavings();
   // Initializing sensors 
@@ -323,7 +339,8 @@ void setup()
 } 
 
 
+
+
 void loop()
 {  
 }
- 
