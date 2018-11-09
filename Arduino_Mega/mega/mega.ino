@@ -1,9 +1,11 @@
+#include <power.h>
 #include <MPU6050.h>
 #include <I2Cdev.h>
 #include <ADXL345.h>
 #include <Wire.h>
-#include<Arduino_FreeRTOS.h>
-#include<task.h>
+#include <Arduino_FreeRTOS.h>
+#include <task.h>
+
 #define STACK_SIZE 500
 #define DEVICE_A_ACCEL (0x53)    //first ADXL345 device address
 #define DEVICE_B_ACCEL (0x1D)    //second ADXL345 device address
@@ -40,14 +42,8 @@ float vOut , voltageReading, currentReading;
 //16 bit integer values for raw data of accelerometers
 int16_t xa_raw, ya_raw, za_raw, xb_raw, yb_raw, zb_raw;
 
-//16 bit integer values for offset data of accelerometers
-int16_t xa_offset, ya_offset, za_offset, xb_offset, yb_offset, zb_offset;
-
 //16 bit integer values for gyroscope readings
 int16_t xg_raw, yg_raw, zg_raw;
-
-//16 bit integer values for offset data of gyroscope
-int16_t xg_offset, yg_offset, zg_offset;
 
 //Structure of data packet
 typedef struct Packet {
@@ -63,7 +59,7 @@ typedef struct Packet {
 Packet packet;
 
 
-char databuf[2800];
+char databuf[4000];
 
 char* acc1_x;
 char* acc1_y;
@@ -79,21 +75,42 @@ char* current_c;
 char* power_c;
 char* energy_c;
 
+int ledflag = HIGH;
+int countLED = 0;
+
+  int h_flag = 0;
+  int n_flag = 0;
+
+int i;
+  
 /**
  * Main Task
  */
 void mainTask(void *p) {
-
+  
   while(1){
+//  Serial.println("Enter mainTask");
     xLastWakeTime = xTaskGetTickCount();
-    for (int i=0;i <PKT_SIZE; i++) {
+    for (i=0;i <PKT_SIZE; i++) {
+    countLED++;
+    if (countLED >= 50) {
+    if(ledflag == LOW) {
+      ledflag = HIGH;
+    }
+    else {
+      ledflag = LOW;
+    }
+     digitalWrite(LED_BUILTIN, ledflag);  
+      countLED = 0;  
+    }
       getData(); 
       changeFormat();
       vTaskDelayUntil(&xLastWakeTime, (20/ portTICK_PERIOD_MS));
     }
-     int len = strlen(databuf);
-     for (int i = 0; i < len; i++) {
+     for (i = 0; i < strlen(databuf); i++) {
         Serial1.write(databuf[i]);
+//        Serial.print(databuf[i]);
+//        Serial.println();
      }
      //Serial.println("Sent");
      strcpy(databuf, "");
@@ -125,12 +142,11 @@ void getData(){
       packet.power = packet.current * packet.voltage;
 
       static long prevTime = 0;
-      float secondsPassed = (millis()-prevTime) / (1000.0);
-
       static float energy = 0;
+      
       //Power / 1000.0 because converting mW to W
       //This allows joules to  be in W per seconds
-      energy += secondsPassed * packet.power;
+      energy += ((millis()-prevTime) / (1000.0)) * packet.power;
 
       prevTime = millis();
 
@@ -141,9 +157,7 @@ void getData(){
  * Data processing
  */
 float remapVoltage(int volt) {
-  float analogToDigital;
-  analogToDigital = (5.0/1023) * volt;  
-  return analogToDigital;
+  return (5.0/1023) * volt;
 }
 
 
@@ -167,40 +181,10 @@ void getScaledReadings() {
   packet.gyro[2] = (zg_raw)*scaleFactorGyro;
  }
 
-
-/*
- * Purpose of adding 255 is to account for downward default acceleration in Z axis to be 1g
- */
-void calibrateSensors() {
-  //Setting range of ADXL345
-  sensorA.setRange(ADXL345_RANGE_2G);
-  sensorB.setRange(ADXL345_RANGE_2G);
-  
-  sensorA.getAcceleration(&xa_raw, &ya_raw, &za_raw);
-  sensorB.getAcceleration(&xb_raw, &yb_raw, &zb_raw);
-  sensorC.getRotation(&xg_raw, &yg_raw, &zg_raw);
-  
-  xa_offset = -xa_raw;
-  ya_offset = -ya_raw;
-  za_offset = -za_raw+255;
-
-  xb_offset = -xb_raw;
-  yb_offset = -yb_raw;
-  zb_offset = -zb_raw+255;
-
-  xg_offset = -xg_raw;
-  yg_offset = -yg_raw;
-  zg_offset = -zg_raw;
-}
-
-
 /**
  *  To perform handshake to ensure that communication between Rpi and Aduino is ready
  */
 void handshake() {
-  int h_flag = 0;
-  int n_flag = 0;
-
    
   while (h_flag == 0) {
     if (Serial1.available()) {
@@ -276,25 +260,67 @@ char charbuf[64] ;
  strcat(databuf, "\r");
 }
 
+void powerSavings() {
+  // Initializing all analog pins that are not used to output pins
+  // Turning the useless analog pins to digital pins and setting them to LOW
+  // This should save a total of 5ma
+  pinMode(A2, OUTPUT);
+  pinMode(A3, OUTPUT);
+  pinMode(A4, OUTPUT);
+  pinMode(A5, OUTPUT);
+  pinMode(A6, OUTPUT);
+  pinMode(A7, OUTPUT);
+  pinMode(A8, OUTPUT);
+  pinMode(A9, OUTPUT);
+  pinMode(A10, OUTPUT);
+  pinMode(A11, OUTPUT);
+  pinMode(A12, OUTPUT);
+  pinMode(A13, OUTPUT);
+  pinMode(A14, OUTPUT);
+  pinMode(A15, OUTPUT);
+
+  digitalWrite(A2, LOW);
+  digitalWrite(A3, LOW);
+  digitalWrite(A4, LOW);
+  digitalWrite(A5, LOW);
+  digitalWrite(A6, LOW);
+  digitalWrite(A7, LOW);
+  digitalWrite(A8, LOW);
+  digitalWrite(A9, LOW);
+  digitalWrite(A10, LOW);
+  digitalWrite(A11, LOW);
+  digitalWrite(A12, LOW);
+  digitalWrite(A13, LOW);
+  digitalWrite(A14, LOW);
+  digitalWrite(A15, LOW);
+
+  // Changing all the rest of the digital pins that are not used to OUTPUT LOW
+  // This should save ~9mA
+  for(i = 0; i <=16; i++) {
+    pinMode(i, OUTPUT);
+    digitalWrite(i, LOW);
+  }
+  for(i = 22; i <=53; i++) {  
+    pinMode(i, OUTPUT);
+    digitalWrite(i, LOW);
+  }
+
+  // Turning off peripherals that are not in use
+  // Timer1, 2 and 3 are for interrupts (attaching interrupts and detaching them, setting PWM etc)
+  power_spi_disable(); 
+  power_timer1_disable();
+  power_timer2_disable();
+  power_timer3_disable();
+}
 
 void setup()
 {
   Wire.begin();        // join i2c bus (address optional for master)
   Serial.begin(115200);  // start serial for output
   Serial1.begin(115200); //serial for gpio connection between Mega and Rpi
-    
-  xa_offset = 0;
-  ya_offset = 0;
-  za_offset = 0;
-  xb_offset = 0;
-  yb_offset = 0;
-  zb_offset = 0;
-  
-  xg_offset = 0;
-  yg_offset = 0;
-  zg_offset = 0;
+  pinMode(LED_BUILTIN, OUTPUT);
 
-  
+  powerSavings();
   // Initializing sensors 
   sensorA.initialize();
   sensorB.initialize();
@@ -313,7 +339,8 @@ void setup()
 } 
 
 
+
+
 void loop()
 {  
 }
- 
