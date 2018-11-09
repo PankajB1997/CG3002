@@ -254,7 +254,7 @@ def fitModel(X, Y):
     models = []
     scores = []
 
-    for i in range(0, 6):
+    for i in range(0, 1):
         model = initialiseModel(i)
         accuracy_scores = cross_val_score(model, X, Y, cv=5, scoring="accuracy", n_jobs=-1)
         scores.append(accuracy_scores.mean())
@@ -341,6 +341,8 @@ if __name__ == "__main__":
 
     X = scaler.fit_transform(X)
     X_test = scaler.transform(X_test)
+
+    pickle.dump(scaler, open(os.path.join('scaler', 'standard_scaler_128.pkl'), 'wb'))
 
     logger.info(str(Counter(Y)))
     # logger.info(str(Counter(Y_val)))

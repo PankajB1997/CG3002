@@ -15,7 +15,7 @@ logger.setLevel(logging.INFO)
 DATASET_FILEPATH = "dataset"
 
 # Default: 64 sets per segment with 75% overlap
-SEGMENT_SIZE = 64
+SEGMENT_SIZE = 128
 OVERLAP = 0.75
 
 # for every segment of data, extract the feature vector
@@ -42,7 +42,7 @@ def extract_feature_vector(X):
 
     X_peakF = []
     # return feature vector by appending all vectors above as one d-dimension feature vector
-    return np.append(X_mean, [X_var, X_max, X_min, X_off, X_mad, X_fft_mean, X_fft_var, X_fft_max, X_fft_min])
+    return np.append(X_mean, [ X_var, X_max, X_min, X_off, X_mad ])
     # , X_fft_mean, X_fft_var, X_fft_max, X_fft_min
 
 # segment data from the raw data files, return list of tuples (segments, move_class)
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         raw_data_all.extend(raw_data[move])
     # raw_data_all = [ data[:6] for data in raw_data_all ]
     scaler.fit(raw_data_all)
-    pickle.dump(scaler, open(os.path.join('scaler', 'min_max_scaler.pkl'), 'wb'))
+    pickle.dump(scaler, open(os.path.join('scaler', 'min_max_scaler_128.pkl'), 'wb'))
     data = []
     for move in raw_data:
         segments = get_all_segments(raw_data[move], move, scaler)

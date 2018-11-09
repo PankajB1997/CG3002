@@ -181,8 +181,9 @@ def readLineCR(port):
 
 def compute_checksum(data, correct_checksum):
     #data, correct_checksum = data.rsplit("," , 1)
-    for i in range(len(data)):
-        cs ^= data[i] #to be changed
+    cs = int(data[0])
+    for i in range(len(data)-1):
+        cs ^= int(data[i]) #to be changed
     
     if (cs == correct_checksum):
         print("Packet OK")

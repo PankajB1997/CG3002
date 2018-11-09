@@ -30,7 +30,7 @@ EXTRACT_SIZE = int((1 - OVERLAP) * N)
 
 CONFIDENCE_THRESHOLD = 0.90
 INITIAL_WAIT = 61500
-WAIT = 1000 # in milliseconds
+WAIT = 3000 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
 
 secret_key = "1234123412341234"  # must be at least 16
@@ -257,7 +257,7 @@ print("connected")
 
 countMovesSent = 0
 stoptime = int(round(time.time() * 1000))
-iter = N
+ite = N
 while (data_flag == False):
 
     print("ENTERING")
@@ -266,8 +266,10 @@ while (data_flag == False):
     otherData = []
     try:
         if not len(previousPacketData) == 0:
-            iter = EXTRACT_SIZE
-        for i in range(iter): # extract from 0->N-1 = N sets of readings
+            ite = EXTRACT_SIZE
+        else:
+            ite = N
+        for i in range(ite): # extract from 0->N-1 = N sets of readings
             data = readLineCR(port).split(',')
             print(data)
             if not len(data) == 13:
@@ -280,31 +282,34 @@ while (data_flag == False):
         print("Error in reading packet!")
         continue
 
-    print("Before " + str(wait_time))
     if int(round(time.time() * 1000)) - wait_time <= INITIAL_WAIT:
         continue
-    print("After " + str(wait_time))
 
-    if int(round(time.time() * 1000)) - stoptime <= WAIT:
+    print(len(previousPacketData))
+    print(len(movementData))
+
+    diff = int(round(time.time() * 1000)) - stoptime
+    if diff <= WAIT:
         continue
 
     # print(otherData)
 
     # Add overlapping logic
     if len(previousPacketData) == N - EXTRACT_SIZE and not EXTRACT_SIZE == N:
-        rawData = previousPacketData + movementData[:EXTRACT_SIZE]
+        rawData = previousPacketData + movementData
         print("Overlap done")
     else:
-        rawData = movementData
+        rawData = movementData[:]
         print("Overlap not done")
 
     # Add ML Logic
     # Precondition 1: dataArray has values for acc1[3], acc2[3], gyro[3], voltage[1], current[1], power[1] and energy[1] in that order
     # Precondition 2: dataArray has N sets of readings, where N is the segment size, hence it has dimensions N*13
     try:
-        danceMove, predictionConfidence = predict_dance_move(movementData)
+        danceMove, predictionConfidence = predict_dance_move(rawData)
         if predictionConfidence > CONFIDENCE_THRESHOLD:
             danceMoveBuffer.append(danceMove)
+        print(len(rawData))
         print(danceMoveBuffer)
     except:
         traceback.print_exc()
@@ -314,16 +319,14 @@ while (data_flag == False):
     isMoveSent = False
     if len(danceMoveBuffer) >= MOVE_BUFFER_MIN_SIZE and lastXDanceMovesSame(danceMoveBuffer) == True:
         try:
-            otherData = np.mean(otherData, axis=0).tolist()
+            otherData = np.mean(otherData, axis=0).tolist() # only calculated for overlapped part of the segment
             voltage = otherData[0]
             current = otherData[1]
             power = otherData[2]
             energy = otherData[3]
             output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
-            if danceMove == "logout":
-                # output = danceMove # with logout command, no other values are sent
-                if not countMovesSent >= 40: # only allow logout to be sent once 40 moves have been sent
-                    continue
+            if danceMove == "logout" and not countMovesSent >= 40: # only allow logout to be sent once 40 moves have been sent
+                continue
             # Send output to server
             sendToServer(s, output)
             print("Sent to server: " + str(output) + ".")
@@ -341,8 +344,11 @@ while (data_flag == False):
 
     # Add overlapping logic
     if EXTRACT_SIZE >= 0 and EXTRACT_SIZE < N:
-        previousPacketData = movementData[EXTRACT_SIZE:]
+        previousPacketData = rawData[EXTRACT_SIZE:]
     else:
+        previousPacketData = []
+
+    if isMoveSent == True:
         previousPacketData = []
 
     # data_flag = True
