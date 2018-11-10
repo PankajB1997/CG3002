@@ -306,8 +306,8 @@ if __name__ == "__main__":
     X_val = np.expand_dims(X_val, axis=2)
     X_test = np.expand_dims(X_test, axis=2)
 
-    # model = fitModel(X, Y, X_val, Y_val)
-    model = load_model(os.path.join(MODELS_SAVEPATH, 'nn_model' + MDL + '.hdf5'))
+    model = fitModel(X, Y, X_val, Y_val)
+    # model = load_model(os.path.join(MODELS_SAVEPATH, 'nn_model' + MDL + '.hdf5'))
 
     # Store only best model file and discard the rest
     modelFiles = os.listdir(MODELS_SAVEPATH)
