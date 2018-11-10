@@ -15,7 +15,7 @@ logger.setLevel(logging.INFO)
 DATASET_FILEPATH = "dataset"
 SCALER_FILEPATH_PREFIX = "nn_"
 
-SEGMENT_SIZE = 64
+SEGMENT_SIZE = 128
 OVERLAP = 0.75
 MDL = "_segment-" + str(SEGMENT_SIZE) + "_overlap-" + str(OVERLAP * 100)
 

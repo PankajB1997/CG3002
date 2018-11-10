@@ -1,8 +1,5 @@
-The actual move number7 was predicted as salute with a prediction confidence of 0.5585409998893738.
-The actual move number7 was predicted as turnclap with a prediction confidence of 0.776120126247406.
-The actual move sidestep was predicted as chicken with a prediction confidence of 0.8172120451927185.
-The actual move turnclap was predicted as salute with a prediction confidence of 0.8439590930938721.
+The actual move chicken was predicted as swing with a prediction confidence of 0.9878668785095215.
 
-Total mistakes made with 95.0% confidence or more: 0
-Total mistakes made overall: 4
-Total number of test cases: 8140
+Total mistakes made with 95.0% confidence or more: 1
+Total mistakes made overall: 1
+Total number of test cases: 20984
