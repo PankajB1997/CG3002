@@ -24,7 +24,7 @@ from sklearn.multiclass import OneVsRestClassifier
 # Fix seed value for reproducibility
 np.random.seed(1234)
 
-N = 64
+N = 128
 OVERLAP = 0.75
 MDL = "_segment-" + str(N) + "_overlap-" + str(OVERLAP * 100)
 

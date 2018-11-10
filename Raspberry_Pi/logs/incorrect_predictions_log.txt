@@ -1,6 +1,26 @@
-The actual move chicken was predicted as swing with a prediction confidence of 0.9915628433227539.
-The actual move salute was predicted as number7 with a prediction confidence of 0.7359817624092102.
+The actual move chicken was predicted as sidestep with a prediction confidence of 0.6558902263641357.
+The actual move chicken was predicted as sidestep with a prediction confidence of 0.8209405541419983.
+The actual move chicken was predicted as swing with a prediction confidence of 0.9170283675193787.
+The actual move chicken was predicted as sidestep with a prediction confidence of 0.9391300082206726.
+The actual move number7 was predicted as salute with a prediction confidence of 0.5797365307807922.
+The actual move number7 was predicted as salute with a prediction confidence of 0.6398579478263855.
+The actual move number7 was predicted as turnclap with a prediction confidence of 0.7649775743484497.
+The actual move number7 was predicted as salute with a prediction confidence of 0.9080623984336853.
+The actual move number7 was predicted as salute with a prediction confidence of 0.9299792647361755.
+The actual move numbersix was predicted as swing with a prediction confidence of 0.9321469664573669.
+The actual move salute was predicted as number7 with a prediction confidence of 0.5177293419837952.
+The actual move salute was predicted as turnclap with a prediction confidence of 0.5183291435241699.
+The actual move salute was predicted as number7 with a prediction confidence of 0.6025106906890869.
+The actual move salute was predicted as number7 with a prediction confidence of 0.6240550875663757.
+The actual move salute was predicted as turnclap with a prediction confidence of 0.9562273621559143.
+The actual move salute was predicted as number7 with a prediction confidence of 0.9857882857322693.
+The actual move sidestep was predicted as chicken with a prediction confidence of 0.6592700481414795.
+The actual move sidestep was predicted as chicken with a prediction confidence of 0.830111026763916.
+The actual move sidestep was predicted as salute with a prediction confidence of 0.9479343891143799.
+The actual move swing was predicted as mermaid with a prediction confidence of 0.900950014591217.
+The actual move turnclap was predicted as salute with a prediction confidence of 0.9966331124305725.
+The actual move turnclap was predicted as cowboy with a prediction confidence of 0.9999998807907104.
 
-Total mistakes made with 95.0% confidence or more: 1
-Total mistakes made overall: 2
-Total number of test cases: 20984
+Total mistakes made with 95.0% confidence or more: 4
+Total mistakes made overall: 22
+Total number of test cases: 13999

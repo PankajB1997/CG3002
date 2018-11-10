@@ -27,7 +27,7 @@ from keras.models import load_model
 # Fix seed value for reproducibility
 np.random.seed(1234)
 
-N = 64
+N = 128
 OVERLAP = 0.75
 EXTRACT_SIZE = int((1 - OVERLAP) * N)
 MDL = "_segment-" + str(N) + "_overlap-" + str(OVERLAP * 100)
