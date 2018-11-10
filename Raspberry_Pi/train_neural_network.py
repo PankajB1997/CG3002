@@ -313,7 +313,7 @@ if __name__ == "__main__":
         if os.path.exists(filepath):
             os.remove(filepath)
     print("Renaming " + str(os.path.join(MODELS_SAVEPATH, modelFiles[0])) + " to " + str(os.path.join(MODELS_SAVEPATH, 'nn_model.hdf5')))
-    os.rename(os.path.join(MODELS_SAVEPATH, modelFiles[0]), os.path.join(MODELS_SAVEPATH, 'nn_model.hdf5'))
+    os.rename(os.path.join(MODELS_SAVEPATH, modelFiles[0]), os.path.join(MODELS_SAVEPATH, 'nn_model' + MDL + '.hdf5'))
 
     print("Predicting...")
     train_pred = model.predict(X)
