@@ -21,46 +21,35 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.multiclass import OneVsRestClassifier
 
+N = 64
+OVERLAP = 0.75
+MDL = "_segment-" + str(N) + "_overlap-" + str(OVERLAP * 100)
+
 # initialise logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 CG3002_FILEPATH = os.path.join('/', 'CG3002')
-# "\\Users\\pankaj\\Documents\\CG3002"
 
 # set constant flag for which classifier to use
 '''
 0: OneVsRestClassifier(estimator = MLPClassifier()),
 1: OneVsRestClassifier(estimator = SVC(kernel="linear", C=0.025)),
 2: RandomForestClassifier(max_depth=5, n_estimators=200, max_features=1),
-3: RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
-4: MLPClassifier(alpha=1),
-5: SVC(kernel="linear", C=0.025),
-6: KNeighborsClassifier(3),
-7: SVC(gamma=2, C=1),
-8: DecisionTreeClassifier(max_depth=5),
-9: AdaBoostClassifier(),
-10: GaussianNB(),
-11: QuadraticDiscriminantAnalysis()
+3: MLPClassifier(alpha=1),
+4: SVC(kernel="linear", C=0.025),
 '''
 
 # set probability threshold for multibucketing
 # PROB_THRESHOLD = 0.20
 
 MODEL_UNIQUE_IDS = {
-    0: 'OneVsRestClassifierMLP',
-    1: 'OneVsRestClassifierSVC',
-    2: 'RandomForestClassifier200',
-    3: 'RandomForestClassifier10',
-    4: 'MLPClassifier',
-    5: 'LinearSVC',
-    # 6: KNeighborsClassifier(3),
-    # 7: SVC(gamma=2, C=1),
-    # 8: DecisionTreeClassifier(max_depth=5),
-    # 9: AdaBoostClassifier(),
-    # 10: GaussianNB(),
-    # 11: QuadraticDiscriminantAnalysis()
+    0: 'OneVsRestClassifierMLP' + MDL,
+    1: 'OneVsRestClassifierSVC' + MDL,
+    2: 'RandomForestClassifier200' + MDL,
+    3: 'MLPClassifier' + MDL,
+    4: 'LinearSVC' + MDL,
 }
 
 CONFIDENCE_THRESHOLD = 0.95
@@ -237,15 +226,8 @@ def initialiseModel(model_index):
         OneVsRestClassifier(estimator = MLPClassifier()),
         OneVsRestClassifier(estimator = SVC(kernel="linear", C=0.025)),
         RandomForestClassifier(max_depth=5, n_estimators=200, max_features=1),
-        RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
         MLPClassifier(alpha=1),
         SVC(kernel="linear", C=0.025),
-        # KNeighborsClassifier(5),
-        # SVC(gamma=2, C=1),
-        # DecisionTreeClassifier(max_depth=5),
-        # AdaBoostClassifier(),
-        # GaussianNB(),
-        # QuadraticDiscriminantAnalysis(),
     ]
     return classifiers[model_index]
 
@@ -254,7 +236,7 @@ def fitModel(X, Y):
     models = []
     scores = []
 
-    for i in range(0, 1):
+    for i in range(0, 5):
         model = initialiseModel(i)
         accuracy_scores = cross_val_score(model, X, Y, cv=5, scoring="accuracy", n_jobs=-1)
         scores.append(accuracy_scores.mean())
@@ -323,8 +305,8 @@ def printConfidenceForIncorrectPredictions(pred_prob, pred_lbl, true_lbl):
         logfile.write("\nTotal number of test cases: " + str(len(pred_prob)))
 
 
-TRAIN_DATASET_PATH = "dataset/train.pkl"
-TEST_DATASET_PATH = "dataset/test.pkl"
+TRAIN_DATASET_PATH = os.path.join("dataset", "train.pkl")
+TEST_DATASET_PATH = os.path.join("dataset", "test.pkl")
 
 if __name__ == "__main__":
 
@@ -342,7 +324,7 @@ if __name__ == "__main__":
     X = scaler.fit_transform(X)
     X_test = scaler.transform(X_test)
 
-    pickle.dump(scaler, open(os.path.join('scaler', 'standard_scaler_128.pkl'), 'wb'))
+    pickle.dump(scaler, open(os.path.join('scaler', 'standard_scaler' + MDL + '.pkl'), 'wb'))
 
     logger.info(str(Counter(Y)))
     # logger.info(str(Counter(Y_val)))

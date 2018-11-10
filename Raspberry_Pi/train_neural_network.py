@@ -15,6 +15,18 @@ from keras.layers import *
 from keras.optimizers import *
 from keras.callbacks import ModelCheckpoint
 
+# Set max memory to allocate on GPU
+import tensorflow as tf
+import keras.backend as K
+config = K.tf.ConfigProto()
+# config.gpu_options.allow_growth = True
+config.gpu_options.per_process_gpu_memory_fraction = 0.45
+session = K.tf.Session(config=config)
+
+N = 64
+OVERLAP = 0.75
+MDL = "_segment-" + str(N) + "_overlap-" + str(OVERLAP * 100)
+
 # initialise logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
@@ -236,7 +248,8 @@ def fitModel(X_train, Y_train, X_val, Y_val):
     checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')
     callbacks_list = [checkpoint]
     sample_weight = compute_sample_weight('balanced', Y_train)
-    model.fit(X_train, str2onehot(Y_train), epochs=20, validation_data=(X_val, str2onehot(Y_val)), batch_size=50, callbacks=callbacks_list, sample_weight=sample_weight)
+    with tf.device('/gpu:0'):
+        model.fit(X_train, str2onehot(Y_train), epochs=20, validation_data=(X_val, str2onehot(Y_val)), batch_size=50, callbacks=callbacks_list, sample_weight=sample_weight)
     return model
 
 def filterDataset(X, Y, X_test, Y_test):
@@ -256,23 +269,21 @@ def filterDataset(X, Y, X_test, Y_test):
 
 TRAIN_DATASET_PATH = os.path.join("dataset", "train.pkl")
 TEST_DATASET_PATH = os.path.join("dataset", "test.pkl")
-SCALER_SAVEPATH = os.path.join("scaler", "standard_scaler.pkl")
 MODELS_SAVEPATH = os.path.join("nn_models")
 
 if __name__ == "__main__":
 
     # scaler = QuantileTransformer(output_distribution='uniform')
     # scaler = MinMaxScaler((-1,1))
-    scaler = StandardScaler()
+    scaler = pickle.load(open(os.path.join('nn_scaler', 'standard_scaler' + MDL + '.pkl'), 'rb'))
 
     # Use the dataset prepared from self-collected dataset's raw data values
     X, Y = pickle.load(open(TRAIN_DATASET_PATH, 'rb'))
     X_test, Y_test = pickle.load(open(TEST_DATASET_PATH, 'rb'))
     X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
 
-    X = scaler.fit_transform(X)
+    X = scaler.transform(X)
     X_test = scaler.transform(X_test)
-    pickle.dump(scaler, open(SCALER_SAVEPATH, 'wb'))
 
     print("Vectorizing...")
 

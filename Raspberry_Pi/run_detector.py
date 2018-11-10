@@ -27,11 +27,27 @@ from scipy.fftpack import fft, ifft, rfft
 N = 64
 OVERLAP = 0.75
 EXTRACT_SIZE = int((1 - OVERLAP) * N)
-
-CONFIDENCE_THRESHOLD = 0.90
-INITIAL_WAIT = 61500
-WAIT = 3000 # in milliseconds
+MDL = "_segment-" + str(N) + "_overlap-" + str(OVERLAP * 100)
+CONFIDENCE_THRESHOLD = 0.75
+INITIAL_WAIT = 61500 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
+
+# Initialize WAIT value in milliseconds depending on N and OVERLAP values
+WAIT = 940 # for best case prediction time 3.5 seconds for N=64 and OVERLAP=0
+if N == 128 and OVERLAP == 0.75:
+    WAIT = 1000 # for best case prediction time 4.2 seconds
+elif N == 128 and OVERLAP == 0.50:
+    WAIT = 1160 # for best case prediction time 5.0 seconds
+elif N == 128 and OVERLAP == 0.25:
+    WAIT = 1020 # for best case prediction time 5.5 seconds
+elif N == 128 and OVERLAP == 0:
+    WAIT = 880 # for best case prediction time 6.0 seconds
+elif N == 64 and OVERLAP == 0.75:
+    WAIT = 1400 # for best case prediction time 3.0 seconds
+elif N == 64 and OVERLAP == 0.50:
+    WAIT = 1080 # for best case prediction time 3.0 seconds
+elif N == 64 and OVERLAP == 0.25:
+    WAIT = 1260 # for best case prediction time 3.5 seconds
 
 secret_key = "1234123412341234"  # must be at least 16
 BLOCK_SIZE = 32 # AES.block_size
@@ -111,9 +127,8 @@ def str2onehot(Y):
    return new_Y
 
 try:
-    # Load model from pickle/hdf5 file
-    # model = load_model(os.path.join('nn_models', 'nn_model.hdf5'))
-    model = pickle.load(open(os.path.join('classifier_models', 'model_OneVsRestClassifierMLP.pkl'), 'rb'))
+    # Load model from pickle file
+    model = pickle.load(open(os.path.join('classifier_models', 'model_OneVsRestClassifierMLP' + MDL + '.pkl'), 'rb'))
 except:
     traceback.print_exc()
     print("Error in loading pretrained model!")
@@ -121,8 +136,8 @@ except:
 
 try:
     # Load scalers
-    min_max_scaler = pickle.load(open(os.path.join('scaler', 'min_max_scaler.pkl'), 'rb'))
-    standard_scaler = pickle.load(open(os.path.join('scaler', 'standard_scaler.pkl'), 'rb'))
+    min_max_scaler = pickle.load(open(os.path.join('scaler', 'min_max_scaler' + MDL + '.pkl'), 'rb'))
+    standard_scaler = pickle.load(open(os.path.join('scaler', 'standard_scaler' + MDL + '.pkl'), 'rb'))
 except:
     traceback.print_exc()
     print("Error in loading scaler objects!")
@@ -151,7 +166,7 @@ def extract_feature_vector(X):
         # X_psd = []
         # X_peakF = []
         # obtain feature vector by appending all vectors above as one d-dimension feature vector
-        X = np.append(X_mean, [X_var, X_max, X_min, X_off, X_mad, X_fft_mean, X_fft_var, X_fft_max, X_fft_min])
+        X = np.append(X_mean, [ X_var, X_max, X_min, X_off, X_mad ])
         return standard_scaler.transform([X])
     except:
         traceback.print_exc()
