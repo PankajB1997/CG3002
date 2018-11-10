@@ -24,6 +24,9 @@ from scipy.signal import savgol_filter
 from scipy.fftpack import fft, ifft, rfft
 # from keras.models import load_model
 
+# Fix seed value for reproducibility
+np.random.seed(1234)
+
 N = 64
 OVERLAP = 0.75
 EXTRACT_SIZE = int((1 - OVERLAP) * N)

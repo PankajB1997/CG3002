@@ -1,5 +1,6 @@
-The actual move chicken was predicted as swing with a prediction confidence of 0.9878668785095215.
+The actual move chicken was predicted as swing with a prediction confidence of 0.9915628433227539.
+The actual move salute was predicted as number7 with a prediction confidence of 0.7359817624092102.
 
 Total mistakes made with 95.0% confidence or more: 1
-Total mistakes made overall: 1
+Total mistakes made overall: 2
 Total number of test cases: 20984

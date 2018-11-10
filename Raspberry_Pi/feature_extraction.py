@@ -7,6 +7,9 @@ from obspy.signal.filter import highpass
 from scipy.signal import savgol_filter, periodogram, welch
 from scipy.fftpack import fft, ifft, rfft
 
+# Fix seed value for reproducibility
+np.random.seed(1234)
+
 # initialise logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()

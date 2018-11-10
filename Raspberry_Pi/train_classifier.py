@@ -21,6 +21,9 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.multiclass import OneVsRestClassifier
 
+# Fix seed value for reproducibility
+np.random.seed(1234)
+
 N = 64
 OVERLAP = 0.75
 MDL = "_segment-" + str(N) + "_overlap-" + str(OVERLAP * 100)

@@ -15,6 +15,9 @@ from keras.layers import *
 from keras.optimizers import *
 from keras.callbacks import ModelCheckpoint
 
+# Fix seed value for reproducibility
+np.random.seed(1234)
+
 # Set max memory to allocate on GPU
 import tensorflow as tf
 import keras.backend as K
@@ -244,7 +247,7 @@ def initialiseModel(X_train):
 # Train the model, monitor on validation loss and save the best model out of given epochs
 def fitModel(X_train, Y_train, X_val, Y_val):
     model = initialiseModel(X_train)
-    filepath = os.path.join("nn_models", "nn_model" + "_{epoch:02d}.hdf5")
+    filepath = os.path.join("nn_models", "nn_model" + MDL + "_{epoch:02d}.hdf5")
     checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')
     callbacks_list = [checkpoint]
     sample_weight = compute_sample_weight('balanced', Y_train)
@@ -303,16 +306,18 @@ if __name__ == "__main__":
     X_val = np.expand_dims(X_val, axis=2)
     X_test = np.expand_dims(X_test, axis=2)
 
-    model = fitModel(X, Y, X_val, Y_val)
+    # model = fitModel(X, Y, X_val, Y_val)
+    model = load_model(os.path.join(MODELS_SAVEPATH, 'nn_model' + MDL + '.hdf5'))
 
     # Store only best model file and discard the rest
     modelFiles = os.listdir(MODELS_SAVEPATH)
+    modelFiles = [ file for file in modelFiles if MDL in file ]
     modelFiles.sort(reverse=True)
     for file in modelFiles[1:]:
         filepath = os.path.join(MODELS_SAVEPATH, file)
         if os.path.exists(filepath):
             os.remove(filepath)
-    print("Renaming " + str(os.path.join(MODELS_SAVEPATH, modelFiles[0])) + " to " + str(os.path.join(MODELS_SAVEPATH, 'nn_model.hdf5')))
+    print("Renaming " + str(os.path.join(MODELS_SAVEPATH, modelFiles[0])) + " to " + str(os.path.join(MODELS_SAVEPATH, 'nn_model' + MDL + '.hdf5')))
     os.rename(os.path.join(MODELS_SAVEPATH, modelFiles[0]), os.path.join(MODELS_SAVEPATH, 'nn_model' + MDL + '.hdf5'))
 
     print("Predicting...")
