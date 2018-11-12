@@ -167,6 +167,7 @@ def extract_feature_vector(X):
         X_fft_max = np.max(X_fft_abs, axis=0)
         X_fft_min = np.min(X_fft_abs, axis=0)
         # X_psd = []
+
         # X_peakF = []
         # obtain feature vector by appending all vectors above as one d-dimension feature vector
         X = np.append(X_mean, [ X_var, X_max, X_min, X_off, X_mad ])
@@ -346,6 +347,8 @@ while (data_flag == False):
                 continue
             # Send output to server
             sendToServer(s, output)
+            port.reset_input_buffer()
+            port.reset_output_buffer()
             print("Sent to server: " + str(output) + ".")
             danceMoveBuffer = []
             stoptime = int(round(time.time() * 1000))

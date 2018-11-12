@@ -27,7 +27,7 @@ from scipy.fftpack import fft, ifft, rfft
 # Fix seed value for reproducibility
 np.random.seed(1234)
 
-N = 128
+N = 64
 OVERLAP = 0.75
 EXTRACT_SIZE = int((1 - OVERLAP) * N)
 MDL = "_segment-" + str(N) + "_overlap-" + str(OVERLAP * 100)
