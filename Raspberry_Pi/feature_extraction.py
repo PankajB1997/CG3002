@@ -6,6 +6,7 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, Ro
 from obspy.signal.filter import highpass
 from scipy.signal import savgol_filter, periodogram, welch
 from scipy.fftpack import fft, ifft, rfft
+from scipy.stats import entropy
 
 # Fix seed value for reproducibility
 np.random.seed(1234)
@@ -20,7 +21,7 @@ SCALER_FILEPATH_PREFIX = "nn_"
 
 SEGMENT_SIZE = 128
 OVERLAP = 0.75
-MDL = "_segment-" + str(SEGMENT_SIZE) + "_overlap-" + str(OVERLAP * 100)
+MDL = "_segment-" + str(SEGMENT_SIZE) + "_overlap-newf-" + str(OVERLAP * 100)
 
 # for every segment of data, extract the feature vector
 def extract_feature_vector(X):
@@ -37,6 +38,7 @@ def extract_feature_vector(X):
     X_fft_var = np.var(X_fft_abs, axis=0)
     X_fft_max = np.max(X_fft_abs, axis=0)
     X_fft_min = np.min(X_fft_abs, axis=0)
+    X_entr = entropy(fft(X))
     # logger.info("hello ")
     # logger.info(X)
 
@@ -46,7 +48,7 @@ def extract_feature_vector(X):
 
     X_peakF = []
     # return feature vector by appending all vectors above as one d-dimension feature vector
-    return np.append(X_mean, [ X_var, X_max, X_min, X_off, X_mad ])
+    return np.append(X_mean, [ X_var, X_entr, X_off, X_mad ])
     # , X_fft_mean, X_fft_var, X_fft_max, X_fft_min
 
 # segment data from the raw data files, return list of tuples (segments, move_class)

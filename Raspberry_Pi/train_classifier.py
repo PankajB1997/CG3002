@@ -26,7 +26,7 @@ np.random.seed(1234)
 
 N = 128
 OVERLAP = 0.75
-MDL = "_segment-" + str(N) + "_overlap-" + str(OVERLAP * 100)
+MDL = "_segment-" + str(N) + "_overlap-newf-" + str(OVERLAP * 100)
 
 # initialise logger
 logging.basicConfig(level=logging.INFO)
