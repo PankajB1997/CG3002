@@ -38,7 +38,7 @@ def extract_feature_vector(X):
     X_fft_var = np.var(X_fft_abs, axis=0)
     X_fft_max = np.max(X_fft_abs, axis=0)
     X_fft_min = np.min(X_fft_abs, axis=0)
-    X_entr = entropy(fft(X))
+    X_entr = entropy(np.abs(np.fft.rfft(X, axis=0))[1:], base=2)
     # logger.info("hello ")
     # logger.info(X)
 

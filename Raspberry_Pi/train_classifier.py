@@ -55,7 +55,7 @@ MODEL_UNIQUE_IDS = {
     4: 'LinearSVC' + MDL,
 }
 
-CONFIDENCE_THRESHOLD = 0.95
+CONFIDENCE_THRESHOLD = 0.75
 
 ENC_LIST = [
     ('sidestep', 0),

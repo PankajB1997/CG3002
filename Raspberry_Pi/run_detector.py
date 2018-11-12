@@ -30,7 +30,7 @@ np.random.seed(1234)
 N = 64
 OVERLAP = 0.75
 EXTRACT_SIZE = int((1 - OVERLAP) * N)
-MDL = "_segment-" + str(N) + "_overlap-" + str(OVERLAP * 100)
+MDL = "_segment-" + str(N) + "_overlap-newf-" + str(OVERLAP * 100)
 CONFIDENCE_THRESHOLD = 0.75
 INITIAL_WAIT = 61500 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
