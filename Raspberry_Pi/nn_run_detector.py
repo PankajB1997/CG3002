@@ -27,8 +27,8 @@ from keras.models import load_model
 # Fix seed value for reproducibility
 np.random.seed(1234)
 
-N = 128
-OVERLAP = 0.75
+N = 32
+OVERLAP = 0.5
 EXTRACT_SIZE = int((1 - OVERLAP) * N)
 MDL = "_segment-" + str(N) + "_overlap-newf-" + str(OVERLAP * 100)
 CONFIDENCE_THRESHOLD = 0.75
@@ -301,6 +301,7 @@ while (data_flag == False):
     if int(round(time.time() * 1000)) - wait_time <= INITIAL_WAIT:
         continue
 
+    print(previousPacketData)
     print(len(previousPacketData))
     print(len(movementData))
 

@@ -19,8 +19,8 @@ logger.setLevel(logging.INFO)
 DATASET_FILEPATH = "dataset"
 SCALER_FILEPATH_PREFIX = "nn_"
 
-SEGMENT_SIZE = 128
-OVERLAP = 0.75
+SEGMENT_SIZE = 32
+OVERLAP = 0
 MDL = "_segment-" + str(SEGMENT_SIZE) + "_overlap-newf-" + str(OVERLAP * 100)
 
 # for every segment of data, extract the feature vector

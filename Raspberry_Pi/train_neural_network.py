@@ -26,8 +26,8 @@ config = K.tf.ConfigProto()
 config.gpu_options.per_process_gpu_memory_fraction = 0.45
 session = K.tf.Session(config=config)
 
-N = 128
-OVERLAP = 0.75
+N = 32
+OVERLAP = 0.5
 MDL = "_segment-" + str(N) + "_overlap-newf-" + str(OVERLAP * 100)
 
 # initialise logger
