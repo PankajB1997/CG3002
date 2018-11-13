@@ -22,21 +22,22 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, Ro
 from obspy.signal.filter import highpass
 from scipy.signal import savgol_filter
 from scipy.fftpack import fft, ifft, rfft
+from scipy.stats import entropy
 # from keras.models import load_model
 
 # Fix seed value for reproducibility
 np.random.seed(1234)
 
 N = 32
-OVERLAP = 0.5
+OVERLAP = 0
 EXTRACT_SIZE = int((1 - OVERLAP) * N)
 MDL = "_segment-" + str(N) + "_overlap-newf-" + str(OVERLAP * 100)
-CONFIDENCE_THRESHOLD = 0.75
+CONFIDENCE_THRESHOLD = 0.5
 INITIAL_WAIT = 61500 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
 
 # Initialize WAIT value in milliseconds depending on N and OVERLAP values
-WAIT = 940 # for best case prediction time 3.5 seconds for N=64 and OVERLAP=0
+WAIT = 2000 # for best case prediction time 3.5 seconds for N=64 and OVERLAP=0
 if N == 128 and OVERLAP == 0.75:
     WAIT = 1000 # for best case prediction time 4.2 seconds
 elif N == 128 and OVERLAP == 0.50:
@@ -277,7 +278,7 @@ stoptime = int(round(time.time() * 1000))
 ite = N
 while (data_flag == False):
 
-    print("ENTERING")
+    # print("ENTERING")
 
     movementData = []
     otherData = []
@@ -288,7 +289,7 @@ while (data_flag == False):
             ite = N
         for i in range(ite): # extract from 0->N-1 = N sets of readings
             data = readLineCR(port).split(',')
-            print(data)
+            # print(data)
             if not len(data) == 13:
                continue
             data = [ float(val.strip()) for val in data ]
@@ -302,9 +303,9 @@ while (data_flag == False):
     if int(round(time.time() * 1000)) - wait_time <= INITIAL_WAIT:
         continue
 
-    print(previousPacketData)
-    print(len(previousPacketData))
-    print(len(movementData))
+    # print(previousPacketData)
+    # print(len(previousPacketData))
+    # print(len(movementData))
 
     diff = int(round(time.time() * 1000)) - stoptime
     if diff <= WAIT:
@@ -315,10 +316,10 @@ while (data_flag == False):
     # Add overlapping logic
     if len(previousPacketData) == N - EXTRACT_SIZE and not EXTRACT_SIZE == N:
         rawData = previousPacketData + movementData
-        print("Overlap done")
+        # print("Overlap done")
     else:
         rawData = movementData[:]
-        print("Overlap not done")
+        # print("Overlap not done")
 
     # Add ML Logic
     # Precondition 1: dataArray has values for acc1[3], acc2[3], gyro[3], voltage[1], current[1], power[1] and energy[1] in that order
@@ -327,7 +328,7 @@ while (data_flag == False):
         danceMove, predictionConfidence = predict_dance_move(rawData)
         if predictionConfidence > CONFIDENCE_THRESHOLD:
             danceMoveBuffer.append(danceMove)
-        print(len(rawData))
+        # print(len(rawData))
         print(danceMoveBuffer)
     except:
         traceback.print_exc()
