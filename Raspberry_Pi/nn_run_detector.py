@@ -149,10 +149,6 @@ except:
 # for every segment of data (128 sets per segment with 0% overlap for now), extract the feature vector
 def extract_feature_vector(X):
     try:
-        # preprocess data
-        X = savgol_filter(X, 3, 2)
-        X = highpass(X, 3, 50)
-        X = min_max_scaler.transform(X)
         # extract time domain features
         X_mean = np.mean(X, axis=0)
         X_var = np.var(X, axis=0)
@@ -166,11 +162,17 @@ def extract_feature_vector(X):
         X_fft_var = np.var(X_fft_abs, axis=0)
         X_fft_max = np.max(X_fft_abs, axis=0)
         X_fft_min = np.min(X_fft_abs, axis=0)
-        # X_psd = []
+        X_entr = entropy(np.abs(np.fft.rfft(X, axis=0))[1:], base=2)
+        # logger.info("hello ")
+        # logger.info(X)
 
-        # X_peakF = []
-        # obtain feature vector by appending all vectors above as one d-dimension feature vector
-        X = np.append(X_mean, [ X_var, X_max, X_min, X_off, X_mad ])
+        # X_psd = np.mean(periodogram(X))
+        # logger.info("hello ")
+        # logger.info(X_psd)
+
+        X_peakF = []
+        # return feature vector by appending all vectors above as one d-dimension feature vector
+        X = np.append(X_mean, [ X_var, X_entr, X_off, X_mad ])
         return standard_scaler.transform([X])
     except:
         traceback.print_exc()
