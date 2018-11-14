@@ -50,7 +50,7 @@ CG3002_FILEPATH = os.path.join('/', 'CG3002')
 # PROB_THRESHOLD = 0.20
 
 MODEL_UNIQUE_IDS = {
-    0: 'OneVsRestClassifierMLPtanh' + MDL,
+    0: 'OneVsRestClassifierMLPtanhJUNYANG' + MDL,
     1: 'OneVsRestClassifierMLP' + MDL,
     2: 'MLPClassifierTanH' + MDL,
     3: 'MLPClassifier' + MDL,
@@ -245,7 +245,7 @@ def fitModel(X, Y):
     models = []
     scores = []
 
-    for i in range(0, 7):
+    for i in range(0, 1):
         model = initialiseModel(i)
         accuracy_scores = cross_val_score(model, X, Y, cv=5, scoring="accuracy", n_jobs=-1)
         scores.append(accuracy_scores.mean())
