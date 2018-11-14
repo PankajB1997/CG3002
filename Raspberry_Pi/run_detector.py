@@ -29,7 +29,7 @@ from scipy.stats import entropy
 np.random.seed(1234)
 
 N = 64
-overlap = 0.75 # change this one! if tweaking overlap for testing!
+overlap = 0.5 # change this one! if tweaking overlap for testing!
 
 MDL_OVERLAP = 0.95 # not for tweaking, for loading the right model files only!
 MDL = "_segment-" + str(N) + "_overlap-newf-" + str(MDL_OVERLAP * 100)
@@ -52,7 +52,7 @@ elif N == 128 and overlap >= 0:
 elif N == 64 and overlap >= 0.75:
     WAIT = 1400 # for best case prediction time 3.0 seconds
 elif N == 64 and overlap >= 0.50:
-    WAIT = 1080 # for best case prediction time 3.0 seconds
+    WAIT = 2080 # for best case prediction time 4.0 seconds
 elif N == 64 and overlap >= 0.25:
     WAIT = 1260 # for best case prediction time 3.5 seconds
 elif N == 64 and overlap >= 0:
@@ -284,8 +284,8 @@ while (handshake_flag == False):
         traceback.print_exc()
         print("Error while attempting a handshake!")
 
-port.reset_input_buffer()
-port.reset_output_buffer()
+# port.reset_input_buffer()
+# port.reset_output_buffer()
 print("connected")
 
 countMovesSent = 0
@@ -306,6 +306,8 @@ while (data_flag == False):
             data = readLineCR(port).split(',')
             # print(data)
             if not len(data) == 13:
+               print("Corrupt packet!")
+               print(data)
                continue
             data = [ float(val.strip()) for val in data ]
             movementData.append(data[:9]) # extract acc1[3], and acc2[3] values

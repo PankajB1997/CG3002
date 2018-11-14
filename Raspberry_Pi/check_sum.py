@@ -207,17 +207,23 @@ def readLineCR(port):
         ch = port.read().decode()
         rv += ch
         # print("I'm reading " + ch)
-        #if ch == "\r" or ch == "":
-        if ch == "\r":
+        if ch == "\r" or ch == "":
+        #if ch == "\r":
             return rv
 
 def compute_checksum(data, correct_checksum):
     #data, correct_checksum = data.rsplit("," , 1)
-    cs = int(data[0])
-    for i in range(len(data)-1):
-        cs += int(data[i]) #to be changed
-    
-    if (cs == correct_checksum):
+    print("In compute_checksum")
+    correct_checksum = correct_checksum.strip()
+    print(correct_checksum)
+    cs = 0
+    for i in range(2):
+        print(data[i])
+        for j in range(len(data[i])):
+            cs += ord(data[i][j]) #to be changed
+    print("Total cs: ")
+    print(str(cs))
+    if (str(cs) == correct_checksum):
         print("Packet OK")
         return True
     else:
@@ -319,21 +325,23 @@ while (data_flag == False):
             ite = N
         for i in range(ite): # extract from 0->N-1 = N sets of readings
             data = readLineCR(port)
-            #print(data)
+            print(data)
             checksum_data.append(data)
             checksum_count = checksum_count + 1
-            if (checksum_count == PACKET_LEN):
+            print(checksum_count)
+            if (checksum_count == 2):
                 cs = compute_checksum(checksum_data, readLineCR(port))
             
-                if (cs):
-                    for j in range (PACKET_LEN):
-                        checksum_data[j].split(',')
-                        #if not len(checksum_data[j]) == 13:
+                if cs:
+                    for j in range(2):
+                        pkt = checksum_data[j].split(',')
+                        #if not len(pkt) == 13:
                         #   continue
-                        checksum_data[j] = [ float(val.strip()) for val in checksum_data[j] ]
-                        movementData.append(checksum_data[j][:9]) # extract acc1[3], and acc2[3] values
-                        otherData.append(checksum_data[j][9:]) # extract voltage, current, power and cumulative power
+                        pkt = [ float(val.strip()) for val in pkt ]
+                        movementData.append(pkt[:9]) # extract acc1[3], and acc2[3] values
+                        otherData.append(pkt[9:]) # extract voltage, current, power and cumulative power
                 checksum_count = 0
+                checksum_data = []
     except:
         traceback.print_exc()
         print("Error in reading packet!")
