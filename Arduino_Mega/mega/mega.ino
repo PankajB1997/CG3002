@@ -92,17 +92,17 @@ void mainTask(void *p) {
 //  Serial.println("Enter mainTask");
     xLastWakeTime = xTaskGetTickCount();
     for (i=0;i <PKT_SIZE; i++) {
-    countLED++;
-    if (countLED >= 50) {
-    if(ledflag == LOW) {
-      ledflag = HIGH;
-    }
-    else {
-      ledflag = LOW;
-    }
-     digitalWrite(LED_BUILTIN, ledflag);  
-      countLED = 0;  
-    }
+//    countLED++;
+//    if (countLED >= 50) {
+//    if(ledflag == LOW) {
+//      ledflag = HIGH;
+//    }
+//    else {
+//      ledflag = LOW;
+//    }
+//     digitalWrite(LED_BUILTIN, ledflag);  
+//      countLED = 0;  
+//    }
       getData(); 
       changeFormat();
       vTaskDelayUntil(&xLastWakeTime, (20/ portTICK_PERIOD_MS));

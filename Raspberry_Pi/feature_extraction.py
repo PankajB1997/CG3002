@@ -7,6 +7,7 @@ from obspy.signal.filter import highpass
 from scipy.signal import savgol_filter, periodogram, welch
 from scipy.fftpack import fft, ifft, rfft
 from scipy.stats import entropy
+import math
 
 # Fix seed value for reproducibility
 np.random.seed(1234)
@@ -17,16 +18,22 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 DATASET_FILEPATH = "dataset"
-SCALER_FILEPATH_PREFIX = "nn_"
+SCALER_FILEPATH_PREFIX = ""
 
-SEGMENT_SIZE = 128
-OVERLAP = 0.75
+SEGMENT_SIZE = 64
+OVERLAP = 0.95
 MDL = "_segment-" + str(SEGMENT_SIZE) + "_overlap-newf-" + str(OVERLAP * 100)
 
 # for every segment of data, extract the feature vector
 def extract_feature_vector(X):
+    # extract acceleration and angular velocity
+    X_accA = math.sqrt(sum(map(lambda x:x*x, np.mean(X[:, 0:3], axis=0))))
+    X_accB = math.sqrt(sum(map(lambda x:x*x, np.mean(X[:, 3:6], axis=0))))
+    X_gyro = math.sqrt(sum(map(lambda x:x*x, np.mean(X[:, 6:9], axis=0))))
+    X_mag = np.asarray([ X_accA, X_accB, X_gyro ])
     # extract time domain features
     X_mean = np.mean(X, axis=0)
+    X_median = np.median(X, axis=0)
     X_var = np.var(X, axis=0)
     X_max = np.max(X, axis=0)
     X_min = np.min(X, axis=0)
@@ -39,17 +46,16 @@ def extract_feature_vector(X):
     X_fft_max = np.max(X_fft_abs, axis=0)
     X_fft_min = np.min(X_fft_abs, axis=0)
     X_entr = entropy(np.abs(np.fft.rfft(X, axis=0))[1:], base=2)
-    # logger.info("hello ")
-    # logger.info(X)
-
-    # X_psd = np.mean(periodogram(X))
-    # logger.info("hello ")
-    # logger.info(X_psd)
-
-    X_peakF = []
     # return feature vector by appending all vectors above as one d-dimension feature vector
-    return np.append(X_mean, [ X_var, X_entr, X_off, X_mad ])
-    # , X_fft_mean, X_fft_var, X_fft_max, X_fft_min
+    res = np.append(X_mean, [ X_median, X_off, X_mad ])
+    # res = np.append(res, [ X_mag ])
+    # '''
+    # Top 30 feature indices from best to worst:
+    # 36, 35, 30, 34, 32, 33, 29, 46, 53, 14, 5, 31, 51, 52, 50, 43, 45, 49, 28, 12, 11, 3, 2, 54, 47, 13, 4, 15, 17, 6
+    # '''
+    # best_features_indices = [ 2, 3, 4, 5, 6, 11, 12, 13, 14, 15, 17, 28, 29, 30, 31, 32, 33, 34, 35, 36, 43, 45, 46, 47, 49, 50, 51, 52, 53, 54 ]
+    # res = [ res[i] for i in range(len(res)) if i+1 in best_features_indices ]
+    return res
 
 # segment data from the raw data files, return list of tuples (segments, move_class)
 # where every tuple represents raw data for that segment and the move_class for that segment
