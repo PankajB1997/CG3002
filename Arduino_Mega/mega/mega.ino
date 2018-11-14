@@ -15,7 +15,7 @@
 #define currentSensorPin 1
 #define RS 0.1
 #define RL 10000
-#define PKT_SIZE 16
+#define PKT_SIZE 2
 
 ADXL345 sensorA = ADXL345(DEVICE_A_ACCEL);
 ADXL345 sensorB = ADXL345(DEVICE_B_ACCEL);

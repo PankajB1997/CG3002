@@ -1,11 +1,21 @@
-The actual move chicken was predicted as sidestep with a prediction confidence of 0.7133601307868958.
-The actual move chicken was predicted as sidestep with a prediction confidence of 0.9526168704032898.
-The actual move number7 was predicted as salute with a prediction confidence of 0.9316670298576355.
-The actual move numbersix was predicted as chicken with a prediction confidence of 0.9666818380355835.
-The actual move sidestep was predicted as salute with a prediction confidence of 0.4859716296195984.
-The actual move swing was predicted as chicken with a prediction confidence of 0.587388813495636.
-The actual move turnclap was predicted as chicken with a prediction confidence of 0.8201614618301392.
+The actual move chicken was predicted as mermaid with a prediction confidence of 0.6364558935165405.
+The actual move number7 was predicted as swing with a prediction confidence of 0.6804282069206238.
+The actual move salute was predicted as turnclap with a prediction confidence of 0.5574849247932434.
+The actual move salute was predicted as turnclap with a prediction confidence of 0.7140783071517944.
+The actual move salute was predicted as turnclap with a prediction confidence of 0.8110812902450562.
+The actual move salute was predicted as number7 with a prediction confidence of 0.8611131906509399.
+The actual move salute was predicted as number7 with a prediction confidence of 0.9884464740753174.
+The actual move sidestep was predicted as chicken with a prediction confidence of 0.5117467641830444.
+The actual move sidestep was predicted as chicken with a prediction confidence of 0.5166096687316895.
+The actual move sidestep was predicted as chicken with a prediction confidence of 0.6462289094924927.
+The actual move sidestep was predicted as chicken with a prediction confidence of 0.7483717203140259.
+The actual move sidestep was predicted as chicken with a prediction confidence of 0.7909679412841797.
+The actual move sidestep was predicted as chicken with a prediction confidence of 0.8743237257003784.
+The actual move sidestep was predicted as chicken with a prediction confidence of 0.9624337553977966.
+The actual move sidestep was predicted as chicken with a prediction confidence of 0.9691048264503479.
+The actual move sidestep was predicted as chicken with a prediction confidence of 0.9756363034248352.
+The actual move sidestep was predicted as chicken with a prediction confidence of 0.9809592366218567.
 
-Total mistakes made with 75.0% confidence or more: 4
-Total mistakes made overall: 7
-Total number of test cases: 19880
+Total mistakes made with 75.0% confidence or more: 9
+Total mistakes made overall: 17
+Total number of test cases: 212185
