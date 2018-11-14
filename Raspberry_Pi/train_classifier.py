@@ -50,7 +50,7 @@ CG3002_FILEPATH = os.path.join('/', 'CG3002')
 # PROB_THRESHOLD = 0.20
 
 MODEL_UNIQUE_IDS = {
-    0: 'OneVsRestClassifierMLPtanhJUNYANG' + MDL,
+    0: 'OneVsRestClassifierMLPtanh_newnumber7' + MDL,
     1: 'OneVsRestClassifierMLP' + MDL,
     2: 'MLPClassifierTanH' + MDL,
     3: 'MLPClassifier' + MDL,
