@@ -152,7 +152,7 @@ except:
     print("Error in loading scaler objects!")
     exit()
 
-# for every segment of data (128 sets per segment with 0% overlap for now), extract the feature vector
+# for every segment of data, extract the feature vector
 def extract_feature_vector(X):
     try:
         # preprocess data
@@ -188,7 +188,7 @@ def extract_feature_vector(X):
         return standard_scaler.transform([X])
     except:
         traceback.print_exc()
-        print("Error in extracting features!")
+        print("Error in predicting dance move!")
 
 def predict_dance_move(segment):
     try:
@@ -317,6 +317,7 @@ while (data_flag == False):
     if int(round(time.time() * 1000)) - wait_time <= INITIAL_WAIT:
         continue
 
+    print(previousPacketData)
     print(len(previousPacketData))
     print(len(movementData))
 

@@ -152,7 +152,7 @@ except:
     print("Error in loading scaler objects!")
     exit()
 
-# for every segment of data (128 sets per segment with 0% overlap for now), extract the feature vector
+# for every segment of data, extract the feature vector
 def extract_feature_vector(X):
     try:
         # preprocess data
@@ -188,7 +188,7 @@ def extract_feature_vector(X):
         return standard_scaler.transform([X])
     except:
         traceback.print_exc()
-        print("Error in extracting features!")
+        print("Error in predicting dance move!")
 
 def predict_dance_move(segment):
     try:
@@ -293,7 +293,7 @@ stoptime = int(round(time.time() * 1000))
 ite = N
 while (data_flag == False):
 
-    print("ENTERING")
+    # print("ENTERING")
 
     movementData = []
     otherData = []
@@ -304,7 +304,7 @@ while (data_flag == False):
             ite = N
         for i in range(ite): # extract from 0->N-1 = N sets of readings
             data = readLineCR(port).split(',')
-            print(data)
+            # print(data)
             if not len(data) == 13:
                continue
             data = [ float(val.strip()) for val in data ]
@@ -318,8 +318,9 @@ while (data_flag == False):
     if int(round(time.time() * 1000)) - wait_time <= INITIAL_WAIT:
         continue
 
-    print(len(previousPacketData))
-    print(len(movementData))
+    # print(previousPacketData)
+    # print(len(previousPacketData))
+    # print(len(movementData))
 
     diff = int(round(time.time() * 1000)) - stoptime
     if diff <= WAIT:
@@ -330,10 +331,10 @@ while (data_flag == False):
     # Add overlapping logic
     if len(previousPacketData) == N - EXTRACT_SIZE and not EXTRACT_SIZE == N:
         rawData = previousPacketData + movementData
-        print("Overlap done")
+        # print("Overlap done")
     else:
         rawData = movementData[:]
-        print("Overlap not done")
+        # print("Overlap not done")
 
     # Add ML Logic
     # Precondition 1: dataArray has values for acc1[3], acc2[3], gyro[3], voltage[1], current[1], power[1] and energy[1] in that order
@@ -342,7 +343,7 @@ while (data_flag == False):
         danceMove, predictionConfidence = predict_dance_move(rawData)
         if predictionConfidence > CONFIDENCE_THRESHOLD:
             danceMoveBuffer.append(danceMove)
-        print(len(rawData))
+        # print(len(rawData))
         print(danceMoveBuffer)
     except:
         traceback.print_exc()
