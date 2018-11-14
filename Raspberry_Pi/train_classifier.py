@@ -24,8 +24,8 @@ from sklearn.multiclass import OneVsRestClassifier
 # Fix seed value for reproducibility
 np.random.seed(1234)
 
-N = 32
-OVERLAP = 0.75
+N = 64
+OVERLAP = 0.95
 MDL = "_segment-" + str(N) + "_overlap-newf-" + str(OVERLAP * 100)
 
 # initialise logger
@@ -37,22 +37,26 @@ CG3002_FILEPATH = os.path.join('/', 'CG3002')
 
 # set constant flag for which classifier to use
 '''
-0: OneVsRestClassifier(estimator = MLPClassifier()),
-1: OneVsRestClassifier(estimator = SVC(kernel="linear", C=0.025)),
-2: RandomForestClassifier(max_depth=5, n_estimators=200, max_features=1),
-3: MLPClassifier(alpha=1),
-4: SVC(kernel="linear", C=0.025),
+0: OneVsRestClassifier(estimator = MLPClassifier(activation='tanh')),
+1: OneVsRestClassifier(estimator = MLPClassifier()),
+2: MLPClassifier(activation='tanh'),
+3: MLPClassifier(),
+4: OneVsRestClassifier(estimator = SVC(kernel="linear", C=0.025)),
+5: SVC(kernel="linear", C=0.025),
+6: RandomForestClassifier(max_depth=5, n_estimators=200, max_features=1),
 '''
 
 # set probability threshold for multibucketing
 # PROB_THRESHOLD = 0.20
 
 MODEL_UNIQUE_IDS = {
-    0: 'OneVsRestClassifierMLP' + MDL,
-    1: 'OneVsRestClassifierSVC' + MDL,
-    2: 'RandomForestClassifier200' + MDL,
+    0: 'OneVsRestClassifierMLPtanh_newnumber7' + MDL,
+    1: 'OneVsRestClassifierMLP' + MDL,
+    2: 'MLPClassifierTanH' + MDL,
     3: 'MLPClassifier' + MDL,
-    4: 'LinearSVC' + MDL,
+    4: 'OneVsRestClassifierSVC' + MDL,
+    5: 'LinearSVC' + MDL,
+    6: 'RandomForestClassifier200' + MDL,
 }
 
 CONFIDENCE_THRESHOLD = 0.75
@@ -226,11 +230,13 @@ def writeDatasetToExcel(X, y, filepath):
 # Initialise neural network model using classifier
 def initialiseModel(model_index):
     classifiers = [
+        OneVsRestClassifier(estimator = MLPClassifier(activation='tanh')),
         OneVsRestClassifier(estimator = MLPClassifier()),
+        MLPClassifier(activation='tanh'),
+        MLPClassifier(),
         OneVsRestClassifier(estimator = SVC(kernel="linear", C=0.025)),
-        RandomForestClassifier(max_depth=5, n_estimators=200, max_features=1),
-        MLPClassifier(alpha=1),
         SVC(kernel="linear", C=0.025),
+        RandomForestClassifier(max_depth=5, n_estimators=200, max_features=1),
     ]
     return classifiers[model_index]
 
@@ -239,7 +245,7 @@ def fitModel(X, Y):
     models = []
     scores = []
 
-    for i in range(0, 5):
+    for i in range(0, 1):
         model = initialiseModel(i)
         accuracy_scores = cross_val_score(model, X, Y, cv=5, scoring="accuracy", n_jobs=-1)
         scores.append(accuracy_scores.mean())

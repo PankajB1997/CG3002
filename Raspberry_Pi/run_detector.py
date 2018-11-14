@@ -28,30 +28,35 @@ from scipy.stats import entropy
 # Fix seed value for reproducibility
 np.random.seed(1234)
 
-N = 32
-OVERLAP = 0
-EXTRACT_SIZE = int((1 - OVERLAP) * N)
-MDL = "_segment-" + str(N) + "_overlap-newf-" + str(OVERLAP * 100)
-CONFIDENCE_THRESHOLD = 0.5
+N = 64
+overlap = 0.5 # change this one! if tweaking overlap for testing!
+
+MDL_OVERLAP = 0.95 # not for tweaking, for loading the right model files only!
+MDL = "_segment-" + str(N) + "_overlap-newf-" + str(MDL_OVERLAP * 100)
+
+EXTRACT_SIZE = int((1 - overlap) * N)
+CONFIDENCE_THRESHOLD = 0.25
 INITIAL_WAIT = 61500 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
 
-# Initialize WAIT value in milliseconds depending on N and OVERLAP values
-WAIT = 2000 # for best case prediction time 3.5 seconds for N=64 and OVERLAP=0
-if N == 128 and OVERLAP == 0.75:
+# Initialize WAIT value in milliseconds depending on N and overlap values
+WAIT = 2000 # for best case prediction time 3.28 seconds for N=32 and overlap=0
+if N == 128 and overlap >= 0.75:
     WAIT = 1000 # for best case prediction time 4.2 seconds
-elif N == 128 and OVERLAP == 0.50:
+elif N == 128 and overlap >= 0.50:
     WAIT = 1160 # for best case prediction time 5.0 seconds
-elif N == 128 and OVERLAP == 0.25:
+elif N == 128 and overlap >= 0.25:
     WAIT = 1020 # for best case prediction time 5.5 seconds
-elif N == 128 and OVERLAP == 0:
+elif N == 128 and overlap >= 0:
     WAIT = 880 # for best case prediction time 6.0 seconds
-elif N == 64 and OVERLAP == 0.75:
+elif N == 64 and overlap >= 0.75:
     WAIT = 1400 # for best case prediction time 3.0 seconds
-elif N == 64 and OVERLAP == 0.50:
-    WAIT = 1080 # for best case prediction time 3.0 seconds
-elif N == 64 and OVERLAP == 0.25:
+elif N == 64 and overlap >= 0.50:
+    WAIT = 2080 # for best case prediction time 4.0 seconds
+elif N == 64 and overlap >= 0.25:
     WAIT = 1260 # for best case prediction time 3.5 seconds
+elif N == 64 and overlap >= 0:
+    WAIT = 940 # for best case prediction time 3.5 seconds
 
 secret_key = "1234123412341234"  # must be at least 16
 BLOCK_SIZE = 32 # AES.block_size
@@ -132,7 +137,7 @@ def str2onehot(Y):
 
 try:
     # Load model from pickle file
-    model = pickle.load(open(os.path.join('classifier_models', 'model_OneVsRestClassifierMLP' + MDL + '.pkl'), 'rb'))
+    model = pickle.load(open(os.path.join('classifier_models', 'model_OneVsRestClassifierMLPtanh_newnumber7' + MDL + '.pkl'), 'rb'))
 except:
     traceback.print_exc()
     print("Error in loading pretrained model!")
@@ -154,23 +159,33 @@ def extract_feature_vector(X):
         X = savgol_filter(X, 3, 2)
         X = highpass(X, 3, 50)
         X = min_max_scaler.transform(X)
+
+        # # extract acceleration and angular velocity
+        # X_accA = math.sqrt(sum(map(lambda x:x*x, np.mean(X[:, 0:3], axis=0))))
+        # X_accB = math.sqrt(sum(map(lambda x:x*x, np.mean(X[:, 3:6], axis=0))))
+        # X_gyro = math.sqrt(sum(map(lambda x:x*x, np.mean(X[:, 6:9], axis=0))))
+        # X_mag = np.asarray([ X_accA, X_accB, X_gyro ])
+
         # extract time domain features
         X_mean = np.mean(X, axis=0)
-        X_var = np.var(X, axis=0)
+        X_median = np.median(X, axis=0)
+        # X_var = np.var(X, axis=0)
         X_max = np.max(X, axis=0)
         X_min = np.min(X, axis=0)
         X_off = np.subtract(X_max, X_min)
         X_mad = robust.mad(X, axis=0)
-        # extract frequency domain features
-        X_fft_abs = np.abs(fft(X)) #np.abs() if you want the absolute val of complex number
-        X_fft_mean = np.mean(X_fft_abs, axis=0)
-        X_fft_var = np.var(X_fft_abs, axis=0)
-        X_fft_max = np.max(X_fft_abs, axis=0)
-        X_fft_min = np.min(X_fft_abs, axis=0)
-        X_entr = entropy(np.abs(np.fft.rfft(X, axis=0))[1:], base=2)
+
+        # # extract frequency domain features
+        # X_fft_abs = np.abs(fft(X)) #np.abs() if you want the absolute val of complex number
+        # X_fft_mean = np.mean(X_fft_abs, axis=0)
+        # X_fft_var = np.var(X_fft_abs, axis=0)
+        # X_fft_max = np.max(X_fft_abs, axis=0)
+        # X_fft_min = np.min(X_fft_abs, axis=0)
+        # X_entr = entropy(np.abs(np.fft.rfft(X, axis=0))[1:], base=2)
+
         # return feature vector by appending all vectors above as one d-dimension feature vector
-        return standard_scaler.transform([np.append(X_mean, [ X_var, X_entr, X_off, X_mad ])])
-        # , X_fft_mean, X_fft_var, X_fft_max, X_fft_min
+        X = np.append(X_mean, [ X_median, X_off, X_mad ])
+        return standard_scaler.transform([X])
     except:
         traceback.print_exc()
         print("Error in predicting dance move!")
@@ -269,8 +284,8 @@ while (handshake_flag == False):
         traceback.print_exc()
         print("Error while attempting a handshake!")
 
-port.reset_input_buffer()
-port.reset_output_buffer()
+# port.reset_input_buffer()
+# port.reset_output_buffer()
 print("connected")
 
 countMovesSent = 0
@@ -291,6 +306,8 @@ while (data_flag == False):
             data = readLineCR(port).split(',')
             # print(data)
             if not len(data) == 13:
+               print("Corrupt packet!")
+               print(data)
                continue
             data = [ float(val.strip()) for val in data ]
             movementData.append(data[:9]) # extract acc1[3], and acc2[3] values
@@ -348,6 +365,8 @@ while (data_flag == False):
                 continue
             # Send output to server
             sendToServer(s, output)
+            port.reset_input_buffer()
+            port.reset_output_buffer()
             print("Sent to server: " + str(output) + ".")
             danceMoveBuffer = []
             stoptime = int(round(time.time() * 1000))

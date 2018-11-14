@@ -10,7 +10,7 @@ data_by_move = {}
 for move in moves:
     data_by_move[move] = []
     for dancer in os.listdir(RAW_DATASET_PATH):
-        # if not dancer == 'jinting':
+        # if not dancer == 'junyang':
         #     continue
         move_data_current_dancer = os.path.join(RAW_DATASET_PATH, dancer, move + '.txt')
         print(move_data_current_dancer)

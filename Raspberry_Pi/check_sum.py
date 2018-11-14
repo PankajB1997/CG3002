@@ -22,20 +22,44 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, Ro
 from obspy.signal.filter import highpass
 from scipy.signal import savgol_filter
 from scipy.fftpack import fft, ifft, rfft
+from scipy.stats import entropy
 # from keras.models import load_model
 
-N = 64
-PACKET_LEN = 32
-OVERLAP = 0
-EXTRACT_SIZE = int((1 - OVERLAP) * N)
+# Fix seed value for reproducibility
+np.random.seed(1234)
 
-CONFIDENCE_THRESHOLD = 0.85
-INITIAL_WAIT = 61500
-WAIT = 2500 # in milliseconds
+N = 64
+overlap = 0.75 # change this one! if tweaking overlap for testing!
+
+MDL_OVERLAP = 0.95 # not for tweaking, for loading the right model files only!
+MDL = "_segment-" + str(N) + "_overlap-newf-" + str(MDL_OVERLAP * 100)
+
+EXTRACT_SIZE = int((1 - overlap) * N)
+CONFIDENCE_THRESHOLD = 0.25
+INITIAL_WAIT = 61500 # in milliseconds
 MOVE_BUFFER_MIN_SIZE = 2
 
-secret_key = "1234123412341234"  #must be at least 16
-BLOCK_SIZE = 32 #AES.block_size
+# Initialize WAIT value in milliseconds depending on N and overlap values
+WAIT = 2000 # for best case prediction time 3.28 seconds for N=32 and overlap=0
+if N == 128 and overlap >= 0.75:
+    WAIT = 1000 # for best case prediction time 4.2 seconds
+elif N == 128 and overlap >= 0.50:
+    WAIT = 1160 # for best case prediction time 5.0 seconds
+elif N == 128 and overlap >= 0.25:
+    WAIT = 1020 # for best case prediction time 5.5 seconds
+elif N == 128 and overlap >= 0:
+    WAIT = 880 # for best case prediction time 6.0 seconds
+elif N == 64 and overlap >= 0.75:
+    WAIT = 1400 # for best case prediction time 3.0 seconds
+elif N == 64 and overlap >= 0.50:
+    WAIT = 1080 # for best case prediction time 3.0 seconds
+elif N == 64 and overlap >= 0.25:
+    WAIT = 1260 # for best case prediction time 3.5 seconds
+elif N == 64 and overlap >= 0:
+    WAIT = 940 # for best case prediction time 3.5 seconds
+
+secret_key = "1234123412341234"  # must be at least 16
+BLOCK_SIZE = 32 # AES.block_size
 
 '''
 The following move states are used:
@@ -112,9 +136,8 @@ def str2onehot(Y):
    return new_Y
 
 try:
-    # Load model from pickle/hdf5 file
-    # model = load_model(os.path.join('nn_models', 'nn_model.hdf5'))
-    model = pickle.load(open(os.path.join('classifier_models', 'model_OneVsRestClassifierMLP.pkl'), 'rb'))
+    # Load model from pickle file
+    model = pickle.load(open(os.path.join('classifier_models', 'model_OneVsRestClassifierMLPtanh' + MDL + '.pkl'), 'rb'))
 except:
     traceback.print_exc()
     print("Error in loading pretrained model!")
@@ -122,41 +145,50 @@ except:
 
 try:
     # Load scalers
-    min_max_scaler = pickle.load(open(os.path.join('scaler', 'min_max_scaler.pkl'), 'rb'))
-    standard_scaler = pickle.load(open(os.path.join('scaler', 'standard_scaler.pkl'), 'rb'))
+    min_max_scaler = pickle.load(open(os.path.join('scaler', 'min_max_scaler' + MDL + '.pkl'), 'rb'))
+    standard_scaler = pickle.load(open(os.path.join('scaler', 'standard_scaler' + MDL + '.pkl'), 'rb'))
 except:
     traceback.print_exc()
     print("Error in loading scaler objects!")
     exit()
 
-# for every segment of data (128 sets per segment with 0% overlap for now), extract the feature vector
+# for every segment of data, extract the feature vector
 def extract_feature_vector(X):
     try:
         # preprocess data
         X = savgol_filter(X, 3, 2)
         X = highpass(X, 3, 50)
         X = min_max_scaler.transform(X)
+
+        # # extract acceleration and angular velocity
+        # X_accA = math.sqrt(sum(map(lambda x:x*x, np.mean(X[:, 0:3], axis=0))))
+        # X_accB = math.sqrt(sum(map(lambda x:x*x, np.mean(X[:, 3:6], axis=0))))
+        # X_gyro = math.sqrt(sum(map(lambda x:x*x, np.mean(X[:, 6:9], axis=0))))
+        # X_mag = np.asarray([ X_accA, X_accB, X_gyro ])
+
         # extract time domain features
         X_mean = np.mean(X, axis=0)
-        X_var = np.var(X, axis=0)
+        X_median = np.median(X, axis=0)
+        # X_var = np.var(X, axis=0)
         X_max = np.max(X, axis=0)
         X_min = np.min(X, axis=0)
         X_off = np.subtract(X_max, X_min)
         X_mad = robust.mad(X, axis=0)
-        # extract frequency domain features
-        X_fft_abs = np.abs(fft(X)) #np.abs() if you want the absolute val of complex number
-        X_fft_mean = np.mean(X_fft_abs, axis=0)
-        X_fft_var = np.var(X_fft_abs, axis=0)
-        X_fft_max = np.max(X_fft_abs, axis=0)
-        X_fft_min = np.min(X_fft_abs, axis=0)
-        # X_psd = []
-        # X_peakF = []
-        # obtain feature vector by appending all vectors above as one d-dimension feature vector
-        X = np.append(X_mean, [X_var, X_max, X_min, X_off, X_mad, X_fft_mean, X_fft_var, X_fft_max, X_fft_min])
+
+        # # extract frequency domain features
+        # X_fft_abs = np.abs(fft(X)) #np.abs() if you want the absolute val of complex number
+        # X_fft_mean = np.mean(X_fft_abs, axis=0)
+        # X_fft_var = np.var(X_fft_abs, axis=0)
+        # X_fft_max = np.max(X_fft_abs, axis=0)
+        # X_fft_min = np.min(X_fft_abs, axis=0)
+        # X_entr = entropy(np.abs(np.fft.rfft(X, axis=0))[1:], base=2)
+
+        # return feature vector by appending all vectors above as one d-dimension feature vector
+        X = np.append(X_mean, [ X_median, X_off, X_mad ])
         return standard_scaler.transform([X])
     except:
         traceback.print_exc()
-        print("Error in extracting features!")
+        print("Error in predicting dance move!")
 
 def predict_dance_move(segment):
     try:
@@ -176,22 +208,28 @@ def readLineCR(port):
         rv += ch
         # print("I'm reading " + ch)
         if ch == "\r" or ch == "":
-        # if ch == "\r":
+        #if ch == "\r":
             return rv
 
 def compute_checksum(data, correct_checksum):
     #data, correct_checksum = data.rsplit("," , 1)
-    cs = int(data[0])
-    for i in range(len(data)-1):
-        cs ^= int(data[i]) #to be changed
-    
-    if (cs == correct_checksum):
+    print("In compute_checksum")
+    correct_checksum = correct_checksum.strip()
+    print(correct_checksum)
+    cs = 0
+    for i in range(2):
+        print(data[i])
+        for j in range(len(data[i])):
+            cs += ord(data[i][j]) #to be changed
+    print("Total cs: ")
+    print(str(cs))
+    if (str(cs) == correct_checksum):
         print("Packet OK")
         return True
     else:
         print("Packet Bad Checksum ")
         return False
-
+        
 def inputData():
     #'#action | voltage | current | power | cumulativepower|'
     action = str(input('Manually enter data: '))
@@ -271,64 +309,73 @@ print("connected")
 
 countMovesSent = 0
 stoptime = int(round(time.time() * 1000))
-
+ite = N
 while (data_flag == False):
 
-    print("ENTERING")
+    # print("ENTERING")
     checksum_data = []
     checksum_count = 0
     cs = False
     movementData = []
     otherData = []
-    try:    
-        for i in range(N): # extract from 0->N-1 = N sets of readings
+    try:
+        if not len(previousPacketData) == 0:
+            ite = EXTRACT_SIZE
+        else:
+            ite = N
+        for i in range(ite): # extract from 0->N-1 = N sets of readings
             data = readLineCR(port)
             print(data)
             checksum_data.append(data)
             checksum_count = checksum_count + 1
-            if (checksum_count == PACKET_LEN):
+            print(checksum_count)
+            if (checksum_count == 2):
                 cs = compute_checksum(checksum_data, readLineCR(port))
             
-                if (cs):
-                    for j in range (PACKET_LEN):
-                        checksum_data[j].split(',')
-                        if not len(checksum_data[j]) == 13:
-                           continue
-                        checksum_data[j] = [ float(val.strip()) for val in checksum_data[j] ]
-                        movementData.append(checksum_data[j][:9]) # extract acc1[3], and acc2[3] values
-                        otherData.append(checksum_data[j][9:]) # extract voltage, current, power and cumulative power
+                if cs:
+                    for j in range(2):
+                        pkt = checksum_data[j].split(',')
+                        #if not len(pkt) == 13:
+                        #   continue
+                        pkt = [ float(val.strip()) for val in pkt ]
+                        movementData.append(pkt[:9]) # extract acc1[3], and acc2[3] values
+                        otherData.append(pkt[9:]) # extract voltage, current, power and cumulative power
                 checksum_count = 0
-
+                checksum_data = []
     except:
         traceback.print_exc()
         print("Error in reading packet!")
         continue
 
-    print("Before " + str(wait_time))
     if int(round(time.time() * 1000)) - wait_time <= INITIAL_WAIT:
         continue
-    print("After " + str(wait_time))
 
-    if int(round(time.time() * 1000)) - stoptime <= WAIT:
+    # print(previousPacketData)
+    # print(len(previousPacketData))
+    # print(len(movementData))
+
+    diff = int(round(time.time() * 1000)) - stoptime
+    if diff <= WAIT:
         continue
 
     # print(otherData)
 
     # Add overlapping logic
     if len(previousPacketData) == N - EXTRACT_SIZE and not EXTRACT_SIZE == N:
-        rawData = previousPacketData + movementData[:EXTRACT_SIZE]
-        print("Overlap done")
+        rawData = previousPacketData + movementData
+        # print("Overlap done")
     else:
-        rawData = movementData
-        print("Overlap not done")
+        rawData = movementData[:]
+        # print("Overlap not done")
 
     # Add ML Logic
     # Precondition 1: dataArray has values for acc1[3], acc2[3], gyro[3], voltage[1], current[1], power[1] and energy[1] in that order
     # Precondition 2: dataArray has N sets of readings, where N is the segment size, hence it has dimensions N*13
     try:
-        danceMove, predictionConfidence = predict_dance_move(movementData)
+        danceMove, predictionConfidence = predict_dance_move(rawData)
         if predictionConfidence > CONFIDENCE_THRESHOLD:
             danceMoveBuffer.append(danceMove)
+        # print(len(rawData))
         print(danceMoveBuffer)
     except:
         traceback.print_exc()
@@ -338,18 +385,18 @@ while (data_flag == False):
     isMoveSent = False
     if len(danceMoveBuffer) >= MOVE_BUFFER_MIN_SIZE and lastXDanceMovesSame(danceMoveBuffer) == True:
         try:
-            otherData = np.mean(otherData, axis=0).tolist()
+            otherData = np.mean(otherData, axis=0).tolist() # only calculated for overlapped part of the segment
             voltage = otherData[0]
             current = otherData[1]
             power = otherData[2]
             energy = otherData[3]
             output = "#" + danceMove + "|" + str(round(voltage, 2)) + "|" + str(round(current, 2)) + "|" + str(round(power, 2)) + "|" + str(round(energy, 2)) + "|"
-            if danceMove == "logout":
-                output = danceMove # with logout command, no other values are sent
-                if not countMovesSent == 40:
-                    continue
+            if danceMove == "logout" and not countMovesSent >= 40: # only allow logout to be sent once 40 moves have been sent
+                continue
             # Send output to server
             sendToServer(s, output)
+            port.reset_input_buffer()
+            port.reset_output_buffer()
             print("Sent to server: " + str(output) + ".")
             danceMoveBuffer = []
             stoptime = int(round(time.time() * 1000))
@@ -365,8 +412,11 @@ while (data_flag == False):
 
     # Add overlapping logic
     if EXTRACT_SIZE >= 0 and EXTRACT_SIZE < N:
-        previousPacketData = movementData[EXTRACT_SIZE:]
+        previousPacketData = rawData[EXTRACT_SIZE:]
     else:
+        previousPacketData = []
+
+    if isMoveSent == True:
         previousPacketData = []
 
     # data_flag = True
