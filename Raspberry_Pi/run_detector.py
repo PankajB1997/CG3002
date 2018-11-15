@@ -304,10 +304,10 @@ while (data_flag == False):
             ite = N
         for i in range(ite): # extract from 0->N-1 = N sets of readings
             data = readLineCR(port).split(',')
-            # print(data)
+            print(data)
             if not len(data) == 13:
                print("Corrupt packet!")
-               print(data)
+               # print(data)
                continue
             data = [ float(val.strip()) for val in data ]
             movementData.append(data[:9]) # extract acc1[3], and acc2[3] values

@@ -11,8 +11,8 @@ import pickle
 N = 128
 count = 1
 
-danceMove = "logout"
-dancer = "junyang"
+danceMove = "number7"
+dancer = "jin"
 SAVEPATH = os.path.join("dataset", "RawData", dancer, danceMove + ".txt")
 
 def readLineCR(port):
