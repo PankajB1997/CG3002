@@ -137,7 +137,7 @@ def str2onehot(Y):
 
 try:
     # Load model from pickle file
-    model = pickle.load(open(os.path.join('classifier_models', 'model_OneVsRestClassifierMLPtanh_newdata' + MDL + '.pkl'), 'rb'))
+    model = pickle.load(open(os.path.join('classifier_models', 'model_OneVsRestClassifierMLPtanh_latest' + MDL + '.pkl'), 'rb'))
 except:
     traceback.print_exc()
     print("Error in loading pretrained model!")
