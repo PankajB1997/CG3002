@@ -247,23 +247,24 @@ def fitModel(X, Y):
 
     for i in range(0, 1):
         model = initialiseModel(i)
-        accuracy_scores = cross_val_score(model, X, Y, cv=5, scoring="accuracy", n_jobs=-1)
-        scores.append(accuracy_scores.mean())
-        logger.info("Cross validation score for model " + str(MODEL_UNIQUE_IDS[i]) + ": " + str(accuracy_scores.mean()))
+        # accuracy_scores = cross_val_score(model, X, Y, cv=5, scoring="accuracy", n_jobs=-1)
+        # scores.append(accuracy_scores.mean())
+        # logger.info("Cross validation score for model " + str(MODEL_UNIQUE_IDS[i]) + ": " + str(accuracy_scores.mean()))
         model.fit(X, Y)
         filepath = os.path.join("classifier_models", "model_" + MODEL_UNIQUE_IDS[i] + ".pkl")
         pickle.dump(model, open(filepath, 'wb'))
         models.append(model)
 
-    max_index = 0
-    max_accuracy_score = scores[0]
-    for i in range(1, len(scores)):
-        if scores[i] > max_accuracy_score:
-            max_accuracy_score = scores[i]
-            max_index = i
-    logger.info("Best model is " + str(MODEL_UNIQUE_IDS[max_index]) + " with accuracy of " + str(max_accuracy_score))
-
-    return models[max_index]
+    # max_index = 0
+    # max_accuracy_score = scores[0]
+    # for i in range(1, len(scores)):
+    #     if scores[i] > max_accuracy_score:
+    #         max_accuracy_score = scores[i]
+    #         max_index = i
+    # logger.info("Best model is " + str(MODEL_UNIQUE_IDS[max_index]) + " with accuracy of " + str(max_accuracy_score))
+    #
+    # return models[max_index]
+    return models[0]
 
 def filterDataset(X, Y, X_test, Y_test):
     classes_removed = [
