@@ -15,7 +15,7 @@
 #define currentSensorPin 1
 #define RS 0.1
 #define RL 10000
-#define PKT_SIZE 2
+#define PKT_SIZE 1
 
 ADXL345 sensorA = ADXL345(DEVICE_A_ACCEL);
 ADXL345 sensorB = ADXL345(DEVICE_B_ACCEL);
@@ -74,22 +74,24 @@ char* voltage_c;
 char* current_c;
 char* power_c;
 char* energy_c;
+char checksum_c[10];
+int checkSum =0 ;
+
 
 int ledflag = HIGH;
 int countLED = 0;
 
-  int h_flag = 0;
-  int n_flag = 0;
-
+int h_flag = 0;
+int n_flag = 0;
 int i;
   
 /**
  * Main Task
  */
 void mainTask(void *p) {
+
   
   while(1){
-//  Serial.println("Enter mainTask");
     xLastWakeTime = xTaskGetTickCount();
     for (i=0;i <PKT_SIZE; i++) {
 //    countLED++;
@@ -106,14 +108,25 @@ void mainTask(void *p) {
       getData(); 
       changeFormat();
       vTaskDelayUntil(&xLastWakeTime, (20/ portTICK_PERIOD_MS));
-    }
+     }
+
+     for (i=0 ; i< strlen(databuf) ; i++ ) {
+     checkSum +=  databuf[i];
+     }
+     
+
+     itoa(checkSum, checksum_c, 10); 
+     strcat(databuf, ",");
+     strcat(databuf, checksum_c);
+     strcat(databuf, "\r");
+ 
      for (i = 0; i < strlen(databuf); i++) {
         Serial1.write(databuf[i]);
-//        Serial.print(databuf[i]);
-//        Serial.println();
+        //Serial.print(databuf[i]); 
      }
-     //Serial.println("Sent");
-     strcpy(databuf, "");
+     //Serial.println();
+     strcpy(databuf, "");  //clear data buffer
+     checkSum =0 ;
      
   }
 }
@@ -213,7 +226,7 @@ void handshake() {
  Change the format of the data from float to string
  */
 void changeFormat(){
-char charbuf[64] ;
+char charbuf[67] ;
 
   
   acc1_x = dtostrf( packet.acc1[0],3,2,charbuf);
@@ -257,7 +270,7 @@ char charbuf[64] ;
   strcat(databuf, ","); 
   energy_c = dtostrf( packet.energy,3,2,charbuf);
   strcat(databuf, energy_c  );
- strcat(databuf, "\r");
+ //strcat(databuf, "\r");
 }
 
 void powerSavings() {
@@ -338,9 +351,16 @@ void setup()
   xTaskCreate(mainTask, "Main Task", STACK_SIZE, (void *)NULL, 2, NULL);
 } 
 
+/** To check on the amount of free Ram avaliable in Mega */
+//int freeRam () {
+//extern int __heap_start, *__brkval;
+//int v;
+//return (int) &v –(__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+//}
 
 
 
 void loop()
 {  
 }
+
