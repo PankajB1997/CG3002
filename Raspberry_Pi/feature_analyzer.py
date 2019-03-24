@@ -47,7 +47,7 @@ def extract_feature_vector(X):
     X_fft_min = np.min(X_fft_abs, axis=0)
     X_entr = entropy(np.abs(np.fft.rfft(X, axis=0))[1:], base=2)
     # return feature vector by appending all vectors above as one d-dimension feature vector
-    res = np.append(X_mean, [ X_median, X_var, X_off, X_mad, X_entr ])
+    res = np.append(X_mean, [ X_median, X_var, X_max, X_min, X_off, X_mad, X_entr, X_fft_mean ])
     # res = np.append(res, [ X_mag ])
     return res
 
@@ -82,6 +82,7 @@ if __name__ == "__main__":
         raw_data_all.extend(raw_data[move])
     scaler = pickle.load(open(os.path.join(SCALER_FILEPATH_PREFIX + 'scaler', 'min_max_scaler' + MDL + '.pkl'), 'rb'))
     data = []
+    disp = []
     movesSampleData = {}
     for move in raw_data:
         segments = get_all_segments(raw_data[move], move, scaler)
@@ -91,18 +92,22 @@ if __name__ == "__main__":
             print("\n" + str(X))
             data.append(X)
         movesSampleData[move] = np.mean(data, axis=0)
+        disp.append(movesSampleData[move])
         data = []
 
     disp = list(map(list, np.transpose(disp)))
     count = 1
     rs = []
+    avgvarbyfeature = [ [], [], [], [], [], [], [], [], [] ]
     for l in disp:
-        range = round(np.max(l) - np.min(l), 2)
+        val = round(np.max(l) - np.min(l), 2)
+        # val = np.var(l) * 1000
         c = str(count)
         if count < 10:
             c = "0" + c
-        print(str(c) + ". " + " ".join([["", "+"][v > 0] + str('{0:.2f}'.format(v)) for v in l]) + " = range : " + '{0:.2f}'.format(range))
-        rs.append((range, count))
+        print(str(c) + ". " + " ".join([["", "+"][v > 0] + str('{0:.2f}'.format(v)) for v in l]) + " = scaled variance : " + '{0:.9f}'.format(val))
+        rs.append((val, count))
+        avgvarbyfeature[(count-1) // 9].append(val)
         count += 1
     rs.sort(reverse=True)
     rs = [ str(t[1]) for t in rs ]
@@ -113,7 +118,11 @@ if __name__ == "__main__":
     rs.sort()
     rs = [ str(t) for t in rs ]
     print(", ".join(rs))
-
-    # for move in movesSampleData:
-    #     print(str(move) + " : " + str(movesSampleData[move].tolist()))
-    # print("diff : " + str(np.subtract(movesSampleData['number7'], movesSampleData['salute']).tolist()))
+    features = [ 'mean', 'median', 'variance', 'maximum', 'minimum', 'offset', 'mean absolute deviation', 'entropy', 'fft modulus' ]
+    avgvarbyfeature = [ np.mean(val) for val in avgvarbyfeature ]
+    tuples = []
+    for i in range(len(features)):
+        tuples.append((avgvarbyfeature[i], features[i]))
+    tuples.sort(reverse=True)
+    for i in range(len(tuples)):
+        print(str(i+1) + ". " + tuples[i][1] + " : " + str(tuples[i][0]))

@@ -18,16 +18,8 @@ from keras.callbacks import ModelCheckpoint
 # Fix seed value for reproducibility
 np.random.seed(1234)
 
-# Set max memory to allocate on GPU
-import tensorflow as tf
-import keras.backend as K
-config = K.tf.ConfigProto()
-# config.gpu_options.allow_growth = True
-config.gpu_options.per_process_gpu_memory_fraction = 0.45
-session = K.tf.Session(config=config)
-
-N = 64
-OVERLAP = 0.95
+N = 32
+OVERLAP = 0.50
 MDL = "_segment-" + str(N) + "_overlap-newf-" + str(OVERLAP * 100)
 
 # initialise logger
@@ -65,6 +57,16 @@ ENC_DICT = {
     9: 'cowboy',
     10: 'logout'
     # 11: 'IDLE',
+}
+
+ENC_LIST = [
+    ('left', 0),
+    ('right', 1),
+]
+
+ENC_DICT = {
+    0: 'left',
+    1: 'right',
 }
 
 CLASSLIST = [ pair[0] for pair in ENC_LIST ]
@@ -242,6 +244,7 @@ def initialiseModel(X_train):
     # from keras import optimizers
     # sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
     # model.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics = ['accuracy'])
+
     return model
 
 # Train the model, monitor on validation loss and save the best model out of given epochs
@@ -277,15 +280,15 @@ MODELS_SAVEPATH = os.path.join("nn_models")
 if __name__ == "__main__":
 
     # scaler = QuantileTransformer(output_distribution='uniform')
-    # scaler = MinMaxScaler((-1,1))
-    scaler = pickle.load(open(os.path.join('nn_scaler', 'standard_scaler' + MDL + '.pkl'), 'rb'))
+    scaler = MinMaxScaler((-1,1))
+    # scaler = pickle.load(open(os.path.join('nn_scaler', 'standard_scaler' + MDL + '.pkl'), 'rb'))
 
     # Use the dataset prepared from self-collected dataset's raw data values
     X, Y = pickle.load(open(TRAIN_DATASET_PATH, 'rb'))
     X_test, Y_test = pickle.load(open(TEST_DATASET_PATH, 'rb'))
     X, Y, X_test, Y_test = filterDataset(X, Y, X_test, Y_test)
 
-    X = scaler.transform(X)
+    X = scaler.fit_transform(X)
     X_test = scaler.transform(X_test)
 
     print("Vectorizing...")

@@ -24,8 +24,8 @@ from sklearn.multiclass import OneVsRestClassifier
 # Fix seed value for reproducibility
 np.random.seed(1234)
 
-N = 64
-OVERLAP = 0.95
+N = 32
+OVERLAP = 0
 MDL = "_segment-" + str(N) + "_overlap-newf-" + str(OVERLAP * 100)
 
 # initialise logger
@@ -50,13 +50,11 @@ CG3002_FILEPATH = os.path.join('/', 'CG3002')
 # PROB_THRESHOLD = 0.20
 
 MODEL_UNIQUE_IDS = {
-    0: 'OneVsRestClassifierMLPtanh_latest' + MDL,
-    1: 'OneVsRestClassifierMLP' + MDL,
-    2: 'MLPClassifierTanH' + MDL,
-    3: 'MLPClassifier' + MDL,
-    4: 'OneVsRestClassifierSVC' + MDL,
-    5: 'LinearSVC' + MDL,
-    6: 'RandomForestClassifier200' + MDL,
+    0: 'OneVsRest Classifier with ANN estimator',
+    1: 'OneVsRest Classifier with SVC estimator',
+    2: 'ANN Classifier',
+    3: 'Random Forest Classifier with 200 trees',
+    4: 'Linear Support Vector Machine',
 }
 
 CONFIDENCE_THRESHOLD = 0.75
@@ -89,6 +87,16 @@ ENC_DICT = {
     9: 'cowboy',
     10: 'logout'
     # 11: 'IDLE',
+}
+
+ENC_LIST = [
+    ('left', 0),
+    ('right', 1),
+]
+
+ENC_DICT = {
+    0: 'left',
+    1: 'right',
 }
 
 CLASSLIST = [ pair[0] for pair in ENC_LIST ]
@@ -231,12 +239,10 @@ def writeDatasetToExcel(X, y, filepath):
 def initialiseModel(model_index):
     classifiers = [
         OneVsRestClassifier(estimator = MLPClassifier(activation='tanh')),
-        OneVsRestClassifier(estimator = MLPClassifier()),
-        MLPClassifier(activation='tanh'),
-        MLPClassifier(),
         OneVsRestClassifier(estimator = SVC(kernel="linear", C=0.025)),
-        SVC(kernel="linear", C=0.025),
+        MLPClassifier(activation='tanh'),
         RandomForestClassifier(max_depth=5, n_estimators=200, max_features=1),
+        SVC(kernel="linear", C=0.025),
     ]
     return classifiers[model_index]
 
@@ -245,13 +251,14 @@ def fitModel(X, Y):
     models = []
     scores = []
 
-    for i in range(0, 1):
+    for i in range(0, 5):
+        filepath = os.path.join("classifier_models", "model_" + MODEL_UNIQUE_IDS[i] + ".pkl")
+        # models.append(pickle.load(open(filepath, 'rb')))
         model = initialiseModel(i)
-        # accuracy_scores = cross_val_score(model, X, Y, cv=5, scoring="accuracy", n_jobs=-1)
-        # scores.append(accuracy_scores.mean())
+        accuracy_scores = cross_val_score(model, X, Y, cv=10, scoring="accuracy", n_jobs=-1)
+        scores.append(accuracy_scores.mean())
         # logger.info("Cross validation score for model " + str(MODEL_UNIQUE_IDS[i]) + ": " + str(accuracy_scores.mean()))
         model.fit(X, Y)
-        filepath = os.path.join("classifier_models", "model_" + MODEL_UNIQUE_IDS[i] + ".pkl")
         pickle.dump(model, open(filepath, 'wb'))
         models.append(model)
 
@@ -264,7 +271,7 @@ def fitModel(X, Y):
     # logger.info("Best model is " + str(MODEL_UNIQUE_IDS[max_index]) + " with accuracy of " + str(max_accuracy_score))
     #
     # return models[max_index]
-    return models[0]
+    return models, scores
 
 def filterDataset(X, Y, X_test, Y_test):
     classes_removed = [
@@ -346,40 +353,51 @@ if __name__ == "__main__":
     # vectorizer(...)
     # vectorizer(...)
 
-    logger.info("Fitting...")
+    logger.info("Fitting...\n")
 
     # X_val, X_test, Y_val, Y_test = train_test_split(X_test, Y_test, test_size=0.5, random_state=42, shuffle=True, stratify=Y_test)
 
-    model = fitModel(X, Y)
+    models, scores = fitModel(X, Y)
 
-    logger.info("Predicting...")
-    train_pred = model.predict(X)
-    # val_pred = model.predict(X_val)
-    import time
-    start = time.time()
-    test_pred = model.predict(X_test)
-    end = time.time()
+    count = 0
 
-    logger.info("Prediction time: " + str(end-start))
+    for model in models:
 
-    logger.info("Predictions done! Compiling results...")
+        # logger.info("Predicting...")
+        import time
+        start = time.time()
+        train_pred = model.predict(X)
+        test_pred = model.predict(X_test)
+        end = time.time()
+        # logger.info("Predictions done! Compiling results...")
 
-    # # Convert model output of class probabilities to corresponding best predictions
-    # Y_train_pred = onehot2str(train_pred)
-    # # Y_val_pred = onehot2str(val_pred)
-    # Y_test_pred = onehot2str(test_pred)
+        print("Model : " + MODEL_UNIQUE_IDS[count])
 
-    # Calculate accuracy, precision, recall and f1 scores
-    calculatePerformanceMetrics(train_pred, Y, "training")
-    # calculatePerformanceMetrics(val_pred, Y_val, "validation")
-    calculatePerformanceMetrics(test_pred, Y_test, "testing")
+        print("Accuracy on Training set : " + str(round(accuracy_score(Y, train_pred)*100, 2)) + " %")
+        print("10-fold Cross Validation Accuracy : " + str(round(scores[count]*100, 2)) + " %")
+        print("Accuracy on Testing set : " + str(round(accuracy_score(Y_test, test_pred)*100, 2)) + " %")
+        print("Total Prediction time : " + str(round((end-start), 2)) + " seconds")
 
-    # pred_prob = train_pred.tolist() + test_pred.tolist()
-    # pred_lbl = Y_train_pred.tolist() + Y_test_pred.tolist()
-    # true_lbl = Y.tolist() + Y_test.tolist()
-    # for i in range(len(pred_prob)):
-    #     pred_prob[i] = max(pred_prob[i])
-    # # Print model confidence for every wrong prediction
-    # printConfidenceForIncorrectPredictions(pred_prob, pred_lbl, true_lbl)
-    # # Print model confidence for every correct prediction
-    # printConfidenceForCorrectPredictions(pred_prob, pred_lbl, true_lbl)
+        print("\n")
+
+        count += 1
+
+        # # # Convert model output of class probabilities to corresponding best predictions
+        # # Y_train_pred = onehot2str(train_pred)
+        # # # Y_val_pred = onehot2str(val_pred)
+        # # Y_test_pred = onehot2str(test_pred)
+        #
+        # # Calculate accuracy, precision, recall and f1 scores
+        # calculatePerformanceMetrics(train_pred, Y, "training")
+        # # calculatePerformanceMetrics(val_pred, Y_val, "validation")
+        # calculatePerformanceMetrics(test_pred, Y_test, "testing")
+        #
+        # # pred_prob = train_pred.tolist() + test_pred.tolist()
+        # # pred_lbl = Y_train_pred.tolist() + Y_test_pred.tolist()
+        # # true_lbl = Y.tolist() + Y_test.tolist()
+        # # for i in range(len(pred_prob)):
+        # #     pred_prob[i] = max(pred_prob[i])
+        # # # Print model confidence for every wrong prediction
+        # # printConfidenceForIncorrectPredictions(pred_prob, pred_lbl, true_lbl)
+        # # # Print model confidence for every correct prediction
+        # # printConfidenceForCorrectPredictions(pred_prob, pred_lbl, true_lbl)
